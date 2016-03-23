@@ -4,14 +4,14 @@ var BasePlugin = function(context) {
 }
 
 BasePlugin.prototype.connect = function(dest) {
-    this.output.connect(dest.inpt ? dest.input : dest);
+    this.outputs[0].connect(dest.inpt ? dest.input : dest);
 }
 
 BasePlugin.prototype.disconnect = function(dest) {
     if (dest == undefined) {
-        this.output.disconnect();
+        this.outputs[0].disconnect();
     } else {
-        this.output.disconnect(dest.input ? dest.input : dest);
+        this.outputs[0].disconnect(dest.input ? dest.input : dest);
     }
 }
 
