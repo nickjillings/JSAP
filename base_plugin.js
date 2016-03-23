@@ -17,14 +17,14 @@ BasePlugin.prototype.disconnect = function(dest) {
 
 BasePlugin.prototype.getParameterNames = function() {
     var names = [];
-    for (var param in this.parameters) {
+    for (var param of this.parameters) {
         names.push(param.name);
     }
     return names;
 }
 
 BasePlugin.prototype.getParameterByName = function(name) {
-    for (var param in this.parameters) {
+    for (var param of this.parameters) {
         if (name == param.name) {return param;}
     }
     console.error("No Parameter called "+name);
