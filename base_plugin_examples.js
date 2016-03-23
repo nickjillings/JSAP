@@ -9,7 +9,7 @@ var VolumeControl = function() {
     // Place your code between these lines
     
     // First we create the web audio API gain node
-    var gain = this.context.createGainNode();
+    var gain = this.context.createGain();
     
     // We have only one input and one output, which is the gain node:
     _inputList[0] = gain;
@@ -57,6 +57,7 @@ var VolumeControl = function() {
 }
 
 VolumeControl.prototype = new BasePlugin(context);
+VolumeControl.prototype.constructor = VolumeControl;
 
 
 // EXAMPLE - Low Pass
@@ -71,8 +72,8 @@ var LowPass = function() {
     
     // This example shows multiple nodes working together!
     var filter = this.context.createBiquadFilter();
-    var inputGain = this.context.createGainNode();
-    var outputGain = this.context.createGainNode();
+    var inputGain = this.context.createGain();
+    var outputGain = this.context.createGain();
     
     // Above we create three nodes, an input gain, the filter and an output gain
     // These are connected as follows...
@@ -133,3 +134,4 @@ var LowPass = function() {
 }
 
 LowPass.prototype = new BasePlugin(context);
+LowPass.prototype.constructor = LowPass;
