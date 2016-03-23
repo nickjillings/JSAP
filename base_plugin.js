@@ -15,13 +15,36 @@ BasePlugin.prototype.disconnect = function(dest) {
     }
 }
 
+BasePlugin.prototype.getParameterNames = function() {
+    var names = [];
+    for (var param in this.parameters) {
+        names.push(param.name);
+    }
+    return names;
+}
+
+BasePlugin.prototype.getParameterByName = function(name) {
+    for (var param in this.parameters) {
+        if (name == param.name) {return param;}
+    }
+    console.error("No Parameter called "+name);
+    return null;
+}
+
+BasePlugin.prototype.setParameterByName = function(name,value) {
+    var parameter = this.getParameterByName(name);
+    if (parameter != null) {
+        parameter.value = value;
+    }
+}
+
 var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
     /* Plugin Private Variables
           These are accessed by the public facing getter/setter
     */
     
     if (arguments.length < 2) {
-        console.error("INVALID PARAMETERS: Must always define defaultValue and dataType");
+        console.error("INVALID PARAMETERS: Must always define defaultValue, dataType and name");
         return;
     }
     
