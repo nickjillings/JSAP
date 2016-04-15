@@ -31,10 +31,27 @@ BasePlugin.prototype.getParameterByName = function(name) {
     return null;
 }
 
+BasePlugin.prototype.getParameterObject = function() {
+    var proto = {};
+    for (var param of this.parameters) {
+        eval("proto."+param.name+"="+param.value);
+    }
+    return proto;
+}
+
 BasePlugin.prototype.setParameterByName = function(name,value) {
     var parameter = this.getParameterByName(name);
     if (parameter != null) {
         parameter.value = value;
+    }
+}
+
+BasePlugin.prototype.setParameterByObject = function(object) {
+    // Set a parameter by passing a paired tuple object of the parameter name with the value
+    // For instance, the Volume Control could use object = {volume: 0.5}
+    // The LowPass could use object = {gain: 0.5, frequency: 1000, Q: 1.3}
+    for (var key in object) {
+        this.setParameterByName(key,eval("object."+key));
     }
 }
 

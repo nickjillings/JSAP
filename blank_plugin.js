@@ -6,7 +6,6 @@ var BlankPlugin = function() {
     /* USER MODIFIABLE BEGIN */
     // Place your code between these lines
     
-    
     /* USER MODIFIABLE END */
     
     
