@@ -154,9 +154,11 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
     The same applies here as the underlying host will have to either accept or ignore the tools' GUI
 */
 
-var PluginUserInterface = function(BasePluginInstance, width, height) {
+var PluginUserInterface = function(BasePluginInstance, width=0, height=0) {
     this.processor = BasePluginInstance;
     this.root = document.createElement("div");
+    if (width > 0) {this.root.style.width = width+"px";}
+    if (height > 0) {this.root.style.height = height+"px";}
     this.dim = {width: width, height: height};
     this.intervalFunction = null;
     this.updateInterval = null;
@@ -173,7 +175,6 @@ var PluginUserInterface = function(BasePluginInstance, width, height) {
         this.input.addEventListener("change",this);
         this.input.addEventListener("mousemove",this);
         this.input.addEventListener("click",this);
-        this.input.addEventListener("touch",this);
     };
     
     this.createPluginParameterInterfaceNode = function(DOM,PluginParameterInstance) {
