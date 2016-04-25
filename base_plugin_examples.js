@@ -169,7 +169,7 @@ var VolumeControlGUI = function() {
     
     this.GUI.root.innerHTML = '<div class="titleHolder" style="width:100%;height:50px;text-align:center"><span>Simple Volume Control</span></div><div name="body" style="width:100%;text-align:center" min:"-24" max:"12" step:"0.5"><input type="range" name="volume-slider"/></div>'
     
-    this.GUI.slider = this.GUI.createPluginParameterInterfaceNode(this.GUI.root.getElementsByTagName("input")[0],_parameters[0]);
+    this.GUI.slider = this.GUI.createPluginParameterInterfaceNode(this.GUI.root.getElementsByTagName("input")[0],gainParam);
     this.GUI.slider.input.min = this.GUI.slider.AudioParam.minimum;
     this.GUI.slider.input.max = this.GUI.slider.AudioParam.maximum;
     this.GUI.slider.input.value = this.GUI.slider.AudioParam.value;

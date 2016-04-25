@@ -177,7 +177,7 @@ var PluginUserInterface = function(BasePluginInstance, width, height) {
     };
     
     this.createPluginParameterInterfaceNode = function(DOM,PluginParameterInstance) {
-        var node = new PluginParameterInterfaceNode(DOM,this.processor,this);
+        var node = new PluginParameterInterfaceNode(DOM,PluginParameterInstance,this.processor,this);
         this.PluginParameterInterfaces.push(node);
         return node;
     };
