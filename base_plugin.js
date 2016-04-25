@@ -147,3 +147,79 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
         }
     });
 }
+
+/*
+    This is an optional module which will attempt to create a graphical implementation.
+    As with other audio plugins for DAWs, the GUI is an optional element which can be accepted or rejected by the host.
+    The same applies here as the underlying host will have to either accept or ignore the tools' GUI
+*/
+
+var PluginUserInterface = function(BasePluginInstance, width, height) {
+    this.processor = BasePluginInstance;
+    this.root = document.createElement("div");
+    this.dim = {width: width, height: height};
+    this.intervalFunction = null;
+    this.updateInterval = null;
+    this.PluginParameterInterfaces = [];
+
+    var PluginParameterInterfaceNode = function(DOM,PluginParameterInstance,processor,gui) {
+        this.input = DOM;
+        this.processor = processor;
+        this.GUI = gui;
+        this.AudioParam = PluginParameterInstance;
+        this.handleEvent = function(event) {
+            this.AudioParam.value = this.input.value;
+        };
+        this.input.addEventListener("change",this);
+        this.input.addEventListener("mousemove",this);
+        this.input.addEventListener("click",this);
+        this.input.addEventListener("touch",this);
+    };
+    
+    this.createPluginParameterInterfaceNode = function(DOM,PluginParameterInstance) {
+        var node = new PluginUserInterfaceNode(DOM,this.processor,this);
+        this.PluginParameterInterfaces.push(node);
+        return node;
+    };
+    
+    this.update = function() {};
+
+};
+
+PluginUserInterface.prototype.getRoot = function() {return this.root;};
+PluginUserInterface.prototype.getDimensions = function() {return this.dim;};
+PluginUserInterface.prototype.getWidth = function() {return this.dim.width;};
+PluginUserInterface.prototype.getHeight = function() {return this.dim.height;};
+PluginUserInterface.prototype.beginCallbacks = function(ms) {
+    // Any registered callbacks are started by the host
+    if (ms == undefined) {ms = 250;} //Default of 250ms update period
+    if (this.intervalFunction == null) {
+        this.updateInterval = ms;
+        window.setInterval(this.update.bind(this),250);
+    }
+}
+PluginUserInterface.prototype.stopCallbacks = function() {
+    // Any registered callbacks are stopped by the host
+    if (this.intervalFunction != null) {
+        window.clearInterval(this.intervalFunction);
+        this.updateInterval = null;
+        this.intervalFunction = null;
+    }
+}
+PluginUserInterface.prototype.loadResource = function(url) {
+    return p = new Promise(function(resolve,reject) {
+        var req = new XMLHttpRequest();
+        req.open('GET', url);
+        req.onload = function() {
+            if (req.status == 200) {
+                resolve(req.response);
+            } else {
+                reject(Error(req.statusText));
+            }
+        };
+        req.onerror = function() {
+            reject(Error("Network Error"));
+        };
+        req.send();
+    });
+}
