@@ -154,7 +154,7 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
     The same applies here as the underlying host will have to either accept or ignore the tools' GUI
 */
 
-var PluginUserInterface = function(BasePluginInstance, width=0, height=0) {
+var PluginUserInterface = function(BasePluginInstance, width, height) {
     this.processor = BasePluginInstance;
     this.root = document.createElement("div");
     if (width > 0) {this.root.style.width = width+"px";}
