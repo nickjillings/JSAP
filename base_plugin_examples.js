@@ -173,7 +173,7 @@ var VolumeControlGUI = function() {
     this.GUI.slider.input.min = this.GUI.slider.AudioParam.minimum;
     this.GUI.slider.input.max = this.GUI.slider.AudioParam.maximum;
     this.GUI.slider.input.value = this.GUI.slider.AudioParam.value;
-    this.GUI.slider.input.step = 0.5;
+    this.GUI.slider.input.step = 0.01;
     
     /* USER MODIFIABLE END */
     
