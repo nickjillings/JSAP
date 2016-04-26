@@ -196,8 +196,7 @@ PluginUserInterface.prototype.beginCallbacks = function(ms) {
     if (ms == undefined) {ms = 250;} //Default of 250ms update period
     if (this.intervalFunction == null) {
         this.updateInterval = ms;
-        console.log(this.update);
-        this.intervalFunction = window.setInterval(this.update.bind(this),250);
+        this.intervalFunction = window.setInterval(function(){this.update()}.bind(this),250);
     }
 }
 PluginUserInterface.prototype.stopCallbacks = function() {
