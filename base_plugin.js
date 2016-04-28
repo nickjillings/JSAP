@@ -15,6 +15,9 @@ BasePlugin.prototype.disconnect = function(dest) {
     }
 }
 
+BasePlugin.prototype.start = function() {};
+BasePlugin.prototype.stop = function() {};
+
 BasePlugin.prototype.getParameterNames = function() {
     var names = [];
     for (var param of this.parameters) {
@@ -90,12 +93,6 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
         update();
     }
     
-    var update = function() {
-        if (boundParam) {
-            boundParam.value = _value;
-        }
-    }
-    
     // Public facing getter/setter to preserve the plugin parameter mappings
     Object.defineProperty(this, "dataType",{
         get: function() {return _dataType;},
@@ -144,7 +141,14 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
             else if (newValue <= _minimum && _minimum != undefined) {newValue == _minimum;}
             _value = newValue;
             update();
+            if (boundParam) {
+                boundParam.value = _value;
+            }
+            return _value;
         }
+    });
+    Object.defineProperty(this,"update",{
+        value: function() {}
     });
 }
 
