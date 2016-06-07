@@ -58,7 +58,7 @@ BasePlugin.prototype.setParameterByObject = function(object) {
     }
 }
 
-var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
+var PluginParameter = function(defaultValue,dataType,name,minimum,maximum,owner) {
     /* Plugin Private Variables
           These are accessed by the public facing getter/setter
     */
@@ -67,6 +67,8 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
         console.error("INVALID PARAMETERS: Must always define defaultValue, dataType and name");
         return;
     }
+    
+    var _parentProcessor = owner;
     
     //The data type of the parameter
     var _dataType = dataType;
@@ -85,6 +87,9 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
     
     //The name of the parameter
     var _name = name;
+    
+    // Store for providence
+    var _actions = [];
     
     var boundParam;
     
@@ -144,9 +149,19 @@ var PluginParameter = function(defaultValue,dataType,name,minimum,maximum) {
             if (boundParam) {
                 boundParam.value = _value;
             }
+            _actions.push({time:owner.context.currentTime, value: _value});
             return _value;
         }
     });
+    
+    Object.defineProperty(this, "actions"), {
+        get: function() {
+            return _actions;
+        },
+        set: function() {
+            console.error("Canno set private variable 'actions'");
+        }
+    }
     Object.defineProperty(this,"update",{
         value: function() {}
     });
