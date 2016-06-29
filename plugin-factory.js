@@ -19,7 +19,7 @@ var PluginFactory = function () {
             name: plugin_name,
             proto: plugin_proto
         };
-        var index = plugin_prototypes.find(function (element, index, array) {
+        var index = plugin_prototypes.findIndex(function (element, index, array) {
             if (element.name == this.name) {
                 return true;
             }
@@ -93,12 +93,7 @@ var PluginFactory = function () {
             if (state == 0) {
                 return;
             }
-            var index = plugin_list.findIndex(function (element, index, array) {
-                if (element == this) {
-                    return true;
-                }
-                return false;
-            }, plugin_object);
+            var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
                 if (index > 0) {
                     plugin_list[index - 1].reconnect(plugin_list[index + 1] || pluginChainStop);
@@ -107,6 +102,37 @@ var PluginFactory = function () {
                     pluginChainStart.connect(plugin_list[index + 1] || pluginChainStop);
                 }
                 plugin_list.splice(index, 1);
+            }
+        }
+
+        this.getPluginIndex = function (plugin_object) {
+            if (state == 0) {
+                return;
+            }
+            var index = plugin_list.findIndex(function (element, index, array) {
+                if (element == this) {
+                    return true;
+                }
+                return false;
+            }, plugin_object);
+        }
+
+        this.movePlugin = function (plugin_object, new_index) {
+            if (state = 0) {
+                return;
+            }
+            var index = this.getPluginIndex(plugin_object);
+            if (index >= 0) {
+                var obj = plugin_list.splice(index, 1);
+                if (new_index == 0) {
+                    plugin_list = [obj].concat(plugin_list);
+                } else if (new_index >= plugin_list.length) {
+                    plugin_list = plugin_list.concat(plugin_list);
+                } else {
+                    var holdLow = plugin_list.slice(0, index);
+                    var holdHigh = plugin_list.slice(index);
+                    plugin_list = holdLow.concat([obj].concat(holdHigh));
+                }
             }
         }
 
