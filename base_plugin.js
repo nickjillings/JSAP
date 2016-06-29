@@ -97,7 +97,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
 
     this.bindToAudioParam = function (AudioParameterNode) {
         boundParam = AudioParameterNode;
-        update();
+        this.value = boundParam.value;
     }
 
     // Public facing getter/setter to preserve the plugin parameter mappings
@@ -160,7 +160,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
                 newValue == _minimum;
             }
             _value = newValue;
-            update();
+            this.update();
             if (boundParam) {
                 boundParam.value = _value;
             }
