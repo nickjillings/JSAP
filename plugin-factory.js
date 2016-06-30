@@ -127,7 +127,7 @@ var PluginFactory = function () {
         }
 
         this.movePlugin = function (plugin_object, new_index) {
-            if (state = 0) {
+            if (state == 0) {
                 return;
             }
             var index = this.getPluginIndex(plugin_object);
