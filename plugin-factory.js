@@ -85,7 +85,9 @@ var PluginFactory = function () {
             var node = new plugin_prototype();
             var obj = new PluginInstance(node, chainStop);
             var last_node = plugin_list[plugin_list.length - 1];
-            last_node.reconnect(node);
+            if (last_node != undefined) {
+                last_node.reconnect(node);
+            }
             plugin_list.push(obj);
             return node;
         }
@@ -139,6 +141,7 @@ var PluginFactory = function () {
         var PluginInstance = function (node, next_node) {
             this.node = node;
             this.next_node = next_node;
+            this.node.connect(this.next_node);
 
             this.reconnect = function (new_next) {
                 if (new_next != this.next_node) {
