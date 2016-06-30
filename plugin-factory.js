@@ -143,6 +143,10 @@ var PluginFactory = function () {
                     var holdHigh = plugin_list.slice(index);
                     plugin_list = holdLow.concat([obj].concat(holdHigh));
                 }
+                for (var i = 0; i < plugin_list.length - 1; i++) {
+                    plugin_list[i].reconnect(plugin_list[i + 1].node);
+                }
+                plugin_list[plugin_list.length - 1].reconnect(pluginChainStop);
             }
         }
 
