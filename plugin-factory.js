@@ -110,6 +110,10 @@ var PluginFactory = function () {
             }
         }
 
+        this.getPlugins = function () {
+            return plugin_list;
+        }
+
         this.getPluginIndex = function (plugin_object) {
             if (state == 0) {
                 return;
