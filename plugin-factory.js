@@ -141,13 +141,13 @@ var PluginFactory = function () {
         var PluginInstance = function (node, next_node) {
             this.node = node;
             this.next_node = next_node;
-            this.node.connect(this.next_node);
+            this.node.connect(this.next_node.input || this.next_node);
 
             this.reconnect = function (new_next) {
                 if (new_next != this.next_node) {
-                    this.node.disconnect(this.next_node);
+                    this.node.disconnect(this.next_node.input || this.next_node);
                     this.next_node = new_next;
-                    this.node.connect(this.next_node);
+                    this.node.connect(this.next_node.input || this.next_node);
                     return true;
                 }
                 return false;
