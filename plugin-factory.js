@@ -144,7 +144,7 @@ var PluginFactory = function () {
                     plugin_list = holdLow.concat(obj.concat(holdHigh));
                 }
                 pluginChainStart.disconnect();
-                pluginChainStart.connect(plugin_list[0]);
+                pluginChainStart.connect(plugin_list[0].getInputs()[0]);
                 for (var i = 0; i < plugin_list.length - 1; i++) {
                     plugin_list[i].reconnect(plugin_list[i + 1].node);
                 }
