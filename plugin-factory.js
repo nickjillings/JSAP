@@ -124,6 +124,7 @@ var PluginFactory = function () {
                 }
                 return false;
             }, plugin_object);
+            return index;
         }
 
         this.movePlugin = function (plugin_object, new_index) {
