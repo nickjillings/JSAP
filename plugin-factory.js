@@ -89,7 +89,7 @@ var PluginFactory = function () {
                 last_node.reconnect(node);
             } else {
                 pluginChainStart.disconnect(pluginChainStop);
-                pluginChainStart.connect(node.inputs[0] || node);
+                pluginChainStart.connect(node.getInputs()[0]);
             }
             plugin_list.push(obj);
             return node;
@@ -148,9 +148,9 @@ var PluginFactory = function () {
 
             this.reconnect = function (new_next) {
                 if (new_next != this.next_node) {
-                    this.node.disconnect(this.next_node.inputs[0] || this.next_node);
+                    this.node.disconnect(this.next_node.getInputs()[0]);
                     this.next_node = new_next;
-                    this.node.connect(this.next_node.inputs[0] || this.next_node);
+                    this.node.connect(this.next_node.getInputs()[0]);
                     return true;
                 }
                 return false;

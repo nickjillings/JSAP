@@ -1,3 +1,8 @@
+// Add getInputs to all AudioNodes to ease deployment
+AudioNode.prototype.getInputs = function () {
+    return [this];
+}
+
 // This should simply define the BasePlugin from which custom plugins can be built from
 var BasePlugin = function (context) {
     this.context = context;
@@ -13,6 +18,10 @@ BasePlugin.prototype.disconnect = function (dest) {
     } else {
         this.outputs[0].disconnect(dest.input ? dest.input : dest);
     }
+}
+
+BasePlugin.prototype.getInputs = function () {
+    return this.inputs;
 }
 
 BasePlugin.prototype.start = function () {};
