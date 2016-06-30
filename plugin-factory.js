@@ -135,13 +135,13 @@ var PluginFactory = function () {
             if (index >= 0) {
                 var obj = plugin_list.splice(index, 1);
                 if (new_index == 0) {
-                    plugin_list = [obj].concat(plugin_list);
+                    plugin_list = obj.concat(plugin_list);
                 } else if (new_index >= plugin_list.length) {
                     plugin_list = plugin_list.concat(plugin_list);
                 } else {
                     var holdLow = plugin_list.slice(0, index);
                     var holdHigh = plugin_list.slice(index);
-                    plugin_list = holdLow.concat([obj].concat(holdHigh));
+                    plugin_list = holdLow.concat(obj.concat(holdHigh));
                 }
                 for (var i = 0; i < plugin_list.length - 1; i++) {
                     plugin_list[i].reconnect(plugin_list[i + 1].node);
