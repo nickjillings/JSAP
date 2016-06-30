@@ -87,6 +87,9 @@ var PluginFactory = function () {
             var last_node = plugin_list[plugin_list.length - 1];
             if (last_node != undefined) {
                 last_node.reconnect(node);
+            } else {
+                pluginChainStart.disconnect(pluginChainStop);
+                pluginChainStart.connect(node.input || node);
             }
             plugin_list.push(obj);
             return node;
