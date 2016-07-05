@@ -174,7 +174,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
                 boundParam.value = _value;
             }
             _actions.push({
-                time: owner.context.currentTime,
+                time: _parentProcessor.context.currentTime,
                 value: _value
             });
             return _value;
