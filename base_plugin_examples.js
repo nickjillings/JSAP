@@ -81,6 +81,7 @@ var VolumeControl = function () {
 }
 
 VolumeControl.prototype = new BasePlugin(context);
+VolumeControl.prototype.name = "VolumeControl";
 VolumeControl.prototype.constructor = VolumeControl;
 
 
@@ -182,6 +183,7 @@ var LowPass = function () {
 }
 
 LowPass.prototype = new BasePlugin(context);
+LowPass.prototype.name = "LowPass";
 LowPass.prototype.constructor = LowPass;
 
 // GUI Example
@@ -280,4 +282,5 @@ var VolumeControlGUI = function () {
 }
 
 VolumeControlGUI.prototype = new BasePlugin(context);
+VolumeControlGUI.prototype.name = "VolumeControlGUI";
 VolumeControlGUI.prototype.constructor = VolumeControlGUI;

@@ -47,4 +47,5 @@ var BlankPlugin = function() {
 }
 
 BlankPlugin.prototype = new BasePlugin(context);
+BlankPlugin.prototype.name = "BlankPlugin";
 BlankPlugin.prototype.constructor = BlankPlugin;

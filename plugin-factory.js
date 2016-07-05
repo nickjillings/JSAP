@@ -6,17 +6,16 @@ var PluginFactory = function () {
     var subFactories = [];
     var plugin_prototypes = [];
 
-    this.addPrototype = function (plugin_proto, plugin_name) {
+    this.addPrototype = function (plugin_proto) {
         if (typeof plugin_proto != "function") {
             console.error("The Prototype must be a function!");
             return;
         }
-        if (typeof plugin_name != "string") {
-            console.error("The plugin name must be defined!");
-            return;
+        if (typeof plugin_proto.prototype.name != "string") {
+            console.error("Malformed plugin. Name not defined");
         }
         var obj = {
-            name: plugin_name,
+            name: plugin_proto.prototype.name,
             proto: plugin_proto
         };
         var index = plugin_prototypes.findIndex(function (element, index, array) {
@@ -34,6 +33,14 @@ var PluginFactory = function () {
 
     this.getPrototypes = function () {
         return plugin_prototypes;
+    }
+    
+    this.getAllPlugins = function() {
+        var list = [];
+        for (var factory of subFactories) {
+            list = list.concat(factory.getPlugins());
+        }
+        return list;
     }
 
     this.createSubFactory = function (chainStart, chainStop) {
@@ -83,6 +90,7 @@ var PluginFactory = function () {
                 return;
             }
             var node = new plugin_prototype();
+            node.prototype.factory = this.parent;
             var obj = new PluginInstance(node, chainStop);
             var last_node = plugin_list[plugin_list.length - 1];
             if (last_node != undefined) {
