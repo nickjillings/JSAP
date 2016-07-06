@@ -171,7 +171,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             } else if (newValue <= _minimum && _minimum != undefined) {
                 newValue == _minimum;
             }
-            _value = this.update(newValue);
+            _value = _update(newValue);
             if (boundParam) {
                 boundParam.value = _value;
             }
@@ -192,8 +192,8 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
         }
     });
     Object.defineProperty(this, "update", {
-        get: function(value) {
-            return _update(value);
+        get: function() {
+            return _update;
         },
         set: function(func) {
             if (typeof func != "function") {
