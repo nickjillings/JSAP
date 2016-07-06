@@ -104,6 +104,9 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     
     // Update Function
     var _update = function(value) {return value};
+    
+    // Trigger Function
+    var _trigger = function() {};
 
     var boundParam;
 
@@ -179,6 +182,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
                 time: _parentProcessor.context.currentTime,
                 value: _value
             });
+            _trigger();
             return _value;
         }
     });
@@ -203,6 +207,22 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
                 console.error("Function must return a value");
             }
             _update = func;
+        }
+    });
+    
+    Object.defineProperty(this,"trigger",{
+        get: function() {
+            return _trigger;
+        },
+        set: function(func,arg_this) {
+            if (typeof func != "function") {
+                console.error("Must pass in a valid function");
+            }
+            if (typeof arg_this == "object") {
+                _trigger = func.bind(arg_this);
+            } else {
+                _trigger = func;
+            }
         }
     });
 }
