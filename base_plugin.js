@@ -194,7 +194,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     });
     Object.defineProperty(this, "update", {
         get: function() {
-            return _function;
+            return _update;
         },
         set: function(func) {
             if (typeof func != "function") {
@@ -203,7 +203,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             if (func(0) == undefined) {
                 console.error("Function must return a value");
             }
-            _function = func;
+            _update = func;
         }
     });
 }
