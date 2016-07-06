@@ -101,6 +101,9 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
 
     // Store for providence
     var _actions = [];
+    
+    // Update Function
+    var _update = function(value) {return value};
 
     var boundParam;
 
@@ -190,7 +193,18 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
         }
     });
     Object.defineProperty(this, "update", {
-        value: function () {}
+        get: function() {
+            return _function;
+        },
+        set: function(func) {
+            if (typeof func != "function") {
+                console.error("Must pass in a valid function");
+            }
+            if (func(0) == undefined) {
+                console.error("Function must return a value");
+            }
+            _function = func;
+        }
     });
 }
 
