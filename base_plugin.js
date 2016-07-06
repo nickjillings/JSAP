@@ -105,6 +105,9 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     // Update Function
     var _update = function(value) {return value};
     
+    // Translate Function
+    var _translate = function(value) {return value;};
+    
     // Trigger Function
     var _trigger = function() {};
 
@@ -112,7 +115,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
 
     this.bindToAudioParam = function (AudioParameterNode) {
         boundParam = AudioParameterNode;
-        this.value = boundParam.value;
+        this.value = _translate(boundParam.value);
     }
 
     // Public facing getter/setter to preserve the plugin parameter mappings
@@ -164,7 +167,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     Object.defineProperty(this, "value", {
         get: function () {
             if (boundParam) {
-                _value = boundParam.value;
+                _value = _translate(boundParam.value);
             }
             return _value;
         },
@@ -207,6 +210,21 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
                 console.error("Function must return a value");
             }
             _update = func;
+        }
+    });
+    
+    Object.defineProperty(this, "translate", {
+        get: function() {
+            return _translate;
+        },
+        set: function(func) {
+            if (typeof func != "function") {
+                console.error("Must pass in a valid function");
+            }
+            if (func(0) == undefined) {
+                console.error("Function must return a value");
+            }
+            _translate = func;
         }
     });
     
