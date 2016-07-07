@@ -22,13 +22,13 @@
     
     var promise;
     if (typeof xtract_mean != "function") {
-        promise = loadResource("http://dmtlab.bcu.ac.uk/nickjillings/js-xtract/js-xtract/jsXtract.js").then(function(response){
+        promise = loadResource("http://dmtlab.bcu.ac.uk/nickjillings/js-xtract/jsXtract.js").then(function(response){
             var script = document.createElement("script");
             script.textContent = response;
             document.getElementsByTagName("head")[0].appendChild(script);
             return true;
         }).then(function(ready){
-            return loadResource("http://dmtlab.bcu.ac.uk/nickjillings/js-xtract/js-xtract/jsXtract-wa.js")}).then(function(response){
+            return loadResource("http://dmtlab.bcu.ac.uk/nickjillings/js-xtract/jsXtract-wa.js")}).then(function(response){
                 var script = document.createElement("script");
                 script.textContent = response;
                 document.getElementsByTagName("head")[0].appendChild(script);
