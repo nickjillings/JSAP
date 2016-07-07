@@ -1,4 +1,42 @@
 // Add getInputs to all AudioNodes to ease deployment
+
+
+(function() {
+    function loadResource(url) {
+        return p = new Promise(function (resolve, reject) {
+            var req = new XMLHttpRequest();
+            req.open('GET', url);
+            req.onload = function () {
+                if (req.status == 200) {
+                    resolve(req.response);
+                } else {
+                    reject(Error(req.statusText));
+                }
+            };
+            req.onerror = function () {
+                reject(Error("Network Error"));
+            };
+            req.send();
+        });
+    }
+    
+    var promise;
+    if (typeof xtract_mean != "function") {
+        promise = loadResource("js-xtract/jsXtract.js").then(function(response){
+            var script = document.createElement("script");
+            script.textContent = response;
+            document.getElementsByTagName("head")[0].appendChild(script);
+            return true;
+        }).then(function(ready){
+            return loadResource("js-xtract/jsXtract-wa.js")}).then(function(response){
+                var script = document.createElement("script");
+                script.textContent = response;
+                document.getElementsByTagName("head")[0].appendChild(script);
+                return true;
+            })
+    }
+})()
+
 AudioNode.prototype.getInputs = function () {
     return [this];
 }

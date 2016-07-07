@@ -27,39 +27,14 @@ var PluginFactory = function () {
     // Check for JS-Xtract and dynamically load
     var promise;
     var self = this;
-    if (typeof xtract_mean != "function") {
-        promise = self.loadResource("js-xtract/jsXtract.js").then(function(response){
+    
+    if (typeof BasePlugin != "function") {
+        promise = self.loadResource("base_plugin.js").then(function(response){
             var script = document.createElement("script");
             script.textContent = response;
             document.getElementsByTagName("head")[0].appendChild(script);
             return true;
-        }).then(function(ready){
-            return self.loadResource("js-xtract/jsXtract-wa.js")}).then(function(response){
-                var script = document.createElement("script");
-                script.textContent = response;
-                document.getElementsByTagName("head")[0].appendChild(script);
-                return true;
-            })
-    }
-    
-    if (typeof BasePlugin != "function") {
-        if (promise == undefined) {
-            promise = self.loadResource("base_plugin.js").then(function(response){
-                var script = document.createElement("script");
-                script.textContent = response;
-                document.getElementsByTagName("head")[0].appendChild(script);
-                return true;
-            })
-        } else {
-            promise.then(function(ready){
-                return self.loadResource("base_plugin.js").then(function(response){
-                    var script = document.createElement("script");
-                    script.textContent = response;
-                    document.getElementsByTagName("head")[0].appendChild(script);
-                    return true;
-                })
-            })
-        }
+        })
     }
 
     this.addPrototype = function (plugin_proto) {
