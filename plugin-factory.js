@@ -5,6 +5,62 @@ var PluginFactory = function () {
 
     var subFactories = [];
     var plugin_prototypes = [];
+    
+    this.loadResource = function (url) {
+        return p = new Promise(function (resolve, reject) {
+            var req = new XMLHttpRequest();
+            req.open('GET', url);
+            req.onload = function () {
+                if (req.status == 200) {
+                    resolve(req.response);
+                } else {
+                    reject(Error(req.statusText));
+                }
+            };
+            req.onerror = function () {
+                reject(Error("Network Error"));
+            };
+            req.send();
+        });
+    }
+    
+    // Check for JS-Xtract and dynamically load
+    var promise;
+    var self = this;
+    if (typeof xtract_mean != "function") {
+        promise = self.loadResource("js-xtract/jsXtract.js").then(function(response){
+            var script = document.createElement("script");
+            script.textContent = response;
+            document.getElementsByTagName("head")[0].appendChild(script);
+            return true;
+        }).then(function(ready){
+            return self.loadResource("js-xtract/jsXtract-wa.js")}).then(function(response){
+                var script = document.createElement("script");
+                script.textContent = response;
+                document.getElementsByTagName("head")[0].appendChild(script);
+                return true;
+            })
+    }
+    
+    if (typeof BasePlugin != "function") {
+        if (promise == undefined) {
+            promise = self.loadResource("base_plugin.js").then(function(response){
+                var script = document.createElement("script");
+                script.textContent = response;
+                document.getElementsByTagName("head")[0].appendChild(script);
+                return true;
+            })
+        } else {
+            promise.then(function(ready){
+                return self.loadResource("base_plugin.js").then(function(response){
+                    var script = document.createElement("script");
+                    script.textContent = response;
+                    document.getElementsByTagName("head")[0].appendChild(script);
+                    return true;
+                })
+            })
+        }
+    }
 
     this.addPrototype = function (plugin_proto) {
         if (typeof plugin_proto != "function") {
