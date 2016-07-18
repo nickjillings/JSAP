@@ -4,6 +4,7 @@ var VolumeControl = function () {
     var _inputList = [];
     var _outputList = [];
     var _parameters = [];
+    var _features = [];
 
     /* USER MODIFIABLE BEGIN */
     // Place your code between these lines
@@ -25,7 +26,14 @@ var VolumeControl = function () {
     _parameters.push(gainParam);
 
     /* USER MODIFIABLE END */
-
+    {
+        var i;
+        for (i=0; i<_outputList.length; i++) {
+            var node = this.context.createAnalyser();
+            _features.push(node);
+            _outputList[i].connect(node);
+        }
+    }
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
@@ -69,6 +77,15 @@ var VolumeControl = function () {
             console.error("Illegal attempt to modify BasePlugin");
         }
     })
+    
+    Object.defineProperty(this, "features", {
+        get: function (index) {
+            return _features;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
 
     Object.defineProperty(this, "parameters", {
         get: function (index) {
@@ -91,6 +108,7 @@ var LowPass = function () {
     var _inputList = [];
     var _outputList = [];
     var _parameters = [];
+    var _features = [];
 
     /* USER MODIFIABLE BEGIN */
     // Place your code between these lines
@@ -127,7 +145,14 @@ var LowPass = function () {
     _parameters.push(frequency);
 
     /* USER MODIFIABLE END */
-
+    {
+        var i;
+        for (i=0; i<_outputList.length; i++) {
+            var node = this.context.createAnalyser();
+            _features.push(node);
+            _outputList[i].connect(node);
+        }
+    }
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
@@ -171,6 +196,15 @@ var LowPass = function () {
             console.error("Illegal attempt to modify BasePlugin");
         }
     })
+    
+    Object.defineProperty(this, "features", {
+        get: function (index) {
+            return _features;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
 
     Object.defineProperty(this, "parameters", {
         get: function (index) {
@@ -192,6 +226,7 @@ var VolumeControlGUI = function () {
     var _inputList = [];
     var _outputList = [];
     var _parameters = [];
+    var _features = [];
 
     /* USER MODIFIABLE BEGIN */
     // Place your code between these lines
@@ -226,7 +261,14 @@ var VolumeControlGUI = function () {
     this.GUI.slider.input.step = 0.01;
 
     /* USER MODIFIABLE END */
-
+    {
+        var i;
+        for (i=0; i<_outputList.length; i++) {
+            var node = this.context.createAnalyser();
+            _features.push(node);
+            _outputList[i].connect(node);
+        }
+    }
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
@@ -265,6 +307,15 @@ var VolumeControlGUI = function () {
     Object.defineProperty(this, "outputs", {
         get: function (index) {
             return _outputList;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
+    
+    Object.defineProperty(this, "features", {
+        get: function (index) {
+            return _features;
         },
         set: function () {
             console.error("Illegal attempt to modify BasePlugin");

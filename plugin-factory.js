@@ -1,8 +1,9 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 
-var PluginFactory = function () {
+var PluginFactory = function (context) {
 
+    var audio_context = context;
     var subFactories = [];
     var plugin_prototypes = [];
     
@@ -92,6 +93,11 @@ var PluginFactory = function () {
             SubFactory.destroy();
         }
     }
+    
+    Object.defineProperty(this,"context",{
+        'get': function(){return audio_context;},
+        'set':function(){}
+    })
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 
@@ -100,6 +106,10 @@ var PluginFactory = function () {
         var pluginChainStop = chainStop;
         this.parent = PluginFactory;
         var state = 1;
+        var chainStartFeature = this.parent.context.createAnalyserNode();
+        pluginChainStart.disconnect();
+        pluginChainStart.connect(chainStartFeature);
+        pluginChainStart.connect(chainStop);
 
         this.getPrototypes = function () {
             return this.parent.getPrototypes();
