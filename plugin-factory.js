@@ -43,10 +43,10 @@ var PluginFactory = function (context, dir) {
     }
     if (typeof jsXtract != "function") {
         var script = document.createElement("script");
-        script.src = dir + "jsXtract/jsXtract.js";
+        script.src = dir + "js-xtract/jsXtract.js";
         document.getElementsByTagName("head")[0].appendChild(script);
         script = document.createElement("script");
-        script.src = dir + "jsXtract/jsXtract-wa.js";
+        script.src = dir + "js-xtract/jsXtract-wa.js";
         document.getElementsByTagName("head")[0].appendChild(script);
     }
 
