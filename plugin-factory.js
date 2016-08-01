@@ -26,7 +26,7 @@ var PluginFactory = function (context, dir) {
     }
 
     // Check for JS-Xtract and dynamically load
-    var promise;
+    var script;
     var self = this;
 
     if (dir == undefined) {
@@ -34,15 +34,12 @@ var PluginFactory = function (context, dir) {
     }
 
     if (typeof BasePlugin != "function") {
-        promise = self.loadResource(dir + "base_plugin.js").then(function (response) {
-            var script = document.createElement("script");
-            script.textContent = response;
-            document.getElementsByTagName("head")[0].appendChild(script);
-            return true;
-        })
+        script = document.createElement("script");
+        script.src = dir + "base_plugin.js";
+        document.getElementsByTagName("head")[0].appendChild(script);
     }
     if (typeof jsXtract != "function") {
-        var script = document.createElement("script");
+        script = document.createElement("script");
         script.src = dir + "js-xtract/jsXtract.js";
         document.getElementsByTagName("head")[0].appendChild(script);
         script = document.createElement("script");
