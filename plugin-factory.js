@@ -1,12 +1,12 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 
-var PluginFactory = function (context,dir) {
+var PluginFactory = function (context, dir) {
 
     var audio_context = context;
     var subFactories = [];
     var plugin_prototypes = [];
-    
+
     this.loadResource = function (url) {
         return p = new Promise(function (resolve, reject) {
             var req = new XMLHttpRequest();
@@ -24,22 +24,30 @@ var PluginFactory = function (context,dir) {
             req.send();
         });
     }
-    
+
     // Check for JS-Xtract and dynamically load
     var promise;
     var self = this;
-    
+
     if (dir == undefined) {
         dir = "js-plugin/";
     }
-    
+
     if (typeof BasePlugin != "function") {
-        promise = self.loadResource(dir+"base_plugin.js").then(function(response){
+        promise = self.loadResource(dir + "base_plugin.js").then(function (response) {
             var script = document.createElement("script");
             script.textContent = response;
             document.getElementsByTagName("head")[0].appendChild(script);
             return true;
         })
+    }
+    if (typeof jsXtract != "function") {
+        var script = document.createElement("script");
+        script.src = dir + "jsXtract/jsXtract.js";
+        document.getElementsByTagName("head")[0].appendChild(script);
+        script = document.createElement("script");
+        script.src = dir + "jsXtract/jsXtract-wa.js";
+        document.getElementsByTagName("head")[0].appendChild(script);
     }
 
     this.addPrototype = function (plugin_proto) {
@@ -70,8 +78,8 @@ var PluginFactory = function (context,dir) {
     this.getPrototypes = function () {
         return plugin_prototypes;
     }
-    
-    this.getAllPlugins = function() {
+
+    this.getAllPlugins = function () {
         var list = [];
         for (var factory of subFactories) {
             list = list.concat(factory.getPlugins());
@@ -97,10 +105,12 @@ var PluginFactory = function (context,dir) {
             SubFactory.destroy();
         }
     }
-    
-    Object.defineProperty(this,"context",{
-        'get': function(){return audio_context;},
-        'set':function(){}
+
+    Object.defineProperty(this, "context", {
+        'get': function () {
+            return audio_context;
+        },
+        'set': function () {}
     })
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
