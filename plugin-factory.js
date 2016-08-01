@@ -1,7 +1,7 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 
-var PluginFactory = function (context) {
+var PluginFactory = function (context,dir) {
 
     var audio_context = context;
     var subFactories = [];
@@ -29,8 +29,12 @@ var PluginFactory = function (context) {
     var promise;
     var self = this;
     
+    if (dir == undefined) {
+        dir = "js-plugin/";
+    }
+    
     if (typeof BasePlugin != "function") {
-        promise = self.loadResource("base_plugin.js").then(function(response){
+        promise = self.loadResource(dir+"base_plugin.js").then(function(response){
             var script = document.createElement("script");
             script.textContent = response;
             document.getElementsByTagName("head")[0].appendChild(script);
