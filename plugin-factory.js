@@ -117,7 +117,7 @@ var PluginFactory = function (context, dir) {
         var pluginChainStop = chainStop;
         this.parent = PluginFactory;
         var state = 1;
-        var chainStartFeature = this.parent.context.createAnalyserNode();
+        var chainStartFeature = this.parent.context.createAnalyser();
         pluginChainStart.disconnect();
         pluginChainStart.connect(chainStartFeature);
         pluginChainStart.connect(chainStop);
