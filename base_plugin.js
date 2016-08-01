@@ -45,6 +45,7 @@ AudioNode.prototype.getInputs = function () {
 // This should simply define the BasePlugin from which custom plugins can be built from
 var BasePlugin = function (context) {
     this.context = context;
+    this.factory = undefined;
 }
 
 BasePlugin.prototype.connect = function (dest) {
