@@ -142,7 +142,7 @@ var PluginFactory = function (context, dir) {
                 return;
             }
             var node = new plugin_prototype();
-            node.prototype.factory = this.parent;
+            node.factory = this.parent;
             var obj = new PluginInstance(node, chainStop);
             var last_node = plugin_list[plugin_list.length - 1];
             if (last_node != undefined) {
