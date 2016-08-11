@@ -7,7 +7,9 @@ var PluginFactory = function (context, dir) {
     var audio_context = context;
     var subFactories = [];
     var plugin_prototypes = [];
-
+    var _plugins = [];
+    var _currentPluginId = 0;
+    
     this.loadResource = function (url) {
         return p = new Promise(function (resolve, reject) {
             var req = new XMLHttpRequest();
@@ -104,6 +106,18 @@ var PluginFactory = function (context, dir) {
             SubFactory.destroy();
         }
     }
+    
+    this.createPluginInstance = function() {
+        var node = new PluginInstance(_currentPluginId++);
+        _plugins.push(node);
+        return node;
+    }
+    
+    this.deletePlugin = function(id) {
+        if (id >= 0 && id < _plugins.length) {
+            _plugins.splice(id, 1);
+        }
+    }
 
     Object.defineProperty(this, "context", {
         'get': function () {
@@ -112,51 +126,36 @@ var PluginFactory = function (context, dir) {
         'set': function () {}
     })
     
-    var FeatureInterface = function(factory) {
-        this.parent = factory;
-        var _featureMap = [];
+    var PluginInstance = function (id) {
+        var _id = id;
         
-        var FeatureMap = function(plugin) {
-            this.plugin = plugin;
-            var _features = [];
-            
-            this.addFeatures = function(fetcher, featureList) {
-                var fetcherObject = _features.find(function(element){
-                    if (element.plugin == this) {return true};
-                    return false;
-                }, fetcher);
-                if (fetcherObject == undefined) {
-                    fetcherObject = {
-                        'plugin': fetcher,
-                        'featureList': featureList
-                    };
-                    _features.push(fetcherObject);
-                } else {
-                    for (var i=0; i<featureList.length; i++) {
-                        if (!fetcherObject.featureList.find(function(element){
-                            if (element.name == this.name) {return true;} return false;
-                        },featureList[i])) {
-                            fetcherObject.featureList.push(featureList[i]);
-                        }
-                    }
-                }
+        this.node = undefined;
+        this.next_node = undefined;
+        
+        this.populate = function(node, next_node) {
+            this.node = node;
+            this.next_node = next_node;
+            this.node.connect(next_node.getInputs());
+        }
+
+        this.reconnect = function (new_next) {
+            if (new_next != this.next_node) {
+                this.node.disconnect(this.next_node.getInputs()[0]);
+                this.next_node = new_next;
+                this.node.connect(this.next_node.getInputs()[0]);
+                return true;
             }
+            return false;
+        }
+
+        this.destory = function () {
+            this.node.destroy();
         }
         
-        this.requestFeatures = function(requestor, fetcher, featureList) {
-            fetcher.features.requestFeatures(featureList);
-            var mapObject = _featureMap.find(function(element){
-                if (element.plugin == requestor) {
-                    return true;
-                }
-                return false;
-            }, requestor);
-            if (mapObject == undefined) {
-                mapObject = new FeatureMap(requestor);
-                _featureMap.push(mapObject);
-            }
-            mapObject.addFeatures(fetcher, featureList);
-        }
+        Object.defineProperties(this, "id", {
+            'get': function() {return _id;},
+            'set': function() {console.error("ID is a read-only variable")}
+        });
     }
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
@@ -165,6 +164,7 @@ var PluginFactory = function (context, dir) {
         var pluginChainStart = chainStart;
         var pluginChainStop = chainStop;
         this.parent = PluginFactory;
+        var _factoryName = "";
         var state = 1;
         var chainStartFeature = this.parent.context.createAnalyser();
         pluginChainStart.disconnect();
@@ -196,7 +196,8 @@ var PluginFactory = function (context, dir) {
             }
             var node = new plugin_prototype(this);
             node.factory = this.parent;
-            var obj = new PluginInstance(node, chainStop);
+            var obj = this.parent.createPluginInstance();
+            obj.populate(node, pluginChainStop);
             var last_node = plugin_list[plugin_list.length - 1];
             if (last_node != undefined) {
                 last_node.reconnect(node);
@@ -220,6 +221,7 @@ var PluginFactory = function (context, dir) {
                     pluginChainStart.connect(plugin_list[index + 1] || pluginChainStop);
                 }
                 plugin_list.splice(index, 1);
+                this.parent.removePlugin(plugin_object.id);
             }
         }
 
@@ -268,25 +270,70 @@ var PluginFactory = function (context, dir) {
                 plugin_list[plugin_list.length - 1].reconnect(pluginChainStop);
             }
         }
-
-        var PluginInstance = function (node, next_node) {
-            this.node = node;
-            this.next_node = next_node;
-            this.node.connect(this.next_node.input || this.next_node);
-
-            this.reconnect = function (new_next) {
-                if (new_next != this.next_node) {
-                    this.node.disconnect(this.next_node.getInputs()[0]);
-                    this.next_node = new_next;
-                    this.node.connect(this.next_node.getInputs()[0]);
-                    return true;
+        
+        Object.defineProperty(this, "name", {
+            get: function() {return _factoryName;},
+            set: function(name) {
+                if (typeof name == "string") {
+                    _factoryName = name;
                 }
-                return false;
+                return _factoryName;
             }
-
-            this.destory = function () {
-                this.node.destroy();
-            }
-        }
+        });
     }
+    
+    
+    // ======= Feature Mapping =======
+    var _featureMaps = [];
+    
+    this.requestFeatures = function(requester, fetcher, features) {
+        /*
+            Request features from a plugin (fetcher) to sent to requester
+        */
+        
+        // Firstly, find the fetcher in the _featureMaps
+        var fetcherObject = _featureMaps.find(function(element){
+            if (element.plugin == this) {return true;} return false;
+        },fetcher);
+        if (!fetcherObject) {
+            fetcherObject = {
+                'plugin': fetcher,
+                'requests': []
+            };
+            _featureMaps.push(fetcherObject)''
+        }
+        
+        // Now find the requester
+        var requesterObject = fetcherObject.requests.find(function(element){
+            if (element.plugin == this) {return true;} return false;
+        },requester);
+        if (!requesterObject) {
+            requesterObject = {
+                'plugin': requester,
+                'features': []
+            };
+            fetcherObject.requests.push(requesterObject);
+        }
+        
+        // Now processes the feature objects:
+        /*
+            {
+                'name': String(),
+                'parameters': []
+            }
+        */
+        for (var i=0; i<features.length; i++) {
+            // Convert the features to eval strings
+            var feature = features[i];
+            var obj = {
+                'name': feature.name,
+                'exec': feature.name+"("+feature.parameters.join(', ')+");"
+            }
+            requesterObject.features.push(obj);
+        }
+        
+        // Now inform the plugin of the features to evaluate
+        fetcher.requestFeatures(requesterObject.features);
+    }
+    
 }

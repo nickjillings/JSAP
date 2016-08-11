@@ -259,63 +259,46 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     });
 }
 
-/* This interface binds the plugin output analysis with the PluginFactory and SubFactory.
-This allows the factory to request certain features be processed and return them
+/*
+    This interface binds the plugin output analysis with the PluginFactory and SubFactory.
+    This allows the factory to request certain features be processed and return them
 */
-var FeatureInterface = function(plugin) {
-    var _featureList = [];
-    var _plugin = plugin;
+
+var FeatureInterface = function(BasePluginInstance) {
+    this.plugin = BasePluginInstance;
     
-    function findFeatureIndex() {
-        return _featureList.findIndex(function(element){
-            if (element.name == featureName) {
-                return true;
-            }
-            return false;
-        },featureName);
+    // Store for holding list of features to transmit
+    var _requestedFeatures = [];
+    /*
+    {
+        'name': name,
+        'exec': execution,
+        'count': number of times requested (0 == remove)
     }
-    function hasFeature(featureName) {
-        if (findFeatureIndex >= 0) {
-            return true;
-        }
-        return false;
-    }
+    */
     
-    function getFeatures() {
-        var result = {};
-        var featureNodes = this.plugin.features;
-        for (var i=0; i<featureNodes.length; i++) {
-            var output = {
-                'output': this.plugin.outputs[i],
-                'features': undefined
-            }
-            var data = featureNodes[i].getXtractData();
-            for (var k=0; k<_featureList.length; k++) {
-                if (eval('typeof'))
-            }
-        }
-    }
     
-    this.requestFeatures = function(featureList) {
-        // Request Features from the current pluginInstance outputs
-        // Each output must return these features
-        
-        /* featureList is a list of objects
-         {
-            'name': featureName,
-            'parameters': []
-         }
-        */
-        for (var i=0; i<featureList.length; i++) {
-            if (!hasFeature(featureList[i].name)) {
-                _featureList.push(featureList);
+    this.requestFeatures = function(features) {
+        // This includes the features to process.
+        for (var i=0; i<features.length; i++) {
+            // Find if the same eval statement already exists!
+            var featureObject = _requestedFeatures.find(function(element){
+                if (element.exec == this.exec) {
+                    return true;
+                }
+                return false;
+            },features[i]);
+            if (featureObject) {
+                featureObject.count++;
+            } else {
+                featureObject = {
+                    'name': features[i].name,
+                    'exec': features[i].exec,
+                    'count': 1
+                };
+                _requestedFeatures.push(featureObject);
             }
         }
-    }
-    
-    this.removeFeatures = function(featureList) {
-        // Deregister features from the current pluginInstnace
-        /* featureList is still a list of objects */
     }
 }
 
