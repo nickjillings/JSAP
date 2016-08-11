@@ -1,6 +1,12 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 
+if (typeof jsXtract != "function") {
+    script = document.createElement("script");
+    script.src = dir + "js-xtract/jsXtract.min.js";
+    document.getElementsByTagName("head")[0].appendChild(script);
+}
+
 var PluginFactory = function (context, dir) {
 
     var audio_context = context;
@@ -31,20 +37,6 @@ var PluginFactory = function (context, dir) {
 
     if (dir == undefined) {
         dir = "js-plugin/";
-    }
-
-    if (typeof BasePlugin != "function") {
-        script = document.createElement("script");
-        script.src = dir + "base_plugin.js";
-        document.getElementsByTagName("head")[0].appendChild(script);
-    }
-    if (typeof jsXtract != "function") {
-        script = document.createElement("script");
-        script.src = dir + "js-xtract/jsXtract.js";
-        document.getElementsByTagName("head")[0].appendChild(script);
-        script = document.createElement("script");
-        script.src = dir + "js-xtract/jsXtract-wa.js";
-        document.getElementsByTagName("head")[0].appendChild(script);
     }
 
     this.addPrototype = function (plugin_proto) {
