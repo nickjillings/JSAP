@@ -259,6 +259,66 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     });
 }
 
+/* This interface binds the plugin output analysis with the PluginFactory and SubFactory.
+This allows the factory to request certain features be processed and return them
+*/
+var FeatureInterface = function(plugin) {
+    var _featureList = [];
+    var _plugin = plugin;
+    
+    function findFeatureIndex() {
+        return _featureList.findIndex(function(element){
+            if (element.name == featureName) {
+                return true;
+            }
+            return false;
+        },featureName);
+    }
+    function hasFeature(featureName) {
+        if (findFeatureIndex >= 0) {
+            return true;
+        }
+        return false;
+    }
+    
+    function getFeatures() {
+        var result = {};
+        var featureNodes = this.plugin.features;
+        for (var i=0; i<featureNodes.length; i++) {
+            var output = {
+                'output': this.plugin.outputs[i],
+                'features': undefined
+            }
+            var data = featureNodes[i].getXtractData();
+            for (var k=0; k<_featureList.length; k++) {
+                if (eval('typeof'))
+            }
+        }
+    }
+    
+    this.requestFeatures = function(featureList) {
+        // Request Features from the current pluginInstance outputs
+        // Each output must return these features
+        
+        /* featureList is a list of objects
+         {
+            'name': featureName,
+            'parameters': []
+         }
+        */
+        for (var i=0; i<featureList.length; i++) {
+            if (!hasFeature(featureList[i].name)) {
+                _featureList.push(featureList);
+            }
+        }
+    }
+    
+    this.removeFeatures = function(featureList) {
+        // Deregister features from the current pluginInstnace
+        /* featureList is still a list of objects */
+    }
+}
+
 /*
     This is an optional module which will attempt to create a graphical implementation.
     As with other audio plugins for DAWs, the GUI is an optional element which can be accepted or rejected by the host.

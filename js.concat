@@ -2,4 +2,6 @@ concatOnSave = true;
 output = js-plugin.min.js;
 minify = false;
 
--src/*.js;
+-src/head.min.js;
+-src/base_plugin.js;
+-src/plugin-factory.js;

@@ -1,11 +1,6 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 
-if (typeof jsXtract != "function") {
-    script = document.createElement("script");
-    script.src = dir + "js-xtract/jsXtract.min.js";
-    document.getElementsByTagName("head")[0].appendChild(script);
-}
 
 var PluginFactory = function (context, dir) {
 
@@ -75,6 +70,21 @@ var PluginFactory = function (context, dir) {
         }
         return list;
     }
+    
+    this.getAllPluginsObject = function() {
+        var obj = {
+            'factory': this,
+            'subFactories': []
+        };
+        for (var i=0; i<subFactories.length; i++) {
+            var sub = {
+                'subFactory': subFactories[i],
+                'plugins': subFactories[i].getPlugins()
+            }
+            obj.subFactories.push(sub);
+        }
+        return obj;
+    }
 
     this.createSubFactory = function (chainStart, chainStop) {
         var node = new PluginSubFactory(this, chainStart, chainStop);
@@ -101,6 +111,53 @@ var PluginFactory = function (context, dir) {
         },
         'set': function () {}
     })
+    
+    var FeatureInterface = function(factory) {
+        this.parent = factory;
+        var _featureMap = [];
+        
+        var FeatureMap = function(plugin) {
+            this.plugin = plugin;
+            var _features = [];
+            
+            this.addFeatures = function(fetcher, featureList) {
+                var fetcherObject = _features.find(function(element){
+                    if (element.plugin == this) {return true};
+                    return false;
+                }, fetcher);
+                if (fetcherObject == undefined) {
+                    fetcherObject = {
+                        'plugin': fetcher,
+                        'featureList': featureList
+                    };
+                    _features.push(fetcherObject);
+                } else {
+                    for (var i=0; i<featureList.length; i++) {
+                        if (!fetcherObject.featureList.find(function(element){
+                            if (element.name == this.name) {return true;} return false;
+                        },featureList[i])) {
+                            fetcherObject.featureList.push(featureList[i]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        this.requestFeatures = function(requestor, fetcher, featureList) {
+            fetcher.features.requestFeatures(featureList);
+            var mapObject = _featureMap.find(function(element){
+                if (element.plugin == requestor) {
+                    return true;
+                }
+                return false;
+            }, requestor);
+            if (mapObject == undefined) {
+                mapObject = new FeatureMap(requestor);
+                _featureMap.push(mapObject);
+            }
+            mapObject.addFeatures(fetcher, featureList);
+        }
+    }
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 
@@ -116,6 +173,10 @@ var PluginFactory = function (context, dir) {
 
         this.getPrototypes = function () {
             return this.parent.getPrototypes();
+        }
+        
+        this.getFactory = function() {
+            return this.parent;
         }
 
         this.destroy = function () {
@@ -133,7 +194,7 @@ var PluginFactory = function (context, dir) {
                 console.error("SubFactory has been destroyed! Cannot add new plugins");
                 return;
             }
-            var node = new plugin_prototype();
+            var node = new plugin_prototype(this);
             node.factory = this.parent;
             var obj = new PluginInstance(node, chainStop);
             var last_node = plugin_list[plugin_list.length - 1];
@@ -164,6 +225,10 @@ var PluginFactory = function (context, dir) {
 
         this.getPlugins = function () {
             return plugin_list;
+        }
+        
+        this.getAllPlugins = function() {
+            return this.parent.getAllPluginsObject();
         }
 
         this.getPluginIndex = function (plugin_object) {
