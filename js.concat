@@ -1,5 +1,5 @@
 concatOnSave = true;
-output = js-plugin.min.js;
+output = jsap.js;
 minify = false;
 
 -src/head.min.js;
