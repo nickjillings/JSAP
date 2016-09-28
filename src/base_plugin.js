@@ -200,7 +200,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
                 boundParam.value = _value;
             }
             _actions.push({
-                'value': value,
+                'value': _value,
                 'time': new Date()
             });
             _trigger();
