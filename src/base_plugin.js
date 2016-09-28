@@ -71,7 +71,7 @@ BasePlugin.prototype.setParameterByObject = function (object) {
     }
 }
 
-BasePlugin.prototype.getParameterActions = function() {
+BasePlugin.prototype.getParameterActions = function () {
     // Return the history of plugin activity
     var object = [];
     for (var param of this.parameters) {
@@ -115,15 +115,19 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
 
     // Store for providence
     var _actions = [];
-    
+
     // Update Function
-    var _update = function(value) {return value};
-    
+    var _update = function (value) {
+        return value
+    };
+
     // Translate Function
-    var _translate = function(value) {return value;};
-    
+    var _translate = function (value) {
+        return value;
+    };
+
     // Trigger Function
-    var _trigger = function() {};
+    var _trigger = function () {};
 
     var boundParam;
 
@@ -213,10 +217,10 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
         }
     });
     Object.defineProperty(this, "update", {
-        get: function() {
+        get: function () {
             return _update;
         },
-        set: function(func) {
+        set: function (func) {
             if (typeof func != "function") {
                 console.error("Must pass in a valid function");
             }
@@ -226,12 +230,12 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             _update = func;
         }
     });
-    
+
     Object.defineProperty(this, "translate", {
-        get: function() {
+        get: function () {
             return _translate;
         },
-        set: function(func) {
+        set: function (func) {
             if (typeof func != "function") {
                 console.error("Must pass in a valid function");
             }
@@ -241,12 +245,12 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             _translate = func;
         }
     });
-    
-    Object.defineProperty(this,"trigger",{
-        get: function() {
+
+    Object.defineProperty(this, "trigger", {
+        get: function () {
             return _trigger;
         },
-        set: function(func,arg_this) {
+        set: function (func, arg_this) {
             if (typeof func != "function") {
                 console.error("Must pass in a valid function");
             }
@@ -264,42 +268,8 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     This allows the factory to request certain features be processed and return them
 */
 
-var FeatureInterface = function(BasePluginInstance) {
+var FeatureInterface = function (BasePluginInstance) {
     this.plugin = BasePluginInstance;
-    
-    // Store for holding list of features to transmit
-    var _requestedFeatures = [];
-    /*
-    {
-        'name': name,
-        'exec': execution,
-        'count': number of times requested (0 == remove)
-    }
-    */
-    
-    
-    this.requestFeatures = function(features) {
-        // This includes the features to process.
-        for (var i=0; i<features.length; i++) {
-            // Find if the same eval statement already exists!
-            var featureObject = _requestedFeatures.find(function(element){
-                if (element.exec == this.exec) {
-                    return true;
-                }
-                return false;
-            },features[i]);
-            if (featureObject) {
-                featureObject.count++;
-            } else {
-                featureObject = {
-                    'name': features[i].name,
-                    'exec': features[i].exec,
-                    'count': 1
-                };
-                _requestedFeatures.push(featureObject);
-            }
-        }
-    }
 }
 
 /*

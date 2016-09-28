@@ -9,7 +9,7 @@ var PluginFactory = function (context, dir) {
     var plugin_prototypes = [];
     var _plugins = [];
     var _currentPluginId = 0;
-    
+
     this.loadResource = function (url) {
         return p = new Promise(function (resolve, reject) {
             var req = new XMLHttpRequest();
@@ -72,13 +72,13 @@ var PluginFactory = function (context, dir) {
         }
         return list;
     }
-    
-    this.getAllPluginsObject = function() {
+
+    this.getAllPluginsObject = function () {
         var obj = {
             'factory': this,
             'subFactories': []
         };
-        for (var i=0; i<subFactories.length; i++) {
+        for (var i = 0; i < subFactories.length; i++) {
             var sub = {
                 'subFactory': subFactories[i],
                 'plugins': subFactories[i].getPlugins()
@@ -106,14 +106,14 @@ var PluginFactory = function (context, dir) {
             SubFactory.destroy();
         }
     }
-    
-    this.createPluginInstance = function() {
+
+    this.createPluginInstance = function () {
         var node = new PluginInstance(_currentPluginId++);
         _plugins.push(node);
         return node;
     }
-    
-    this.deletePlugin = function(id) {
+
+    this.deletePlugin = function (id) {
         if (id >= 0 && id < _plugins.length) {
             _plugins.splice(id, 1);
         }
@@ -125,14 +125,14 @@ var PluginFactory = function (context, dir) {
         },
         'set': function () {}
     })
-    
+
     var PluginInstance = function (id) {
         var _id = id;
-        
+
         this.node = undefined;
         this.next_node = undefined;
-        
-        this.populate = function(node, next_node) {
+
+        this.populate = function (node, next_node) {
             this.node = node;
             this.next_node = next_node;
             this.node.connect(next_node.getInputs());
@@ -151,10 +151,14 @@ var PluginFactory = function (context, dir) {
         this.destory = function () {
             this.node.destroy();
         }
-        
+
         Object.defineProperties(this, "id", {
-            'get': function() {return _id;},
-            'set': function() {console.error("ID is a read-only variable")}
+            'get': function () {
+                return _id;
+            },
+            'set': function () {
+                console.error("ID is a read-only variable")
+            }
         });
     }
 
@@ -174,8 +178,8 @@ var PluginFactory = function (context, dir) {
         this.getPrototypes = function () {
             return this.parent.getPrototypes();
         }
-        
-        this.getFactory = function() {
+
+        this.getFactory = function () {
             return this.parent;
         }
 
@@ -228,8 +232,8 @@ var PluginFactory = function (context, dir) {
         this.getPlugins = function () {
             return plugin_list;
         }
-        
-        this.getAllPlugins = function() {
+
+        this.getAllPlugins = function () {
             return this.parent.getAllPluginsObject();
         }
 
@@ -270,10 +274,12 @@ var PluginFactory = function (context, dir) {
                 plugin_list[plugin_list.length - 1].reconnect(pluginChainStop);
             }
         }
-        
+
         Object.defineProperty(this, "name", {
-            get: function() {return _factoryName;},
-            set: function(name) {
+            get: function () {
+                return _factoryName;
+            },
+            set: function (name) {
                 if (typeof name == "string") {
                     _factoryName = name;
                 }
@@ -281,59 +287,11 @@ var PluginFactory = function (context, dir) {
             }
         });
     }
-    
-    
+
+
     // ======= Feature Mapping =======
     var _featureMaps = [];
-    
-    this.requestFeatures = function(requester, fetcher, features) {
-        /*
-            Request features from a plugin (fetcher) to sent to requester
-        */
-        
-        // Firstly, find the fetcher in the _featureMaps
-        var fetcherObject = _featureMaps.find(function(element){
-            if (element.plugin == this) {return true;} return false;
-        },fetcher);
-        if (!fetcherObject) {
-            fetcherObject = {
-                'plugin': fetcher,
-                'requests': []
-            };
-            _featureMaps.push(fetcherObject)''
-        }
-        
-        // Now find the requester
-        var requesterObject = fetcherObject.requests.find(function(element){
-            if (element.plugin == this) {return true;} return false;
-        },requester);
-        if (!requesterObject) {
-            requesterObject = {
-                'plugin': requester,
-                'features': []
-            };
-            fetcherObject.requests.push(requesterObject);
-        }
-        
-        // Now processes the feature objects:
-        /*
-            {
-                'name': String(),
-                'parameters': []
-            }
-        */
-        for (var i=0; i<features.length; i++) {
-            // Convert the features to eval strings
-            var feature = features[i];
-            var obj = {
-                'name': feature.name,
-                'exec': feature.name+"("+feature.parameters.join(', ')+");"
-            }
-            requesterObject.features.push(obj);
-        }
-        
-        // Now inform the plugin of the features to evaluate
-        fetcher.requestFeatures(requesterObject.features);
-    }
-    
+
+    this.requestFeatures = function (requester, fetcher, features) {}
+
 }
