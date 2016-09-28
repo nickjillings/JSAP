@@ -1,54 +1,47 @@
-
-if (typeof jsXtract != "function") {
-    script = document.createElement("script");
-    script.src = dir + "js-xtract/jsXtract.min.js";
-    document.getElementsByTagName("head")[0].appendChild(script);
-}
-
 if (!Array.prototype.find) {
-  Array.prototype.find = function(predicate) {
-    'use strict';
-    if (this == null) {
-      throw new TypeError('Array.prototype.find called on null or undefined');
-    }
-    if (typeof predicate !== 'function') {
-      throw new TypeError('predicate must be a function');
-    }
-    var list = Object(this);
-    var length = list.length >>> 0;
-    var thisArg = arguments[1];
-    var value;
+    Array.prototype.find = function (predicate) {
+        'use strict';
+        if (this == null) {
+            throw new TypeError('Array.prototype.find called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
 
-    for (var i = 0; i < length; i++) {
-      value = list[i];
-      if (predicate.call(thisArg, value, i, list)) {
-        return value;
-      }
-    }
-    return undefined;
-  };
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return value;
+            }
+        }
+        return undefined;
+    };
 }
 
 if (!Array.prototype.findIndex) {
-  Array.prototype.findIndex = function(predicate) {
-    'use strict';
-    if (this == null) {
-      throw new TypeError('Array.prototype.findIndex called on null or undefined');
-    }
-    if (typeof predicate !== 'function') {
-      throw new TypeError('predicate must be a function');
-    }
-    var list = Object(this);
-    var length = list.length >>> 0;
-    var thisArg = arguments[1];
-    var value;
+    Array.prototype.findIndex = function (predicate) {
+        'use strict';
+        if (this == null) {
+            throw new TypeError('Array.prototype.findIndex called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
 
-    for (var i = 0; i < length; i++) {
-      value = list[i];
-      if (predicate.call(thisArg, value, i, list)) {
-        return i;
-      }
-    }
-    return -1;
-  };
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return i;
+            }
+        }
+        return -1;
+    };
 }
