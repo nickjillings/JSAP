@@ -1,7 +1,14 @@
 concatOnSave = true;
 output = jsXtract.min.js;
-minify = true;
+minify = false;
 
 -jsXtract.js;
+-modules/freeFFT.js;
+-modules/TimeData.js;
+-modules/SpectrumData.js;
+-modules/PeakSpectrumData.js;
+-modules/HarmonicSpectrumData.js;
+-modules/DataPrototype.js;
+-features.js;
 -jsXtract-wa.js;
 -chroma/FB.js;
