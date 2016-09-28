@@ -195,16 +195,15 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             } else if (newValue <= _minimum && _minimum != undefined) {
                 newValue == _minimum;
             }
-            _value = _update(newValue);
             if (boundParam) {
-                boundParam.value = _value;
+                boundParam.value = _update(newValue);
             }
             _actions.push({
-                'value': _value,
+                'value': newValue,
                 'time': new Date()
             });
             _trigger();
-            return _value;
+            return newValue;
         }
     });
 
