@@ -23,7 +23,7 @@
 
 // This binds the js-xtract with the Web Audio API AudioBuffer and AnalyserNodes
 
-if (AnalyserNode) {
+if (typeof AnalyserNode != "undefined") {
 
     AnalyserNode.prototype.timeData = undefined;
     AnalyserNode.prototype.spectrumData = undefined;
@@ -38,17 +38,17 @@ if (AnalyserNode) {
         } else {
             var view = new UInt8Array(this.fftSize);
             this.getByteTimeDomainData(view);
-            for (var i=0; i<this.fftSize; i++) {
+            for (var i = 0; i < this.fftSize; i++) {
                 dst[i] = view[i];
-                dst[i] = (dst[i]/127.5)-1;
+                dst[i] = (dst[i] / 127.5) - 1;
             }
         }
         this.timeData.copyDataFrom(dst);
         this.timeData.result.spectrum = this.spectrumData;
         var LogStore = new Float32Array(this.frequencyBinCount);
         this.getFloatFrequencyData(LogStore);
-        for (var i=0; i<this.frequencyBinCount; i++) {
-            LogStore[i] = Math.pow(10.0, LogStore[i]/20);
+        for (var i = 0; i < this.frequencyBinCount; i++) {
+            LogStore[i] = Math.pow(10.0, LogStore[i] / 20);
         }
         this.spectrumData.copyDataFrom(LogStore);
         return this.timeData;
@@ -67,7 +67,7 @@ if (AnalyserNode) {
         var self = this;
         this.callbackObject.onaudioprocess = function (e) {
             var current_frame = self.getXtractData();
-            this.previousResult = _func.call(_arg_this,current_frame, this.previousFrame, this.previousResult);
+            this.previousResult = _func.call(_arg_this, current_frame, this.previousFrame, this.previousResult);
             this.previousFrame = current_frame;
             var N = e.outputBuffer.length;
             var output = new Float32Array(N);
@@ -75,7 +75,7 @@ if (AnalyserNode) {
             if (typeof this.previousResult != "number") {
                 result = 0.0;
             }
-            for (var i=0; i<N; i++) {
+            for (var i = 0; i < N; i++) {
                 output[i] = result;
             }
             e.outputBuffer.copyToChannel(output, 0, 0);
@@ -93,7 +93,7 @@ if (AnalyserNode) {
     }
 }
 
-if (AudioBuffer) {
+if (typeof AudioBuffer != "undefined") {
 
     AudioBuffer.prototype.xtract_get_data_frames = function (frame_size, hop_size) {
         if (typeof frame_size != "number") {
@@ -108,42 +108,69 @@ if (AudioBuffer) {
         if (hop_size <= 0 || hop_size != Math.floor(hop_size)) {
             throw ("xtract_get_data_frames requires the hop_size to be a positive integer");
         }
-        var frames = [];
+        this.frames = [];
         var N = this.length;
-        var K = Math.ceil(N / frame_size);
+        var K = this.xtract_get_number_of_frames(hop_size);
         for (var c = 0; c < this.numberOfChannels; c++) {
             var data = this.getChannelData(c);
-            frames[c] = [];
-            for (var k=0; k<K; k++) {
-                var frame = new TimeData(hop_size, this.sampleRate);
-                frame.copyDataFrom(data.subarray(frame_size*k, frame_size*k+hop_size));
-                frames[c].push(frame);
+            this.frames[c] = [];
+            for (var k = 0; k < K; k++) {
+                var frame = new TimeData(frame_size, this.sampleRate);
+                frame.copyDataFrom(data.subarray(hop_size * k, hop_size * k + frame_size));
+                this.frames[c].push(frame);
+                frame = undefined;
             }
+            data = undefined;
         }
-        return frames;
+        return this.frames;
     }
 
-    AudioBuffer.prototype.xtract_process_frame_data = function (func, frame_size, hop_size, arg_this) {
-        // Process each data point and return a JSON of each frame result from func
-        // Func must return something for this to be a useful feature
-        // func has the following arguments (element, index, array);
-        var result = {
-            num_channels: this.numberOfChannels,
-            channel_results: []
-        };
-        var K = frame_size >> 1;
-        var frames = this.xtract_get_data_frames(frame_size,hop_size);
-        for (var c = 0; c < frames.length; c++) {
-            result.channel_results[c] = {
-                num_frames: frames[c].length,
-                results: []
-            };
-            for (var k=0; k<frames[c].length; k++) {
-                var frame = frames[c][k];
-                func.call(arg_this,frame,k,frames[c]);
-                result.channel_results[c].results[k] = JSON.parse(frame.toJSON());
-            }
+    AudioBuffer.prototype.xtract_get_number_of_frames = function (hop_size) {
+        if (hop_size == undefined) {
+            throw ("xtract_get_number_of_frames requires the hop_size to be defined");
         }
-        return result;
+        if (hop_size <= 0 || hop_size != Math.floor(hop_size)) {
+            throw ("xtract_get_data_frames requires the hop_size to be a positive integer");
+        }
+        return Math.floor(this.length / hop_size);
+    }
+
+    AudioBuffer.prototype.xtract_get_frame = function (dst, channel, index, frame_size, hop_size) {
+        if (typeof dst != "object" || dst.constructor != Float32Array) {
+            throw ("dst must be a Float32Array object equal in length to hop_size");
+        }
+        if (typeof channel != "number" || channel != Math.floor(channel)) {
+            throw ("xtract_get_frame requires the channel to be an integer value");
+        }
+        if (typeof index != "number" || index != Math.floor(index)) {
+            throw ("xtract_get_frame requires the index to be an integer value");
+        }
+        if (typeof frame_size != "number") {
+            throw ("xtract_get_frame requires the frame_size to be defined");
+        }
+        if (frame_size <= 0 || frame_size != Math.floor(frame_size)) {
+            throw ("xtract_get_frame requires the frame_size to be a positive integer");
+        }
+        if (hop_size == undefined) {
+            hop_size = frame_size;
+        }
+        if (dst.length != hop_size) {
+            throw ("dst must be a Float32Array object equal in length to hop_size");
+        }
+        if (hop_size <= 0 || hop_size != Math.floor(hop_size)) {
+            throw ("xtract_get_frame requires the hop_size to be a positive integer");
+        }
+        if (channel < 0 || channel > this.numberOfChannels) {
+            throw ("channel number " + channel + " out of bounds");
+        }
+        var K = this.xtract_get_number_of_frames(hop_size);
+        if (index < 0 || index >= K) {
+            throw ("index number " + index + " out of bounds");
+        }
+        return this.copyFromChannel(dst, channel, hop_size * index);
+    }
+
+    AudioBuffer.prototype.xtract_process_frame_data = function () {
+        throw ("AudioBuffer::xtract_process_frame_data has been deprecated");
     }
 }
