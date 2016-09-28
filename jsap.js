@@ -53,9 +53,87 @@ AudioNode.prototype.getInputs = function () {
 }
 
 // This should simply define the BasePlugin from which custom plugins can be built from
-var BasePlugin = function (context) {
+var BasePlugin = function (context, owner) {
+    var _inputList = [];
+    var _outputList = [];
+    var _parameters = [];
+    var _owner = owner;
+    var _features = [];
     this.context = context;
     this.factory = undefined;
+
+    Object.defineProperty(this, "numInputs", {
+        get: function () {
+            return _inputList.length;
+        },
+        set: function () {
+            console.error("Cannot set the number of inputs of BasePlugin");
+        }
+    })
+    Object.defineProperty(this, "numOutputs", {
+        get: function () {
+            return _outputList.length;
+        },
+        set: function () {
+            console.error("Cannot set the number of outputs of BasePlugin");
+        }
+    })
+    Object.defineProperty(this, "numParameters", {
+        get: function () {
+            return _parameters.length;
+        },
+        set: function () {
+            console.error("Cannot set the number of parameters of BasePlugin");
+        }
+    })
+
+    Object.defineProperty(this, "owner", {
+        get: function () {
+            return _owner;
+        },
+        set: function (owner) {
+            if (typeof owner == "object") {
+                _owner = owner;
+            }
+            return _owner;
+        }
+    })
+
+    Object.defineProperty(this, "inputs", {
+        get: function (index) {
+            return _inputList;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
+
+    Object.defineProperty(this, "outputs", {
+        get: function (index) {
+            return _outputList;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
+
+    Object.defineProperty(this, "features", {
+        get: function (index) {
+            return _features;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
+
+    Object.defineProperty(this, "parameters", {
+        get: function (index) {
+            return _parameters;
+        },
+        set: function () {
+            console.error("Illegal attempt to modify BasePlugin");
+        }
+    })
 }
 
 BasePlugin.prototype.connect = function (dest) {
@@ -130,7 +208,6 @@ BasePlugin.prototype.getParameterActions = function () {
     }
     return object;
 }
-
 var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, owner) {
     /* Plugin Private Variables
           These are accessed by the public facing getter/setter
