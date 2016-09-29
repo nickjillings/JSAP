@@ -20,3 +20,6 @@ var BlankPlugin = function (context, owner) {
         }
     })();
 }
+
+// Also update the prototype function here!
+BlankPlugin.prototype.name = "Cool Plugin Name Here";

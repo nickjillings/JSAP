@@ -37,6 +37,7 @@ var VolumeControl = function (context, owner) {
         }
     })();
 }
+VolumeControl.prototype.name = "Example Volume";
 
 // EXAMPLE - Low Pass
 
@@ -92,7 +93,7 @@ var LowPass = function (context, owner) {
         }
     })();
 }
-
+LowPass.prototype.name = "Example Low Pass";
 // GUI Example
 
 var VolumeControlGUI = function (context, owner) {
@@ -145,3 +146,4 @@ var VolumeControlGUI = function (context, owner) {
         }
     })();
 }
+VolumeControlGUI.prototype.name = "Example Volume with GUI";
