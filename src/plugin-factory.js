@@ -33,7 +33,7 @@ var PluginFactory = function (context, dir) {
     var self = this;
 
     if (dir == undefined) {
-        dir = "js-plugin/";
+        dir = "jsap/";
     }
 
     this.addPrototype = function (plugin_proto) {
@@ -135,7 +135,7 @@ var PluginFactory = function (context, dir) {
         this.populate = function (node, next_node) {
             this.node = node;
             this.next_node = next_node;
-            this.node.connect(next_node.getInputs());
+            this.node.connect(next_node.getInputs()[0]);
         }
 
         this.reconnect = function (new_next) {
@@ -152,7 +152,7 @@ var PluginFactory = function (context, dir) {
             this.node.destroy();
         }
 
-        Object.defineProperties(this, "id", {
+        Object.defineProperty(this, "id", {
             'get': function () {
                 return _id;
             },
@@ -198,7 +198,7 @@ var PluginFactory = function (context, dir) {
                 console.error("SubFactory has been destroyed! Cannot add new plugins");
                 return;
             }
-            var node = new plugin_prototype(this);
+            var node = new plugin_prototype(this.parent.context, this);
             node.factory = this.parent;
             var obj = this.parent.createPluginInstance();
             obj.populate(node, pluginChainStop);
