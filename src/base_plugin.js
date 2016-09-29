@@ -272,8 +272,9 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             } else if (newValue <= _minimum && _minimum != undefined) {
                 newValue == _minimum;
             }
+            _value = newValue;
             if (boundParam) {
-                boundParam.value = _update(newValue);
+                boundParam.value = _update(_value);
             }
             _actions.push({
                 'value': newValue,
