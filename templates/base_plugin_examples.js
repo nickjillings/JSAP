@@ -1,20 +1,21 @@
 // EXAMPLE - Volume Control
 
-var VolumeControl = function (owner) {
-    var _inputList = [];
-    var _outputList = [];
-    var _parameters = [];
-    var _features = [];
-    var _owner = owner;
+var VolumeControl = function (context, owner) {
+    this.__proto__ = new BasePlugin(context, owner);
     /* USER MODIFIABLE BEGIN */
-    // Place your code between these lines
+
+    /// IMPORTANT ///
+    // Change this to the name of this object
+    this.constructor = VolumeControl;
+
+    // Place your code between this line...
 
     // First we create the web audio API gain node
     var gain = this.context.createGain();
 
     // We have only one input and one output, which is the gain node:
-    _inputList[0] = gain;
-    _outputList[0] = gain;
+    this.inputs[0] = gain;
+    this.output[0] = gain;
 
     // Next we must create the parameter, again there is only one:
     var gainParam = new PluginParameter(1, "Number", "Volume", 0, 2, this);
@@ -23,77 +24,31 @@ var VolumeControl = function (owner) {
     // We have bound the parameter to the web audio gain node parameter gain.
 
     // We can add the gainParam to the parameter list presented to the plugin by:
-    _parameters.push(gainParam);
+    this.parameters.push(gainParam);
 
+    // ... and this line!
     /* USER MODIFIABLE END */
-        (function(){
+    (function () {
         var i;
-        for (i=0; i<_outputList.length; i++) {
+        for (i = 0; i < this.numOutputs; i++) {
             var node = this.context.createAnalyser();
-            _features.push(node);
-            _outputList[i].connect(node);
+            this.features.push(node);
+            this.outputs[i].connect(node);
         }
     })();
-    
-    Object.defineProperty(this,"numInputs",{
-        get: function() {return _inputList.length;},
-        set: function() {console.error("Cannot set the number of inputs of BasePlugin");}
-    })
-    Object.defineProperty(this,"numOutputs",{
-        get: function() {return _outputList.length;},
-        set: function() {console.error("Cannot set the number of outputs of BasePlugin");}
-    })
-    Object.defineProperty(this,"numParameters",{
-        get: function() {return _parameters.length;},
-        set: function() {console.error("Cannot set the number of parameters of BasePlugin");}
-    })
-    
-    Object.defineProperty(this, "owner", {
-        get: function() {return _owner;},
-        set: function(owner) {
-            if (typeof owner == "object") {
-                _owner = owner;
-            }
-            return _owner;
-        }
-    })
-    
-    Object.defineProperty(this,"inputs",{
-        get: function(index) {return _inputList;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"outputs",{
-        get: function(index) {return _outputList;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"features",{
-        get: function(index) {return _features;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"parameters",{
-        get: function(index) {return _parameters;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
 }
-
-VolumeControl.prototype = new BasePlugin(context);
-VolumeControl.prototype.name = "VolumeControl";
-VolumeControl.prototype.constructor = VolumeControl;
-
 
 // EXAMPLE - Low Pass
 
-var LowPass = function (owner) {
-    var _inputList = [];
-    var _outputList = [];
-    var _parameters = [];
-    var _features = [];
-    var _owner = owner;
+var LowPass = function (context, owner) {
+    this.__proto__ = new BasePlugin(context, owner);
     /* USER MODIFIABLE BEGIN */
-    // Place your code between these lines
+
+    /// IMPORTANT ///
+    // Change this to the name of this object
+    this.constructor = LowPass;
+
+    // Place your code between this line...
 
     // This example shows multiple nodes working together!
     var filter = this.context.createBiquadFilter();
@@ -108,8 +63,8 @@ var LowPass = function (owner) {
 
     //...however we only present the input and output gain nodes
 
-    _inputList[0] = inputGain;
-    _outputList[0] = outputGain;
+    this.inputs[0] = inputGain;
+    this.outputs[0] = outputGain;
 
     // Next we must create the parameters, we do not want to expose every parameter in their full range:
     var inputGainParameter = new PluginParameter(1, "Number", "Input Gain", 0.8, 1.2, this);
@@ -122,85 +77,40 @@ var LowPass = function (owner) {
     frequency.bindToAudioParam(filter.frequency);
 
     // And now present the three parameters
-    _parameters.push(inputGainParameter);
-    _parameters.push(outputGainParameter);
-    _parameters.push(frequency);
+    this.parameters.push(inputGainParameter);
+    this.parameters.push(outputGainParameter);
+    this.parameters.push(frequency);
 
+    // ... and this line!
     /* USER MODIFIABLE END */
-    (function(){
+    (function () {
         var i;
-        for (i=0; i<_outputList.length; i++) {
+        for (i = 0; i < this.numOutputs; i++) {
             var node = this.context.createAnalyser();
-            _features.push(node);
-            _outputList[i].connect(node);
+            this.features.push(node);
+            this.outputs[i].connect(node);
         }
     })();
-    
-    Object.defineProperty(this,"numInputs",{
-        get: function() {return _inputList.length;},
-        set: function() {console.error("Cannot set the number of inputs of BasePlugin");}
-    })
-    Object.defineProperty(this,"numOutputs",{
-        get: function() {return _outputList.length;},
-        set: function() {console.error("Cannot set the number of outputs of BasePlugin");}
-    })
-    Object.defineProperty(this,"numParameters",{
-        get: function() {return _parameters.length;},
-        set: function() {console.error("Cannot set the number of parameters of BasePlugin");}
-    })
-    
-    Object.defineProperty(this, "owner", {
-        get: function() {return _owner;},
-        set: function(owner) {
-            if (typeof owner == "object") {
-                _owner = owner;
-            }
-            return _owner;
-        }
-    })
-    
-    Object.defineProperty(this,"inputs",{
-        get: function(index) {return _inputList;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"outputs",{
-        get: function(index) {return _outputList;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"features",{
-        get: function(index) {return _features;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"parameters",{
-        get: function(index) {return _parameters;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
 }
-
-LowPass.prototype = new BasePlugin(context);
-LowPass.prototype.name = "LowPass";
-LowPass.prototype.constructor = LowPass;
 
 // GUI Example
 
-var VolumeControlGUI = function (owner) {
-    var _inputList = [];
-    var _outputList = [];
-    var _parameters = [];
-    var _features = [];
-    var _owner = owner;
+var VolumeControlGUI = function (context, owner) {
+    this.__proto__ = new BasePlugin(context, owner);
     /* USER MODIFIABLE BEGIN */
-    // Place your code between these lines
+
+    /// IMPORTANT ///
+    // Change this to the name of this object
+    this.constructor = VolumeControlGUI;
+
+    // Place your code between this line...
 
     // First we create the web audio API gain node
     var gain = this.context.createGain();
 
     // We have only one input and one output, which is the gain node:
-    _inputList[0] = gain;
-    _outputList[0] = gain;
+    this.inputs[0] = gain;
+    this.outputs[0] = gain;
 
     // Next we must create the parameter, again there is only one:
     var gainParam = new PluginParameter(1, "Number", "Volume", 0, 2);
@@ -209,7 +119,7 @@ var VolumeControlGUI = function (owner) {
     // We have bound the parameter to the web audio gain node parameter gain.
 
     // We can add the gainParam to the parameter list presented to the plugin by:
-    _parameters.push(gainParam);
+    this.parameters.push(gainParam);
 
     // The above lines are the same as the VolumeControl example above, however we now want to add a GUI
     // Create an instance of PluginUserInterfaceInstance
@@ -224,60 +134,14 @@ var VolumeControlGUI = function (owner) {
     this.GUI.slider.input.value = this.GUI.slider.AudioParam.value;
     this.GUI.slider.input.step = 0.01;
 
+    // ... and this line!
     /* USER MODIFIABLE END */
-    (function(){
+    (function () {
         var i;
-        for (i=0; i<_outputList.length; i++) {
+        for (i = 0; i < this.numOutputs; i++) {
             var node = this.context.createAnalyser();
-            _features.push(node);
-            _outputList[i].connect(node);
+            this.features.push(node);
+            this.outputs[i].connect(node);
         }
     })();
-    
-    Object.defineProperty(this,"numInputs",{
-        get: function() {return _inputList.length;},
-        set: function() {console.error("Cannot set the number of inputs of BasePlugin");}
-    })
-    Object.defineProperty(this,"numOutputs",{
-        get: function() {return _outputList.length;},
-        set: function() {console.error("Cannot set the number of outputs of BasePlugin");}
-    })
-    Object.defineProperty(this,"numParameters",{
-        get: function() {return _parameters.length;},
-        set: function() {console.error("Cannot set the number of parameters of BasePlugin");}
-    })
-    
-    Object.defineProperty(this, "owner", {
-        get: function() {return _owner;},
-        set: function(owner) {
-            if (typeof owner == "object") {
-                _owner = owner;
-            }
-            return _owner;
-        }
-    })
-    
-    Object.defineProperty(this,"inputs",{
-        get: function(index) {return _inputList;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"outputs",{
-        get: function(index) {return _outputList;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"features",{
-        get: function(index) {return _features;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
-    
-    Object.defineProperty(this,"parameters",{
-        get: function(index) {return _parameters;},
-        set: function() {console.error("Illegal attempt to modify BasePlugin");}
-    })
 }
-
-VolumeControlGUI.prototype = new BasePlugin(context);
-VolumeControlGUI.prototype.name = "VolumeControlGUI";
-VolumeControlGUI.prototype.constructor = VolumeControlGUI;

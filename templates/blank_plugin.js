@@ -13,10 +13,10 @@ var BlankPlugin = function (context, owner) {
     /* USER MODIFIABLE END */
     (function () {
         var i;
-        for (i = 0; i < _outputList.length; i++) {
+        for (i = 0; i < this.numOutputs; i++) {
             var node = this.context.createAnalyser();
-            _features.push(node);
-            _outputList[i].connect(node);
+            this.features.push(node);
+            this.outputs[i].connect(node);
         }
     })();
 }
