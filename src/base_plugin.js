@@ -2,172 +2,180 @@
 
 AudioNode.prototype.getInputs = function () {
     return [this];
-}
+};
 
 // This should simply define the BasePlugin from which custom plugins can be built from
 var BasePlugin = function (context, owner) {
-    var _inputList = [];
-    var _outputList = [];
-    var _parameters = [];
-    var _owner = owner;
-    var _features = [];
+    var inputList = [],
+        outputList = [],
+        parameterList = [],
+        featureList = [],
+        pOwner = owner;
     this.context = context;
     this.factory = undefined;
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
-            return _inputList.length;
+            return inputList.length;
         },
         set: function () {
-            console.error("Cannot set the number of inputs of BasePlugin");
+            throw ("Cannot set the number of inputs of BasePlugin");
         }
-    })
+    });
     Object.defineProperty(this, "numOutputs", {
         get: function () {
-            return _outputList.length;
+            return outputList.length;
         },
         set: function () {
-            console.error("Cannot set the number of outputs of BasePlugin");
+            throw ("Cannot set the number of outputs of BasePlugin");
         }
-    })
+    });
     Object.defineProperty(this, "numParameters", {
         get: function () {
-            return _parameters.length;
+            return parameterList.length;
         },
         set: function () {
-            console.error("Cannot set the number of parameters of BasePlugin");
+            throw ("Cannot set the number of parameters of BasePlugin");
         }
-    })
+    });
 
     Object.defineProperty(this, "owner", {
         get: function () {
-            return _owner;
+            return pOwner;
         },
         set: function (owner) {
-            if (typeof owner == "object") {
-                _owner = owner;
+            if (typeof owner === "object") {
+                pOwner = owner;
             }
-            return _owner;
+            return pOwner;
         }
-    })
+    });
 
     Object.defineProperty(this, "inputs", {
         get: function (index) {
-            return _inputList;
+            return inputList;
         },
         set: function () {
-            console.error("Illegal attempt to modify BasePlugin");
+            throw ("Illegal attempt to modify BasePlugin");
         }
-    })
+    });
 
     Object.defineProperty(this, "outputs", {
         get: function (index) {
-            return _outputList;
+            return outputList;
         },
         set: function () {
-            console.error("Illegal attempt to modify BasePlugin");
+            throw ("Illegal attempt to modify BasePlugin");
         }
-    })
+    });
 
     Object.defineProperty(this, "features", {
         get: function (index) {
-            return _features;
+            return featureList;
         },
         set: function () {
-            console.error("Illegal attempt to modify BasePlugin");
+            throw ("Illegal attempt to modify BasePlugin");
         }
-    })
+    });
 
     Object.defineProperty(this, "parameters", {
         get: function (index) {
-            return _parameters;
+            return parameterList;
         },
         set: function () {
-            console.error("Illegal attempt to modify BasePlugin");
+            throw ("Illegal attempt to modify BasePlugin");
         }
-    })
-}
+    });
+};
 
 BasePlugin.prototype.connect = function (dest) {
     this.outputs[0].connect(dest.inpt ? dest.input : dest);
-}
+};
 
 BasePlugin.prototype.disconnect = function (dest) {
-    if (dest == undefined) {
+    if (dest === undefined) {
         this.outputs[0].disconnect();
     } else {
         this.outputs[0].disconnect(dest.input ? dest.input : dest);
     }
-}
+};
 
 BasePlugin.prototype.getInputs = function () {
     return this.inputs;
-}
+};
 
 BasePlugin.prototype.start = function () {};
 BasePlugin.prototype.stop = function () {};
 
 BasePlugin.prototype.getParameterNames = function () {
-    var names = [];
-    for (var param of this.parameters) {
-        names.push(param.name);
+    var names = [],
+        i;
+    for (i = 0; i < this.parameters.length; i++) {
+        names.push(this.parameters[i].name);
     }
     return names;
-}
+};
 
 BasePlugin.prototype.getParameterByName = function (name) {
-    for (var param of this.parameters) {
-        if (name == param.name) {
-            return param;
+    var i;
+    for (i = 0; i < this.parameters.length; i++) {
+        if (name === this.parameters[i].name) {
+            return this.parameters[i];
         }
     }
-    console.error("No Parameter called " + name);
     return null;
-}
+};
 
 BasePlugin.prototype.getParameterObject = function () {
-    var proto = {};
-    for (var param of this.parameters) {
-        eval("proto." + param.name + "=" + param.value);
+    var proto = {},
+        i,
+        param;
+    for (i = 0; i < this.parameters.length; i++) {
+        param = this.parameters[i];
+        proto[param.name] = param.value;
     }
     return proto;
-}
+};
 
 BasePlugin.prototype.setParameterByName = function (name, value) {
     var parameter = this.getParameterByName(name);
-    if (parameter != null) {
+    if (parameter !== null) {
         parameter.value = value;
     }
-}
+};
 
 BasePlugin.prototype.setParameterByObject = function (object) {
     // Set a parameter by passing a paired tuple object of the parameter name with the value
     // For instance, the Volume Control could use object = {volume: 0.5}
     // The LowPass could use object = {gain: 0.5, frequency: 1000, Q: 1.3}
-    for (var key in object) {
-        this.setParameterByName(key, eval("object." + key));
+    var key;
+    for (key in object) {
+        if (object.hasOwnProperty(key)) {
+            this.setParameterByName(key, object[key]);
+        }
     }
-}
+};
 
 BasePlugin.prototype.getParameterActions = function () {
     // Return the history of plugin activity
-    var object = [];
-    for (var param of this.parameters) {
+    var object = [],
+        i;
+    for (i = 0; i < this.parameters.length; i++) {
         object.push({
-            'parameterName': param.name,
-            'actions': param.actions
+            'parameterName': this.parameters[i].name,
+            'actions': this.parameters[i].actions
         });
     }
     return object;
-}
+};
+
 var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, owner) {
     /* Plugin Private Variables
           These are accessed by the public facing getter/setter
     */
 
     if (arguments.length < 2) {
-        console.error("INVALID PARAMETERS: Must always define defaultValue, dataType and name");
-        return;
+        throw ("INVALID PARAMETERS: Must always define defaultValue, dataType and name");
     }
 
     var _parentProcessor = owner;
@@ -219,7 +227,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _dataType;
         },
         set: function () {
-            console.error("Cannot set the dataType of PluginParameter");
+            throw ("Cannot set the dataType of PluginParameter");
         }
     });
 
@@ -228,7 +236,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _minimum;
         },
         set: function () {
-            console.error("Cannot set the minimum value of PluginParameter");
+            throw ("Cannot set the minimum value of PluginParameter");
         }
     });
 
@@ -237,7 +245,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _maximum;
         },
         set: function () {
-            console.error("Cannot set the maximum value of PluginParameter");
+            throw ("Cannot set the maximum value of PluginParameter");
         }
     });
 
@@ -246,7 +254,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _default;
         },
         set: function () {
-            console.error("Cannot set the default value of PluginParameter");
+            throw ("Cannot set the default value of PluginParameter");
         }
     });
 
@@ -255,7 +263,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _name;
         },
         set: function () {
-            console.error("Cannot set the name of PluginParameter");
+            throw ("Cannot set the name of PluginParameter");
         }
     });
 
@@ -290,7 +298,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _actions;
         },
         set: function () {
-            console.error("Cannot set private variable 'actions'");
+            throw ("Cannot set private variable 'actions'");
         }
     });
     Object.defineProperty(this, "update", {
@@ -299,10 +307,10 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
         },
         set: function (func) {
             if (typeof func != "function") {
-                console.error("Must pass in a valid function");
+                throw ("Must pass in a valid function");
             }
             if (func(0) == undefined) {
-                console.error("Function must return a value");
+                throw ("Function must return a value");
             }
             _update = func;
         }
@@ -314,10 +322,10 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
         },
         set: function (func) {
             if (typeof func != "function") {
-                console.error("Must pass in a valid function");
+                throw ("Must pass in a valid function");
             }
             if (func(0) == undefined) {
-                console.error("Function must return a value");
+                throw ("Function must return a value");
             }
             _translate = func;
         }
@@ -329,7 +337,7 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
         },
         set: function (func, arg_this) {
             if (typeof func != "function") {
-                console.error("Must pass in a valid function");
+                throw ("Must pass in a valid function");
             }
             if (typeof arg_this == "object") {
                 _trigger = func.bind(arg_this);
