@@ -79,7 +79,16 @@ var PluginFactory = function (context, dir) {
             Object.defineProperties(plugin, {
                 'factory': {
                     'value': this.factory
+                },
+                'pluginInstance': {
+                    'value': node
+                },
+                'prototypeObject': {
+                    'value': this
                 }
+            });
+            Object.defineProperty(node, "prototypeObject", {
+                'value': this
             });
             this.factory.registerPluginInstance(node);
             return node;
