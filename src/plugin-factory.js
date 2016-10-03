@@ -59,12 +59,7 @@ var PluginFactory = function (context, dir) {
     };
 
     this.getAllPlugins = function () {
-        var list = [],
-            i;
-        for (i = 0; i < subFactories.length; i += 1) {
-            list = list.concat(subFactories[i].getPlugins());
-        }
-        return list;
+        return pluginsList;
     };
 
     this.getAllPluginsObject = function () {
@@ -80,6 +75,12 @@ var PluginFactory = function (context, dir) {
             });
         }
         return obj;
+    };
+
+    this.getPluginInstance = function (plugin_object) {
+        return this.getAllPlugins().find(function (instance) {
+            return instance.node === this;
+        }, plugin_object);
     };
 
     this.createSubFactory = function (chainStart, chainStop) {
@@ -103,6 +104,7 @@ var PluginFactory = function (context, dir) {
 
     this.createPluginInstance = function () {
         var node = new PluginInstance(currentPluginId++);
+        this.FeatureMap.createSourceMap(node);
         pluginsList.push(node);
         return node;
     };
@@ -119,6 +121,103 @@ var PluginFactory = function (context, dir) {
         },
         'set': function () {}
     });
+
+    this.FeatureMap = function () {
+        var Mappings = [];
+
+        var RequestorMap = function (requestorInstance) {
+            var Features = [];
+            Object.defineProperties(this, {
+                'getRequestorInstance': {
+                    'value': function () {
+                        return requestorInstance;
+                    }
+                }
+            });
+        }
+
+        var SourceMap = function (sourceInstance) {
+            var Mappings = [];
+
+            this.createRequestorMap = function (requestorInstance) {
+                var node = new RequestorMap(requestorInstance);
+                Mappings.push(node);
+                return node;
+            };
+            this.findRequestorMapIndex = function (requestorInstance) {
+                return Mappings.findIndex(function (element) {
+                    return element.getRequestorInstance() === this;
+                }, requestorInstance);
+            };
+            this.findRequestorMap = function (requestorInstance) {
+                var index = this.findRequestorMapIndex(requestorInstance);
+                if (index >= 0) {
+                    return Mappings[index];
+                }
+                return undefined;
+            };
+            this.deleteRequestorMap = function (requestorInstance) {
+                var index = this.findRequestorMapIndex(requestorInstance);
+                if (index === -1) {
+                    return false;
+                }
+                Mappings.splice(index, 1);
+                return true;
+            };
+
+            Object.defineProperties(this, {
+                'getSourceInstance': {
+                    'value': function () {
+                        return sourceInstance;
+                    }
+                }
+            });
+
+            Object.defineProperties(sourceInstance, {
+                'featureMap': {
+                    'value': this
+                }
+            });
+        };
+
+        this.getMappings = function () {
+            return Mappings;
+        };
+        this.createSourceMap = function (sourceInstance) {
+            var node = new SourceMap(sourceInstance);
+            Mappings.push(node);
+            return node;
+        };
+        this.findSourceMapIndex = function (sourceInstance) {
+            return Mappings.findIndex(function (elem) {
+                return (elem.getSourceInstance() === this);
+            }, sourceInstance);
+        };
+        this.findSourceMap = function (sourceInstance) {
+            var index = this.findSourceMapIndex(sourceInstance);
+            if (index >= 0) {
+                return Mappings[index];
+            }
+            return undefined;
+        };
+        this.deleteSourceMap = function (sourceInstance) {
+            var index = this.findSourceMapIndex(sourceInstance);
+            if (index === -1) {
+                return false;
+            }
+            Mappings.splice(index, 1);
+            return true;
+        };
+        Object.defineProperties(this, {
+            'getMappings': {
+                'value': function () {
+                    return Mappings;
+                }
+            }
+        });
+    };
+
+    this.FeatureMap = new this.FeatureMap();
 
     var PluginInstance = function (id) {
 

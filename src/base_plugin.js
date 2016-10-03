@@ -353,8 +353,15 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     This allows the factory to request certain features be processed and return them
 */
 
-var FeatureInterface = function (BasePluginInstance) {
+var FeatureInterface = function (BasePluginInstance, Factory) {
     this.plugin = BasePluginInstance;
+
+    this.requestFeatures = function (sourcePlugin, featureList) {
+        /*
+            Use this to request features from a specific sourcePlugin
+            The PluginFactory will create all necessary mappings from plugin to PluginInstance nodes
+        */
+    }
 }
 
 /*
