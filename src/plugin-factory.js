@@ -34,6 +34,58 @@ var PluginFactory = function (context, dir) {
         dir = "jsap/";
     }
 
+    var PluginInstance = function (id, plugin_node) {
+        this.next_node = undefined;
+
+        this.reconnect = function (new_next) {
+            if (new_next !== this.next_node) {
+                if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
+                    this.node.disconnect(this.next_node.getInputs()[0]);
+                }
+                this.next_node = new_next;
+                this.node.connect(this.next_node.getInputs()[0]);
+                return true;
+            }
+            return false;
+        };
+
+        this.destory = function () {
+            this.node.destroy();
+        };
+
+        Object.defineProperties(this, {
+            'id': {
+                'value': id
+            },
+            'node': {
+                'value': plugin_node
+            }
+        });
+    };
+
+    var PluginPrototype = function (proto) {
+        Object.defineProperties(this, {
+            'name': {
+                'value': proto.prototype.name
+            },
+            'proto': {
+                'value': proto
+            }
+        });
+
+        this.createPluginInstance = function (owner) {
+            var plugin = new proto(this.factory.context, owner);
+            var node = new PluginInstance(currentPluginId++, plugin);
+            Object.defineProperties(plugin, {
+                'factory': {
+                    'value': this.factory
+                }
+            });
+            this.factory.registerPluginInstance(node);
+            return node;
+        };
+    };
+
     this.addPrototype = function (plugin_proto) {
         if (typeof plugin_proto !== "function") {
             throw ("The Prototype must be a function!");
@@ -41,17 +93,18 @@ var PluginFactory = function (context, dir) {
         if (typeof plugin_proto.prototype.name !== "string") {
             throw ("Malformed plugin. Name not defined");
         }
-        var obj = {
-                name: plugin_proto.prototype.name,
-                proto: plugin_proto
-            },
-            index = plugin_prototypes.findIndex(function (element) {
-                return element.name === this.name;
-            }, obj);
-        if (index !== -1) {
-            throw ("The plugin name must be unique!");
+        if (plugin_prototypes.find(function (element) {
+                return element.proto === this;
+            }, plugin_proto)) {
+            throw ("The plugin must be unique!");
         }
+        var obj = new PluginPrototype(plugin_proto);
         plugin_prototypes.push(obj);
+        Object.defineProperties(obj, {
+            'factory': {
+                'value': this
+            }
+        });
     };
 
     this.getPrototypes = function () {
@@ -102,11 +155,19 @@ var PluginFactory = function (context, dir) {
         }
     };
 
-    this.createPluginInstance = function () {
-        var node = new PluginInstance(currentPluginId++);
-        this.FeatureMap.createSourceMap(node);
-        pluginsList.push(node);
-        return node;
+    this.registerPluginInstance = function (instance) {
+        if (pluginsList.find(function (p) {
+                return p === this
+            }, instance)) {
+            throw ("Plugin Instance not unique");
+        }
+        this.FeatureMap.createSourceMap(instance);
+        pluginsList.push(instance);
+        return true;
+    }
+
+    this.createPluginInstance = function (PluginPrototype) {
+        throw ("DEPRECATED - Use PluginPrototype.createPluginInstance(owner);");
     };
 
     this.deletePlugin = function (id) {
@@ -219,36 +280,6 @@ var PluginFactory = function (context, dir) {
 
     this.FeatureMap = new this.FeatureMap();
 
-    var PluginInstance = function (id) {
-
-        this.node = undefined;
-        this.next_node = undefined;
-
-        this.populate = function (node, next_node) {
-            this.node = node;
-            this.next_node = next_node;
-            this.node.connect(next_node.getInputs()[0]);
-        };
-
-        this.reconnect = function (new_next) {
-            if (new_next !== this.next_node) {
-                this.node.disconnect(this.next_node.getInputs()[0]);
-                this.next_node = new_next;
-                this.node.connect(this.next_node.getInputs()[0]);
-                return true;
-            }
-            return false;
-        };
-
-        this.destory = function () {
-            this.node.destroy();
-        };
-
-        Object.defineProperty(this, "id", {
-            'value': id
-        });
-    };
-
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 
         var plugin_list = [],
@@ -281,23 +312,21 @@ var PluginFactory = function (context, dir) {
 
         // Plugin creation / destruction
 
-        this.createPlugin = function (PluginPrototype) {
-            var node, obj, last_node;
+        this.createPlugin = function (prototypeObject) {
+            var node, last_node;
             if (state === 0) {
                 throw ("SubFactory has been destroyed! Cannot add new plugins");
             }
-            node = new PluginPrototype(this.parent.context, this);
-            node.factory = this.parent;
-            obj = this.parent.createPluginInstance();
-            obj.populate(node, pluginChainStop);
+            node = prototypeObject.createPluginInstance(this);
+            node.reconnect(pluginChainStop);
             last_node = plugin_list[plugin_list.length - 1];
             if (last_node !== undefined) {
                 last_node.reconnect(node);
             } else {
                 pluginChainStart.disconnect(pluginChainStop);
-                pluginChainStart.connect(node.getInputs()[0]);
+                pluginChainStart.connect(node.node.getInputs()[0]);
             }
-            plugin_list.push(obj);
+            plugin_list.push(node);
             return node;
         };
 
