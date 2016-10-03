@@ -282,6 +282,9 @@ var PluginFactory = function (context, dir) {
     };
 
     this.FeatureMap = new this.FeatureMap();
+    Object.defineProperty(this.FeatureMap, "factory", {
+        'value': this
+    });
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 

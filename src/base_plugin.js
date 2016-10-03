@@ -349,12 +349,31 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
 }
 
 /*
-    This interface binds the plugin output analysis with the PluginFactory and SubFactory.
-    This allows the factory to request certain features be processed and return them
-*/
+            This interface binds the plugin output analysis with the PluginFactory and SubFactory.
+            This allows the factory to request certain features be processed and return them
+        */
 
 var FeatureInterface = function (BasePluginInstance, Factory) {
     this.plugin = BasePluginInstance;
+
+    var Receiver = {
+        parent: this,
+        plugin: this.plugin,
+        factory: this.plugin.factory,
+        getRequestedFeatures: function () {},
+        requestFeatures: function (sourcePlugin, featureList) {},
+        deleteFeatures: function (sourcePlugin, featureList) {},
+        postFeatures: function (featureList) {}
+    }
+
+    var Sender = {
+        parent: this,
+        plugin: this.plugin,
+        factory: this.plugin.factory,
+        featureList: [],
+        requestFeatures: function (featureList) {},
+        postFeatures: function () {}
+    }
 
     this.requestFeatures = function (sourcePlugin, featureList) {
         /*
@@ -362,7 +381,13 @@ var FeatureInterface = function (BasePluginInstance, Factory) {
             The PluginFactory will create all necessary mappings from plugin to PluginInstance nodes
         */
     }
-}
+    this.deleteFeatures = function (sourcePlugin, featureList) {
+
+    }
+    this.getFeatureList = function () {
+
+    }
+};
 
 /*
     This is an optional module which will attempt to create a graphical implementation.
