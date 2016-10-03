@@ -349,9 +349,9 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
 }
 
 /*
-            This interface binds the plugin output analysis with the PluginFactory and SubFactory.
-            This allows the factory to request certain features be processed and return them
-        */
+    This interface binds the plugin output analysis with the PluginFactory and SubFactory.
+    This allows the factory to request certain features be processed and return them
+*/
 
 var FeatureInterface = function (BasePluginInstance, Factory) {
     this.plugin = BasePluginInstance;
@@ -380,12 +380,13 @@ var FeatureInterface = function (BasePluginInstance, Factory) {
             Use this to request features from a specific sourcePlugin
             The PluginFactory will create all necessary mappings from plugin to PluginInstance nodes
         */
+        Receiver.requestFeatures(sourcePlugin, featureList);
     }
     this.deleteFeatures = function (sourcePlugin, featureList) {
-
+        Receiver.deleteFeatures(sourcePlugin, featureList);
     }
     this.getFeatureList = function () {
-
+        Receiver.getRequestedFeatures();
     }
 };
 

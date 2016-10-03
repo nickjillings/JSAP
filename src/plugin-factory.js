@@ -191,10 +191,18 @@ var PluginFactory = function (context, dir) {
 
         var RequestorMap = function (requestorInstance) {
             var Features = [];
+
+            this.addFeatures = function (featureList) {}
+
             Object.defineProperties(this, {
                 'getRequestorInstance': {
                     'value': function () {
                         return requestorInstance;
+                    }
+                },
+                'getFeatureList': {
+                    'value': function () {
+                        return Features;
                     }
                 }
             });
@@ -279,6 +287,44 @@ var PluginFactory = function (context, dir) {
                 }
             }
         });
+
+        this.getRequestorFeatureList = function (requestor) {
+            if (requestor.constructor != PluginInstance) {
+                requestor = requestor.pluginInstance;
+            }
+            var list = [],
+                i;
+            for (i = 0; i < Mappings.length; i++) {
+                var requestorMap = Mappings[i].findRequestorMap(requestor);
+                if (requestorMap) {
+                    list.push({
+                        plugin: Mappings.getSourceInstance().plugin,
+                        featureList: requestorMap.getFeatureList()
+                    });
+                }
+            }
+            return list;
+        }
+
+        // FeatureInterface
+        this.requestFeatures = function (requestor, source, featureList) {
+            if (requestor.constructor != PluginInstance) {
+                requestor = requestor.pluginInstance;
+            }
+            if (source.constructor != PluginInstance) {
+                source = source.pluginInstance;
+            }
+            var sourceMap = this.findSourceMap(source);
+            if (sourceMap == undefined) {
+                console.log("WARNING - SourceMap undefined");
+                sourceMap = this.createSourceMap(source);
+            }
+            var requestorMap = sourceMap.findRequestorMap(requestor);
+            if (requestorMap == undefined) {
+                sourceMap.createRequestorMap(requestor);
+            }
+            requestorMap.addFeatures(featureList);
+        }
     };
 
     this.FeatureMap = new this.FeatureMap();
