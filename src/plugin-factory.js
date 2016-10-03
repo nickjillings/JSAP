@@ -139,12 +139,6 @@ var PluginFactory = function (context, dir) {
         return obj;
     };
 
-    this.getPluginInstance = function (plugin_object) {
-        return this.getAllPlugins().find(function (instance) {
-            return instance.node === this;
-        }, plugin_object);
-    };
-
     this.createSubFactory = function (chainStart, chainStop) {
         var node = new PluginSubFactory(this, chainStart, chainStop);
         subFactories.push(node);
