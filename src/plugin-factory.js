@@ -40,17 +40,17 @@ var PluginFactory = function (context, dir) {
         this.reconnect = function (new_next) {
             if (new_next !== this.next_node) {
                 if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
-                    this.node.disconnect(this.next_node.getInputs()[0]);
+                    plugin_node.disconnect(this.next_node.getInputs()[0]);
                 }
                 this.next_node = new_next;
-                this.node.connect(this.next_node.getInputs()[0]);
+                plugin_node.connect(this.next_node.getInputs()[0]);
                 return true;
             }
             return false;
         };
 
         this.destory = function () {
-            this.node.destroy();
+            plugin_node.destroy();
         };
 
         Object.defineProperties(this, {
@@ -64,22 +64,13 @@ var PluginFactory = function (context, dir) {
     };
 
     var PluginPrototype = function (proto) {
-        Object.defineProperties(this, {
-            'name': {
-                'value': proto.prototype.name
-            },
-            'proto': {
-                'value': proto
-            }
-        });
+        this.name = proto.prototype.name;
+        this.proto = proto;
 
         this.createPluginInstance = function (owner) {
-            var plugin = new proto(this.factory.context, owner);
+            var plugin = new proto(this.factory, owner);
             var node = new PluginInstance(currentPluginId++, plugin);
             Object.defineProperties(plugin, {
-                'factory': {
-                    'value': this.factory
-                },
                 'pluginInstance': {
                     'value': node
                 },

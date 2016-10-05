@@ -5,14 +5,48 @@ AudioNode.prototype.getInputs = function () {
 };
 
 // This should simply define the BasePlugin from which custom plugins can be built from
-var BasePlugin = function (context, owner) {
+var BasePlugin = function (factory, owner) {
     var inputList = [],
         outputList = [],
         parameterList = [],
-        featureList = [],
         pOwner = owner;
-    this.context = context;
-    this.factory = undefined;
+    this.context = factory.context;
+    this.factory = factory;
+    this.featureMap = new FeatureInterface(this, factory);
+
+    this.addInput = function (node) {
+        inputList.push(node);
+        return inputList;
+    };
+    this.deleteInput = function (node) {
+        var i = inputList.findIndex(function (e) {
+            return e === this;
+        }, node);
+        if (i === -1) {
+            return false;
+        }
+        inputList.splice(i, 1);
+        return true;
+    }
+    this.addOutput = function (node) {
+        obj = {
+            node: node,
+            xtract: this.factory.context.createAnalyser()
+        }
+        obj.node.connect(obj.xtract);
+        outputList.push(obj);
+        return this.outputs;
+    }
+    this.deleteOutput = function (node) {
+        var i = outputList.findIndex(function (e) {
+            return e.node === this;
+        }, node);
+        if (i === -1) {
+            return false;
+        }
+        outputList.splice(i, 1);
+        return true;
+    }
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
@@ -62,16 +96,12 @@ var BasePlugin = function (context, owner) {
 
     Object.defineProperty(this, "outputs", {
         get: function (index) {
-            return outputList;
-        },
-        set: function () {
-            throw ("Illegal attempt to modify BasePlugin");
-        }
-    });
-
-    Object.defineProperty(this, "features", {
-        get: function (index) {
-            return featureList;
+            var list = [],
+                i;
+            for (i = 0; i < outputList.length; i++) {
+                list.push(outputList[i].node);
+            }
+            return list;
         },
         set: function () {
             throw ("Illegal attempt to modify BasePlugin");

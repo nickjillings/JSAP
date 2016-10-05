@@ -1,5 +1,5 @@
-var BlankPlugin = function (context, owner) {
-    this.__proto__ = new BasePlugin(context, owner);
+var BlankPlugin = function (factory, owner) {
+    this.__proto__ = new BasePlugin(factory, owner);
 
     /* USER MODIFIABLE BEGIN */
 

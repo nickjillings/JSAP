@@ -53,14 +53,48 @@ AudioNode.prototype.getInputs = function () {
 };
 
 // This should simply define the BasePlugin from which custom plugins can be built from
-var BasePlugin = function (context, owner) {
+var BasePlugin = function (factory, owner) {
     var inputList = [],
         outputList = [],
         parameterList = [],
-        featureList = [],
         pOwner = owner;
-    this.context = context;
-    this.factory = undefined;
+    this.context = factory.context;
+    this.factory = factory;
+    this.featureMap = new FeatureInterface(this, factory);
+
+    this.addInput = function (node) {
+        inputList.push(node);
+        return inputList;
+    };
+    this.deleteInput = function (node) {
+        var i = inputList.findIndex(function (e) {
+            return e === this;
+        }, node);
+        if (i === -1) {
+            return false;
+        }
+        inputList.splice(i, 1);
+        return true;
+    }
+    this.addOutput = function (node) {
+        obj = {
+            node: node,
+            xtract: this.factory.context.createAnalyser()
+        }
+        obj.node.connect(obj.xtract);
+        outputList.push(obj);
+        return this.outputs;
+    }
+    this.deleteOutput = function (node) {
+        var i = outputList.findIndex(function (e) {
+            return e.node === this;
+        }, node);
+        if (i === -1) {
+            return false;
+        }
+        outputList.splice(i, 1);
+        return true;
+    }
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
@@ -110,16 +144,12 @@ var BasePlugin = function (context, owner) {
 
     Object.defineProperty(this, "outputs", {
         get: function (index) {
-            return outputList;
-        },
-        set: function () {
-            throw ("Illegal attempt to modify BasePlugin");
-        }
-    });
-
-    Object.defineProperty(this, "features", {
-        get: function (index) {
-            return featureList;
+            var list = [],
+                i;
+            for (i = 0; i < outputList.length; i++) {
+                list.push(outputList[i].node);
+            }
+            return list;
         },
         set: function () {
             throw ("Illegal attempt to modify BasePlugin");
@@ -576,17 +606,17 @@ var PluginFactory = function (context, dir) {
         this.reconnect = function (new_next) {
             if (new_next !== this.next_node) {
                 if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
-                    this.node.disconnect(this.next_node.getInputs()[0]);
+                    plugin_node.disconnect(this.next_node.getInputs()[0]);
                 }
                 this.next_node = new_next;
-                this.node.connect(this.next_node.getInputs()[0]);
+                plugin_node.connect(this.next_node.getInputs()[0]);
                 return true;
             }
             return false;
         };
 
         this.destory = function () {
-            this.node.destroy();
+            plugin_node.destroy();
         };
 
         Object.defineProperties(this, {
@@ -600,22 +630,13 @@ var PluginFactory = function (context, dir) {
     };
 
     var PluginPrototype = function (proto) {
-        Object.defineProperties(this, {
-            'name': {
-                'value': proto.prototype.name
-            },
-            'proto': {
-                'value': proto
-            }
-        });
+        this.name = proto.prototype.name;
+        this.proto = proto;
 
         this.createPluginInstance = function (owner) {
-            var plugin = new proto(this.factory.context, owner);
+            var plugin = new proto(this.factory, owner);
             var node = new PluginInstance(currentPluginId++, plugin);
             Object.defineProperties(plugin, {
-                'factory': {
-                    'value': this.factory
-                },
                 'pluginInstance': {
                     'value': node
                 },
