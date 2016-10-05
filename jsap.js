@@ -60,7 +60,7 @@ var BasePlugin = function (factory, owner) {
         pOwner = owner;
     this.context = factory.context;
     this.factory = factory;
-    this.featureMap = new FeatureInterface(this, factory);
+    this.featureMap = new PluginFeatureInterface(this);
 
     this.addInput = function (node) {
         inputList.push(node);
@@ -426,47 +426,63 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     });
 }
 
-/*
-    This interface binds the plugin output analysis with the PluginFactory and SubFactory.
-    This allows the factory to request certain features be processed and return them
-*/
-
-var FeatureInterface = function (BasePluginInstance, Factory) {
+var PluginFeatureInterface = function (BasePluginInstance) {
     this.plugin = BasePluginInstance;
+    this.Receiver = new PluginFeatureInterfaceReceiver(this);
+    this.Sender = new PluginFeatureInterfaceSender(this);
+    this.addOutput = function (audioNode, index) {
+        Sender.extractors.push({
+            'index': index,
+            'node': audioNode,
+            'frameSize': []
+        });
+    }
+}
+var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
 
-    var Receiver = {
-        parent: this,
-        plugin: this.plugin,
-        factory: this.plugin.factory,
-        getRequestedFeatures: function () {},
-        requestFeatures: function (sourcePlugin, featureList) {},
-        deleteFeatures: function (sourcePlugin, featureList) {},
-        postFeatures: function (featureList) {}
+}
+var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
+    var OutputNode = function (parent, output) {
+        var extractors = [];
+        this.addExtractor = function (frameSize) {
+            var obj = {
+                'frameSize': frameSize,
+                'extractor': this.parent.factory.context.createAnalyser(),
+                'features': []
+            };
+            output.connect(obj.extractor);
+            extractors.push(obj);
+        };
+        this.findExtractor = function (frameSize) {
+            return extractors.find(function (e) {
+                return e.frameSize === this;
+            }, frameSize)
+        };
+        this.deleteExtractor = function (frameSize) {};
+    }
+    var outputNodes = [];
+    this.updateFeatures(featureObject) {
+        // [] Output -> {} 'framesize' -> {} 'features'
+        var o;
+        for (o = 0; o < featureObject.length; o++) {
+            if (outputNodes[o] === undefined) {
+                if (o > FeatureInterfaceInstance.plugin.numOutputs) {
+                    throw ("Requested an output that does not exist");
+                }
+                outputNodes[o].push(new OutputNode(FeatureInterfaceInstance.plugin, FeatureInterfaceInstance.plugin.outputs[o]));
+            }
+            var si;
+            for (si = 0; si < featureObject[o].length; si++) {
+                var extractor = outputNodes[o].findExtractor(featureObject[o][si].frameSize);
+                if (!extractor) {
+                    outputNodes[o].addExtractor(featureObject[o][si].frameSize);
+                }
+                extractor.features = featureObject[o][si].featureList;
+            }
+        }
     }
 
-    var Sender = {
-        parent: this,
-        plugin: this.plugin,
-        factory: this.plugin.factory,
-        featureList: [],
-        requestFeatures: function (featureList) {},
-        postFeatures: function () {}
-    }
-
-    this.requestFeatures = function (sourcePlugin, featureList) {
-        /*
-            Use this to request features from a specific sourcePlugin
-            The PluginFactory will create all necessary mappings from plugin to PluginInstance nodes
-        */
-        Receiver.requestFeatures(sourcePlugin, featureList);
-    }
-    this.deleteFeatures = function (sourcePlugin, featureList) {
-        Receiver.deleteFeatures(sourcePlugin, featureList);
-    }
-    this.getFeatureList = function () {
-        Receiver.getRequestedFeatures();
-    }
-};
+}
 
 /*
     This is an optional module which will attempt to create a graphical implementation.
@@ -721,7 +737,6 @@ var PluginFactory = function (context, dir) {
             }, instance)) {
             throw ("Plugin Instance not unique");
         }
-        this.FeatureMap.createSourceMap(instance);
         pluginsList.push(instance);
         return true;
     }
@@ -745,143 +760,147 @@ var PluginFactory = function (context, dir) {
 
     this.FeatureMap = function () {
         var Mappings = [];
+        var SourceMap = function (pluginInstace) {
+            var Mappings = [];
+            var Sender = pluginInstace.featureMap.Sender;
+            this.getSourceInstance = function () {
+                return pluginInstace;
+            }
 
-        var RequestorMap = function (requestorInstance) {
-            var Features = [];
-
-            this.addFeatures = function (featureList) {}
-
-            Object.defineProperties(this, {
-                'getRequestorInstance': {
-                    'value': function () {
-                        return requestorInstance;
-                    }
-                },
-                'getFeatureList': {
-                    'value': function () {
-                        return Features;
+            function updateSender() {
+                function recursiveFind(rootArray, featureList) {
+                    var f;
+                    for (f = 0; f < featureList.length; f++) {
+                        var featureNode = rootArray.find(function (e) {
+                            return e.name === this.name;
+                        }, featureList[f]);
+                        if (featureNode) {
+                            if (featureList[f].parameters.length != 0) {
+                                featureNode = {
+                                    'name',
+                                    'parameters': featureList[f].parameters, 'features': []
+                                };
+                                rootArray.push(featureNode);
+                            }
+                        }
+                        if (featureList[f].features.length > 0) {
+                            recursiveFind(featureNode.features, featureList[f].features);
+                        }
                     }
                 }
-            });
+                var i, outputList = [];
+                for (i = 0; i < Mappings.length; i++) {
+                    if (outputList[Mappings[i].outputIndex] == undefined) {
+                        outputList[Mappings[i].outputIndex] = [];
+                    }
+                    var frameList = outputList[Mappings[i].outputIndex].find(function (e) {
+                        return e.frameSize === this.frameSize;
+                    }, Mappings[i]);
+                    if (!frameList) {
+                        frameList = {
+                            'frameSize': Mappings[i].frameSize,
+                            'featureList': []
+                        };
+                    }
+                    recursiveFind(frameList.featureList, Mappings[i].getFeatureList());
+                }
+                Sender.updateFeatures(outputList);
+            }
+
+            this.requestFeatures = function (requestorInstance, featureObject) {
+                var map = Mappings.find(function (e) {
+                    return (e.outputIndex == this.outputIndex && e.frameSize == this.frameSize);
+                }, featureObject);
+                if (!map) {
+                    map = {
+                        'outputIndex': featureObject.outputIndex,
+                        'frameSize': featureObject.frameSize,
+                        'requestors': [],
+                        'getFeatureList': function () {
+                            var Features = [],
+                                i;
+                            for (i = 0; i < this.requestors.length; i++) {
+                                Features.push(this.requestors[i].getFeatureList());
+                            }
+                            return Features;
+                        }
+                    }
+                    Mappings.push(map);
+                }
+                var requestor = map.requestors.find(function (e) {
+                    return e.getRequestorInstance() === this;
+                }, requestorInstance);
+                if (!requestor) {
+                    requestor = new RequestorMap(requestor);
+                    map.requestors.push(requestor);
+                }
+                requestor.addFeatures(featureObject);
+                updateSender();
+            }
+        }
+        var RequestorMap = function (pluginInstance) {
+            var Features = [];
+            this.getRequestorInstance = function () {
+                return pluginInstace;
+            }
+
+            function recursivelyAddFeatures(rootArray, featureObject) {
+                var i;
+                for (i = 0; i < featureObject.length; i++) {
+                    // Check we have not already listed the feature
+                    var featureNode = rootArray.find(function (e) {
+                        return e.name === this.name;
+                    }, featureObject[i]);
+                    if (!featureNode) {
+                        featureNode = {
+                            'name': featureObject[i].name,
+                            'parameters': featureObject[i].parameters,
+                            'features': []
+                        }
+                        Features.push(featureNode);
+                    }
+                    if (featureObject[i].features != undefined * * featureObject[i].features.lenth > 0) {
+                        recursivelyAddFeatures(featureNode.features, featureObject[i].features);
+                    }
+                }
+            }
+
+            this.addFeatures = function (featureObject) {
+                recursivelyAddFeatures(Features, featureObject);
+            }
+
+            this.getFeatureList = function () {
+                return Features;
+            }
         }
 
-        var SourceMap = function (sourceInstance) {
-            var Mappings = [];
+        function findSourceIndex(pluginInstance) {
+            return Mappings.findIndex(function (e) {
+                return e.getSourceInstance() === this;
+            }, pluginInstance);
+        }
 
-            this.createRequestorMap = function (requestorInstance) {
-                var node = new RequestorMap(requestorInstance);
-                Mappings.push(node);
-                return node;
-            };
-            this.findRequestorMapIndex = function (requestorInstance) {
-                return Mappings.findIndex(function (element) {
-                    return element.getRequestorInstance() === this;
-                }, requestorInstance);
-            };
-            this.findRequestorMap = function (requestorInstance) {
-                var index = this.findRequestorMapIndex(requestorInstance);
-                if (index >= 0) {
-                    return Mappings[index];
-                }
-                return undefined;
-            };
-            this.deleteRequestorMap = function (requestorInstance) {
-                var index = this.findRequestorMapIndex(requestorInstance);
-                if (index === -1) {
-                    return false;
-                }
-                Mappings.splice(index, 1);
-                return true;
-            };
-
-            Object.defineProperties(this, {
-                'getSourceInstance': {
-                    'value': function () {
-                        return sourceInstance;
-                    }
-                }
-            });
-
-            Object.defineProperties(sourceInstance, {
-                'featureMap': {
-                    'value': this
-                }
-            });
-        };
-
-        this.getMappings = function () {
-            return Mappings;
-        };
-        this.createSourceMap = function (sourceInstance) {
-            var node = new SourceMap(sourceInstance);
+        // GENERAL INTERFACE
+        this.createSourceMap = function (pluginInstance) {
+            var node = new SourceMap(pluginInstance);
             Mappings.push(node);
             return node;
         };
-        this.findSourceMapIndex = function (sourceInstance) {
-            return Mappings.findIndex(function (elem) {
-                return (elem.getSourceInstance() === this);
-            }, sourceInstance);
-        };
-        this.findSourceMap = function (sourceInstance) {
-            var index = this.findSourceMapIndex(sourceInstance);
-            if (index >= 0) {
-                return Mappings[index];
-            }
-            return undefined;
-        };
-        this.deleteSourceMap = function (sourceInstance) {
-            var index = this.findSourceMapIndex(sourceInstance);
+        this.deleteSourceMap = function (pluginInstance) {
+            var index = findSourceIndex(pluginInstance);
             if (index === -1) {
-                return false;
+                throw ("Could not find the source map for the plugin");
             }
             Mappings.splice(index, 1);
-            return true;
         };
-        Object.defineProperties(this, {
-            'getMappings': {
-                'value': function () {
-                    return Mappings;
-                }
-            }
-        });
 
-        this.getRequestorFeatureList = function (requestor) {
-            if (requestor.constructor != PluginInstance) {
-                requestor = requestor.pluginInstance;
-            }
-            var list = [],
-                i;
-            for (i = 0; i < Mappings.length; i++) {
-                var requestorMap = Mappings[i].findRequestorMap(requestor);
-                if (requestorMap) {
-                    list.push({
-                        plugin: Mappings.getSourceInstance().plugin,
-                        featureList: requestorMap.getFeatureList()
-                    });
-                }
-            }
-            return list;
-        }
+        this.requestFeatures = function (requestor, source, featureObject) {
+            var source = Mappings[findSourceIndex(source)];
 
-        // FeatureInterface
-        this.requestFeatures = function (requestor, source, featureList) {
-            if (requestor.constructor != PluginInstance) {
-                requestor = requestor.pluginInstance;
-            }
-            if (source.constructor != PluginInstance) {
-                source = source.pluginInstance;
-            }
-            var sourceMap = this.findSourceMap(source);
-            if (sourceMap == undefined) {
-                console.log("WARNING - SourceMap undefined");
-                sourceMap = this.createSourceMap(source);
-            }
-            var requestorMap = sourceMap.findRequestorMap(requestor);
-            if (requestorMap == undefined) {
-                sourceMap.createRequestorMap(requestor);
-            }
-            requestorMap.addFeatures(featureList);
-        }
+        };
+        this.deleteFeautres = function (requestor, source, featureObject) {};
+        this.getFeatureList = function (requestor, source);
+        this.postFeatures = function (featureObject);
     };
 
     this.FeatureMap = new this.FeatureMap();

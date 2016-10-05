@@ -12,7 +12,7 @@ var BasePlugin = function (factory, owner) {
         pOwner = owner;
     this.context = factory.context;
     this.factory = factory;
-    this.featureMap = new FeatureInterface(this, factory);
+    this.featureMap = new PluginFeatureInterface(this);
 
     this.addInput = function (node) {
         inputList.push(node);
@@ -378,47 +378,63 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
     });
 }
 
-/*
-    This interface binds the plugin output analysis with the PluginFactory and SubFactory.
-    This allows the factory to request certain features be processed and return them
-*/
-
-var FeatureInterface = function (BasePluginInstance, Factory) {
+var PluginFeatureInterface = function (BasePluginInstance) {
     this.plugin = BasePluginInstance;
+    this.Receiver = new PluginFeatureInterfaceReceiver(this);
+    this.Sender = new PluginFeatureInterfaceSender(this);
+    this.addOutput = function (audioNode, index) {
+        Sender.extractors.push({
+            'index': index,
+            'node': audioNode,
+            'frameSize': []
+        });
+    }
+}
+var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
 
-    var Receiver = {
-        parent: this,
-        plugin: this.plugin,
-        factory: this.plugin.factory,
-        getRequestedFeatures: function () {},
-        requestFeatures: function (sourcePlugin, featureList) {},
-        deleteFeatures: function (sourcePlugin, featureList) {},
-        postFeatures: function (featureList) {}
+}
+var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
+    var OutputNode = function (parent, output) {
+        var extractors = [];
+        this.addExtractor = function (frameSize) {
+            var obj = {
+                'frameSize': frameSize,
+                'extractor': this.parent.factory.context.createAnalyser(),
+                'features': []
+            };
+            output.connect(obj.extractor);
+            extractors.push(obj);
+        };
+        this.findExtractor = function (frameSize) {
+            return extractors.find(function (e) {
+                return e.frameSize === this;
+            }, frameSize)
+        };
+        this.deleteExtractor = function (frameSize) {};
+    }
+    var outputNodes = [];
+    this.updateFeatures(featureObject) {
+        // [] Output -> {} 'framesize' -> {} 'features'
+        var o;
+        for (o = 0; o < featureObject.length; o++) {
+            if (outputNodes[o] === undefined) {
+                if (o > FeatureInterfaceInstance.plugin.numOutputs) {
+                    throw ("Requested an output that does not exist");
+                }
+                outputNodes[o].push(new OutputNode(FeatureInterfaceInstance.plugin, FeatureInterfaceInstance.plugin.outputs[o]));
+            }
+            var si;
+            for (si = 0; si < featureObject[o].length; si++) {
+                var extractor = outputNodes[o].findExtractor(featureObject[o][si].frameSize);
+                if (!extractor) {
+                    outputNodes[o].addExtractor(featureObject[o][si].frameSize);
+                }
+                extractor.features = featureObject[o][si].featureList;
+            }
+        }
     }
 
-    var Sender = {
-        parent: this,
-        plugin: this.plugin,
-        factory: this.plugin.factory,
-        featureList: [],
-        requestFeatures: function (featureList) {},
-        postFeatures: function () {}
-    }
-
-    this.requestFeatures = function (sourcePlugin, featureList) {
-        /*
-            Use this to request features from a specific sourcePlugin
-            The PluginFactory will create all necessary mappings from plugin to PluginInstance nodes
-        */
-        Receiver.requestFeatures(sourcePlugin, featureList);
-    }
-    this.deleteFeatures = function (sourcePlugin, featureList) {
-        Receiver.deleteFeatures(sourcePlugin, featureList);
-    }
-    this.getFeatureList = function () {
-        Receiver.getRequestedFeatures();
-    }
-};
+}
 
 /*
     This is an optional module which will attempt to create a graphical implementation.
