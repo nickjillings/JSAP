@@ -59,6 +59,16 @@ var PluginFactory = function (context, dir) {
             },
             'node': {
                 'value': plugin_node
+            },
+            'getInputs': {
+                'value': function () {
+                    return plugin_node.getInputs();
+                }
+            },
+            'getOutputs': {
+                'value': function () {
+                    return plugin_node.getOutputs();
+                }
             }
         });
     };
@@ -70,7 +80,7 @@ var PluginFactory = function (context, dir) {
         this.createPluginInstance = function (owner) {
             var plugin = new proto(this.factory, owner);
             var node = new PluginInstance(currentPluginId++, plugin);
-            Object.defineProperties(plugin, {
+            Object.defineProperties(plugin.__proto__, {
                 'pluginInstance': {
                     'value': node
                 },
@@ -180,32 +190,31 @@ var PluginFactory = function (context, dir) {
         var Mappings = [];
         var SourceMap = function (pluginInstace) {
             var Mappings = [];
-            var Sender = pluginInstace.featureMap.Sender;
+            var Sender = pluginInstace.node.featureMap.Sender;
             this.getSourceInstance = function () {
                 return pluginInstace;
             }
 
             function updateSender() {
-                function recursiveFind(rootArray, featureList) {
-                    var f;
+                function recursiveFind(featureList) {
+                    var f, list = [];
                     for (f = 0; f < featureList.length; f++) {
-                        var featureNode = rootArray.find(function (e) {
+                        var featureNode = list.find(function (e) {
                             return e.name === this.name;
                         }, featureList[f]);
-                        if (featureNode) {
-                            if (featureList[f].parameters.length != 0) {
-                                featureNode = {
-                                    'name': featureList[f].name,
-                                    'parameters': featureList[f].parameters,
-                                    'features': []
-                                };
-                                rootArray.push(featureNode);
-                            }
+                        if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length != 0)) {
+                            featureNode = {
+                                'name': featureList[f].name,
+                                'parameters': featureList[f].parameters,
+                                'features': []
+                            };
+                            list.push(featureNode);
                         }
-                        if (featureList[f].features.length > 0) {
-                            recursiveFind(featureNode.features, featureList[f].features);
+                        if (featureList[f].features && featureList[f].features.length > 0) {
+                            list.push(recursiveFind(featureNode.features, featureList[f].features));
                         }
                     }
+                    return list;
                 }
                 var i, outputList = [];
                 for (i = 0; i < Mappings.length; i++) {
@@ -218,10 +227,11 @@ var PluginFactory = function (context, dir) {
                     if (!frameList) {
                         frameList = {
                             'frameSize': Mappings[i].frameSize,
-                            'featureList': []
+                            'featureList': undefined
                         };
+                        outputList[Mappings[i].outputIndex].push(frameList);
                     }
-                    recursiveFind(frameList.featureList, Mappings[i].getFeatureList());
+                    frameList.featureList = recursiveFind(Mappings[i].getFeatureList());
                 }
                 Sender.updateFeatures(outputList);
             }
@@ -250,7 +260,7 @@ var PluginFactory = function (context, dir) {
                     return e.getRequestorInstance() === this;
                 }, requestorInstance);
                 if (!requestor) {
-                    requestor = new RequestorMap(requestor);
+                    requestor = new RequestorMap(requestorInstance);
                     map.requestors.push(requestor);
                 }
                 requestor.addFeatures(featureObject);
@@ -265,6 +275,7 @@ var PluginFactory = function (context, dir) {
         }
         var RequestorMap = function (pluginInstance) {
             var Features = [];
+            var Receiver = pluginInstance.node.featureMap.Receiver;
             this.getRequestorInstance = function () {
                 return pluginInstace;
             }
@@ -291,7 +302,7 @@ var PluginFactory = function (context, dir) {
             }
 
             this.addFeatures = function (featureObject) {
-                recursivelyAddFeatures(Features, featureObject);
+                recursivelyAddFeatures(Features, featureObject.features);
             }
 
             this.getFeatureList = function () {
@@ -353,14 +364,18 @@ var PluginFactory = function (context, dir) {
         };
 
         this.requestFeatures = function (requestor, source, featureObject) {
-            if (requestor.constructor != pluginInstance) {
+            if (requestor.constructor != PluginInstance) {
                 requestor = requestor.pluginInstance;
             }
-            if (source.constructor != pluginInstance) {
+            if (source.constructor != PluginInstance) {
                 source = source.pluginInstance;
             }
             // Get the source map
             var sourceMap = Mappings[findSourceIndex(source)];
+            if (!sourceMap) {
+                sourceMap = new SourceMap(source);
+                Mappings.push(sourceMap);
+            }
             sourceMap.requestFeatures(requestor, featureObject);
         };
         this.deleteFeautres = function (requestor, source, featureObject) {};

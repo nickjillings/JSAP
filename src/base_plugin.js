@@ -390,7 +390,7 @@ var PluginFeatureInterface = function (BasePluginInstance) {
         });
     }
 
-    Object.defineProperty(this.Receiver, "onfeatures", {
+    Object.defineProperty(this, "onfeatures", {
         'get': function () {
             return this.Receiver.onfeatures;
         },
@@ -401,7 +401,7 @@ var PluginFeatureInterface = function (BasePluginInstance) {
 }
 var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
     var c_features = function () {};
-    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.featureMap;
+    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.FeatureMap;
     this.requestFeatures = function (featureList) {
         var i;
         for (i = 0; i < featureList.length; i++) {
@@ -419,10 +419,10 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
         if (featureObject === undefined) {
             throw ("FeatureObject must be defined");
         }
-        if (typeof featureObject.outputIndex !== "Number" || typeof featureObject.frameSize !== "Number" || typeof featureObject.features !== "Object") {
+        if (typeof featureObject.outputIndex !== "number" || typeof featureObject.frameSize !== "number" || typeof featureObject.features !== "object") {
             throw ("Malformed featureObject");
         }
-        FactoryFeatureMap.requestFeatures(this, source, featureObject);
+        FactoryFeatureMap.requestFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
     }
     this.postFeatures = function (Message) {
         /*
@@ -454,16 +454,22 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
 
 }
 var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
+    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.FeatureMap;
     var OutputNode = function (parent, output) {
         var extractors = [];
+        var Extractor = function (output, frameSize) {
+            this.extractor = FeatureInterfaceInstance.plugin.factory.context.createAnalyser();
+            this.extractor.fftSize = frameSize;
+            output.connect(this.extractor);
+            this.features = [];
+            Object.defineProperty(this, "frameSize", {
+                'value': frameSize
+            });
+        }
         this.addExtractor = function (frameSize) {
-            var obj = {
-                'frameSize': frameSize,
-                'extractor': this.parent.factory.context.createAnalyser(),
-                'features': []
-            };
-            output.connect(obj.extractor);
+            var obj = new Extractor(output, frameSize);
             extractors.push(obj);
+            return obj;
         };
         this.findExtractor = function (frameSize) {
             return extractors.find(function (e) {
@@ -481,13 +487,13 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                 if (o > FeatureInterfaceInstance.plugin.numOutputs) {
                     throw ("Requested an output that does not exist");
                 }
-                outputNodes[o].push(new OutputNode(FeatureInterfaceInstance.plugin, FeatureInterfaceInstance.plugin.outputs[o]));
+                outputNodes[o] = new OutputNode(FeatureInterfaceInstance.plugin, FeatureInterfaceInstance.plugin.outputs[o]);
             }
             var si;
             for (si = 0; si < featureObject[o].length; si++) {
                 var extractor = outputNodes[o].findExtractor(featureObject[o][si].frameSize);
                 if (!extractor) {
-                    outputNodes[o].addExtractor(featureObject[o][si].frameSize);
+                    extractor = outputNodes[o].addExtractor(featureObject[o][si].frameSize);
                 }
                 extractor.features = featureObject[o][si].featureList;
             }
