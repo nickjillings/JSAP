@@ -195,8 +195,9 @@ var PluginFactory = function (context, dir) {
                         if (featureNode) {
                             if (featureList[f].parameters.length != 0) {
                                 featureNode = {
-                                    'name',
-                                    'parameters': featureList[f].parameters, 'features': []
+                                    'name': featureList[f].name,
+                                    'parameters': featureList[f].parameters,
+                                    'features': []
                                 };
                                 rootArray.push(featureNode);
                             }
@@ -255,6 +256,12 @@ var PluginFactory = function (context, dir) {
                 requestor.addFeatures(featureObject);
                 updateSender();
             }
+
+            this.findFrameMap = function (outputIndex, frameSize) {
+                return Mappings.find(function (e) {
+                    return (e.outputIndex === outputIndex && e.frameSize === frameSize);
+                });
+            }
         }
         var RequestorMap = function (pluginInstance) {
             var Features = [];
@@ -277,7 +284,7 @@ var PluginFactory = function (context, dir) {
                         }
                         Features.push(featureNode);
                     }
-                    if (featureObject[i].features != undefined * * featureObject[i].features.lenth > 0) {
+                    if (featureObject[i].features !== undefined && featureObject[i].features.lenth > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
                     }
                 }
@@ -289,6 +296,39 @@ var PluginFactory = function (context, dir) {
 
             this.getFeatureList = function () {
                 return Features;
+            }
+
+            this.postFeatures = function (featureObject) {
+                var message = {
+                        'plugin': featureObject.plugin,
+                        'outputIndex': featureObject.outputIndex,
+                        'frameSize': featureObject.frameSize,
+                        'features': {}
+                    },
+                    i;
+
+                function recursivePostFeatures(rootNode, resultsList, FeatureList) {
+                    // Add the results tree where necessary
+                    var i, param;
+                    for (param in resultsList) {
+                        if (resultsList.hasOwnProperty(param)) {
+                            var node = FeatureList.find(function (e) {
+                                return e.name === this;
+                            }, param);
+                            if (node) {
+                                if (resultsList[param].constructor === Object && (node.features && node.features.length > 0)) {
+                                    rootNode[param] = {};
+                                    recursivePostFeatures(rootNode[param], resultsList[param], node.features);
+                                } else {
+                                    rootNode[param] = resultsList[param];
+                                }
+                            }
+                        }
+                    }
+                }
+                recursivePostFeatures(message.features, featureObject.features, Features);
+
+                pluginInstance.plugin.featureMap.Receiver.postFeatures(message);
             }
         }
 
@@ -313,12 +353,35 @@ var PluginFactory = function (context, dir) {
         };
 
         this.requestFeatures = function (requestor, source, featureObject) {
-            var source = Mappings[findSourceIndex(source)];
-
+            if (requestor.constructor != pluginInstance) {
+                requestor = requestor.pluginInstance;
+            }
+            if (source.constructor != pluginInstance) {
+                source = source.pluginInstance;
+            }
+            // Get the source map
+            var sourceMap = Mappings[findSourceIndex(source)];
+            sourceMap.requestFeatures(requestor, featureObject);
         };
         this.deleteFeautres = function (requestor, source, featureObject) {};
-        this.getFeatureList = function (requestor, source);
-        this.postFeatures = function (featureObject);
+        this.getFeatureList = function (requestor, source) {};
+        this.postFeatures = function (featureObject) {
+            // Receive from the Sender objects
+            // Trigger distributed search for results transmission
+
+            // First get the instance mapping for output/frame
+            var source = Mappings[findSourceIndex(featureObject.plugin)];
+            if (!source) {
+                throw ("Plugin Instance not loaded!");
+            }
+            var frameMap = source.findFrameMap(featureObject.outputIndex, featureObject.frameSize);
+
+            // Send the feature object to the RequestorMap object to handle comms
+            frameMap.forEach(function (e) {
+                e.postFeatures(this);
+            }, featureObject);
+
+        };
     };
 
     this.FeatureMap = new this.FeatureMap();

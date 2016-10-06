@@ -437,8 +437,68 @@ var PluginFeatureInterface = function (BasePluginInstance) {
             'frameSize': []
         });
     }
+
+    Object.defineProperty(this.Receiver, "onfeatures", {
+        'get': function () {
+            return this.Receiver.onfeatures;
+        },
+        'set': function (func) {
+            return this.Receiver.onfeatures = func;
+        }
+    });
 }
 var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
+    var c_features = function () {};
+    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.featureMap;
+    this.requestFeatures = function (featureList) {
+        var i;
+        for (i = 0; i < featureList.length; i++) {
+            this.requestFeaturesFromPlugin(featureList[i].plugin, {
+                'outputIndex': featureList[i].outputIndex,
+                'frameSize': featureList[i].frameSize,
+                'features': featureList[i].features
+            });
+        }
+    }
+    this.requestFeaturesFromPlugin = function (source, featureObject) {
+        if (source === undefined) {
+            throw ("Source plugin must be defined");
+        }
+        if (featureObject === undefined) {
+            throw ("FeatureObject must be defined");
+        }
+        if (typeof featureObject.outputIndex !== "Number" || typeof featureObject.frameSize !== "Number" || typeof featureObject.features !== "Object") {
+            throw ("Malformed featureObject");
+        }
+        FactoryFeatureMap.requestFeatures(this, source, featureObject);
+    }
+    this.postFeatures = function (Message) {
+        /*
+            Called by the Plugin Factory with the feature message
+            message = {
+                'plugin': sourcePluginInstance,
+                'outputIndex': outputIndex,
+                'frameSize': frameSize,
+                'features': {} JS-Xtract feature results object
+            }
+        */
+        if (typeof c_features === "function") {
+            c_features(Message);
+        }
+    }
+
+    Object.defineProperty(this, "onfeatures", {
+        'get': function () {
+            return c_features;
+        },
+        'set': function (func) {
+            if (typeof func === "function") {
+                c_features = func;
+                return true;
+            }
+            return false;
+        }
+    });
 
 }
 var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
@@ -461,7 +521,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
         this.deleteExtractor = function (frameSize) {};
     }
     var outputNodes = [];
-    this.updateFeatures(featureObject) {
+    this.updateFeatures = function (featureObject) {
         // [] Output -> {} 'framesize' -> {} 'features'
         var o;
         for (o = 0; o < featureObject.length; o++) {
@@ -482,6 +542,20 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
         }
     }
 
+    this.postFeatures = function (featureObject) {
+        /*
+            Called by the individual extractor instances:
+            featureObject = {'frameSize': frameSize,
+            'outputIndex': outputIndex,
+            'results':[]}
+        */
+        FeatureInterfaceInstance.plugin.factory.featureMap.postFeatures({
+            'plugin': FeatureInterfaceInstance.plugin.pluginInstance,
+            'outputIndex': featureObject.outputIndex,
+            'frameSize': featureObject.frameSize,
+            'results': featureObject.results
+        });
+    }
 }
 
 /*
@@ -777,8 +851,9 @@ var PluginFactory = function (context, dir) {
                         if (featureNode) {
                             if (featureList[f].parameters.length != 0) {
                                 featureNode = {
-                                    'name',
-                                    'parameters': featureList[f].parameters, 'features': []
+                                    'name': featureList[f].name,
+                                    'parameters': featureList[f].parameters,
+                                    'features': []
                                 };
                                 rootArray.push(featureNode);
                             }
@@ -837,6 +912,12 @@ var PluginFactory = function (context, dir) {
                 requestor.addFeatures(featureObject);
                 updateSender();
             }
+
+            this.findFrameMap = function (outputIndex, frameSize) {
+                return Mappings.find(function (e) {
+                    return (e.outputIndex === outputIndex && e.frameSize === frameSize);
+                });
+            }
         }
         var RequestorMap = function (pluginInstance) {
             var Features = [];
@@ -859,7 +940,7 @@ var PluginFactory = function (context, dir) {
                         }
                         Features.push(featureNode);
                     }
-                    if (featureObject[i].features != undefined * * featureObject[i].features.lenth > 0) {
+                    if (featureObject[i].features !== undefined && featureObject[i].features.lenth > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
                     }
                 }
@@ -871,6 +952,39 @@ var PluginFactory = function (context, dir) {
 
             this.getFeatureList = function () {
                 return Features;
+            }
+
+            this.postFeatures = function (featureObject) {
+                var message = {
+                        'plugin': featureObject.plugin,
+                        'outputIndex': featureObject.outputIndex,
+                        'frameSize': featureObject.frameSize,
+                        'features': {}
+                    },
+                    i;
+
+                function recursivePostFeatures(rootNode, resultsList, FeatureList) {
+                    // Add the results tree where necessary
+                    var i, param;
+                    for (param in resultsList) {
+                        if (resultsList.hasOwnProperty(param)) {
+                            var node = FeatureList.find(function (e) {
+                                return e.name === this;
+                            }, param);
+                            if (node) {
+                                if (resultsList[param].constructor === Object && (node.features && node.features.length > 0)) {
+                                    rootNode[param] = {};
+                                    recursivePostFeatures(rootNode[param], resultsList[param], node.features);
+                                } else {
+                                    rootNode[param] = resultsList[param];
+                                }
+                            }
+                        }
+                    }
+                }
+                recursivePostFeatures(message.features, featureObject.features, Features);
+
+                pluginInstance.plugin.featureMap.Receiver.postFeatures(message);
             }
         }
 
@@ -895,12 +1009,35 @@ var PluginFactory = function (context, dir) {
         };
 
         this.requestFeatures = function (requestor, source, featureObject) {
-            var source = Mappings[findSourceIndex(source)];
-
+            if (requestor.constructor != pluginInstance) {
+                requestor = requestor.pluginInstance;
+            }
+            if (source.constructor != pluginInstance) {
+                source = source.pluginInstance;
+            }
+            // Get the source map
+            var sourceMap = Mappings[findSourceIndex(source)];
+            sourceMap.requestFeatures(requestor, featureObject);
         };
         this.deleteFeautres = function (requestor, source, featureObject) {};
-        this.getFeatureList = function (requestor, source);
-        this.postFeatures = function (featureObject);
+        this.getFeatureList = function (requestor, source) {};
+        this.postFeatures = function (featureObject) {
+            // Receive from the Sender objects
+            // Trigger distributed search for results transmission
+
+            // First get the instance mapping for output/frame
+            var source = Mappings[findSourceIndex(featureObject.plugin)];
+            if (!source) {
+                throw ("Plugin Instance not loaded!");
+            }
+            var frameMap = source.findFrameMap(featureObject.outputIndex, featureObject.frameSize);
+
+            // Send the feature object to the RequestorMap object to handle comms
+            frameMap.forEach(function (e) {
+                e.postFeatures(this);
+            }, featureObject);
+
+        };
     };
 
     this.FeatureMap = new this.FeatureMap();

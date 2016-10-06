@@ -389,8 +389,68 @@ var PluginFeatureInterface = function (BasePluginInstance) {
             'frameSize': []
         });
     }
+
+    Object.defineProperty(this.Receiver, "onfeatures", {
+        'get': function () {
+            return this.Receiver.onfeatures;
+        },
+        'set': function (func) {
+            return this.Receiver.onfeatures = func;
+        }
+    });
 }
 var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
+    var c_features = function () {};
+    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.featureMap;
+    this.requestFeatures = function (featureList) {
+        var i;
+        for (i = 0; i < featureList.length; i++) {
+            this.requestFeaturesFromPlugin(featureList[i].plugin, {
+                'outputIndex': featureList[i].outputIndex,
+                'frameSize': featureList[i].frameSize,
+                'features': featureList[i].features
+            });
+        }
+    }
+    this.requestFeaturesFromPlugin = function (source, featureObject) {
+        if (source === undefined) {
+            throw ("Source plugin must be defined");
+        }
+        if (featureObject === undefined) {
+            throw ("FeatureObject must be defined");
+        }
+        if (typeof featureObject.outputIndex !== "Number" || typeof featureObject.frameSize !== "Number" || typeof featureObject.features !== "Object") {
+            throw ("Malformed featureObject");
+        }
+        FactoryFeatureMap.requestFeatures(this, source, featureObject);
+    }
+    this.postFeatures = function (Message) {
+        /*
+            Called by the Plugin Factory with the feature message
+            message = {
+                'plugin': sourcePluginInstance,
+                'outputIndex': outputIndex,
+                'frameSize': frameSize,
+                'features': {} JS-Xtract feature results object
+            }
+        */
+        if (typeof c_features === "function") {
+            c_features(Message);
+        }
+    }
+
+    Object.defineProperty(this, "onfeatures", {
+        'get': function () {
+            return c_features;
+        },
+        'set': function (func) {
+            if (typeof func === "function") {
+                c_features = func;
+                return true;
+            }
+            return false;
+        }
+    });
 
 }
 var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
@@ -413,7 +473,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
         this.deleteExtractor = function (frameSize) {};
     }
     var outputNodes = [];
-    this.updateFeatures(featureObject) {
+    this.updateFeatures = function (featureObject) {
         // [] Output -> {} 'framesize' -> {} 'features'
         var o;
         for (o = 0; o < featureObject.length; o++) {
@@ -434,6 +494,20 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
         }
     }
 
+    this.postFeatures = function (featureObject) {
+        /*
+            Called by the individual extractor instances:
+            featureObject = {'frameSize': frameSize,
+            'outputIndex': outputIndex,
+            'results':[]}
+        */
+        FeatureInterfaceInstance.plugin.factory.featureMap.postFeatures({
+            'plugin': FeatureInterfaceInstance.plugin.pluginInstance,
+            'outputIndex': featureObject.outputIndex,
+            'frameSize': featureObject.frameSize,
+            'results': featureObject.results
+        });
+    }
 }
 
 /*
