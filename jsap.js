@@ -555,7 +555,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
             'outputIndex': outputIndex,
             'results':[]}
         */
-        FeatureInterfaceInstance.plugin.factory.featureMap.postFeatures({
+        FeatureInterfaceInstance.plugin.factory.FeatureMap.postFeatures({
             'plugin': FeatureInterfaceInstance.plugin.pluginInstance,
             'outputIndex': featureObject.outputIndex,
             'frameSize': featureObject.frameSize,
@@ -986,12 +986,12 @@ var PluginFactory = function (context, dir) {
                     for (param in resultsList) {
                         if (resultsList.hasOwnProperty(param)) {
                             var node = FeatureList.find(function (e) {
-                                return e.name === this;
-                            }, param);
+                                return e.name == param;
+                            });
                             if (node) {
-                                if (resultsList[param].constructor === Object && (node.features && node.features.length > 0)) {
+                                if (resultsList[param].constructor === Object && node.results) {
                                     rootNode[param] = {};
-                                    recursivePostFeatures(rootNode[param], resultsList[param], node.features);
+                                    recursivePostFeatures(rootNode[param], resultsList[param], node.results);
                                 } else {
                                     rootNode[param] = resultsList[param];
                                 }
@@ -999,9 +999,9 @@ var PluginFactory = function (context, dir) {
                         }
                     }
                 }
-                recursivePostFeatures(message.features, featureObject.features, Features);
+                recursivePostFeatures(message.features, featureObject.results, Features);
 
-                pluginInstance.plugin.featureMap.Receiver.postFeatures(message);
+                pluginInstance.node.featureMap.Receiver.postFeatures(message);
             }
         }
 
@@ -1054,7 +1054,7 @@ var PluginFactory = function (context, dir) {
             var frameMap = source.findFrameMap(featureObject.outputIndex, featureObject.frameSize);
 
             // Send the feature object to the RequestorMap object to handle comms
-            frameMap.forEach(function (e) {
+            frameMap.requestors.forEach(function (e) {
                 e.postFeatures(this);
             }, featureObject);
 

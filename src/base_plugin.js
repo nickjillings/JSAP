@@ -507,7 +507,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
             'outputIndex': outputIndex,
             'results':[]}
         */
-        FeatureInterfaceInstance.plugin.factory.featureMap.postFeatures({
+        FeatureInterfaceInstance.plugin.factory.FeatureMap.postFeatures({
             'plugin': FeatureInterfaceInstance.plugin.pluginInstance,
             'outputIndex': featureObject.outputIndex,
             'frameSize': featureObject.frameSize,
