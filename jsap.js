@@ -77,17 +77,12 @@ var BasePlugin = function (factory, owner) {
         return true;
     }
     this.addOutput = function (node) {
-        obj = {
-            node: node,
-            xtract: this.factory.context.createAnalyser()
-        }
-        obj.node.connect(obj.xtract);
-        outputList.push(obj);
+        outputList.push(node);
         return this.outputs;
     }
     this.deleteOutput = function (node) {
         var i = outputList.findIndex(function (e) {
-            return e.node === this;
+            return e === this;
         }, node);
         if (i === -1) {
             return false;
