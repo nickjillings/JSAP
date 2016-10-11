@@ -91,12 +91,7 @@ var BasePlugin = function (factory, owner) {
 
     Object.defineProperty(this, "outputs", {
         get: function (index) {
-            var list = [],
-                i;
-            for (i = 0; i < outputList.length; i++) {
-                list.push(outputList[i].node);
-            }
-            return list;
+            return outputList;
         },
         set: function () {
             throw ("Illegal attempt to modify BasePlugin");
