@@ -167,7 +167,8 @@ var PluginFactory = function (context, dir) {
                 'state': 0,
                 'complete': function () {
                     this.state = 1;
-                }
+                },
+                'test': resource.test
             }
             object.promise.then(object.complete.bind(object));
         }
@@ -178,7 +179,7 @@ var PluginFactory = function (context, dir) {
         this.ready = function () {
             var state = true;
             for (var i = 0; i < resourcePromises.length; i++) {
-                if (resourcePromises[i].state !== 1) {
+                if (resourcePromises[i].state !== 1 && resourcePromises[i].test()) {
                     state = false;
                     break;
                 }
