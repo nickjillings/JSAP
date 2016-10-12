@@ -12,21 +12,66 @@ var PluginFactory = function (context, dir) {
         script,
         self = this;
 
-    this.loadResource = function (url) {
+    /*
+        this.loadResource. Load a resource into the global namespace
+        
+        @param resourceObject: a JS object holding the following parameters:
+            .url: URL of the resource
+            .test: function to call, returns true if resource already loaded, false if not
+    */
+    this.loadResource = function (resourceObject) {
+        if (resourceObject) {
+            if (typeof resourceObject.url !== "string") {
+                throw ("resourceObject.url must be a string");
+            }
+            if (typeof resourceObject.test !== "function") {
+                throw ("resourceObject.test must be a function");
+            }
+            var response = resourceObject.test();
+            if (response !== false && response !== true) {
+                throw ("resourceObject.test must return true or false");
+            }
+            if (!response) {
+                return loadResource(resourceObject).then(function (resourceObject) {
+                    if (typeof resourceObject.returnObject === "string") {
+                        var returnObject;
+                        eval("returnObject = " + resourceObject.returnObject);
+                        return returnObject;
+                    } else {
+                        return true;
+                    }
+                });
+            } else {
+                return new Promise(function (resolve, reject) {
+                    if (typeof resourceObject.returnObject === "string") {
+                        eval("resolve(" + resourceObject.returnObject + ")");
+                    } else {
+                        resolve(true);
+                    }
+                });
+            }
+        }
+    }
+
+    this.loadPluginScript = function (resourceObject) {
+        if (resourceObject) {
+            if (typeof resourceObject.returnObject !== "string") {
+                throw ("resourceObject.returnObject must be the name of the prototype function");
+            }
+            this.loadResource(resourceObject).then(function (plugin) {
+                return self.addPrototype(plugin);
+            });
+        }
+    }
+
+    function loadResource(resourceObject) {
         return new Promise(function (resolve, reject) {
-            var req = new XMLHttpRequest();
-            req.open('GET', url);
-            req.onload = function () {
-                if (req.status === 200) {
-                    resolve(req.response);
-                } else {
-                    reject(new Error(req.statusText));
-                }
-            };
-            req.onerror = function () {
-                reject(new Error("Network Error"));
-            };
-            req.send();
+            var script = document.createElement("script");
+            script.src = resourceObject.url;
+            document.getElementsByTagName("head")[0].appendChild(script);
+            script.onload = function () {
+                resolve(resourceObject);
+            }
         });
     };
 
