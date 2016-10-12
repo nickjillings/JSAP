@@ -31,24 +31,42 @@ var PluginFactory = function (context, dir) {
             if (response !== false && response !== true) {
                 throw ("resourceObject.test must return true or false");
             }
-            if (!response) {
-                return loadResource(resourceObject).then(function (resourceObject) {
-                    if (typeof resourceObject.returnObject === "string") {
-                        var returnObject;
-                        eval("returnObject = " + resourceObject.returnObject);
-                        return returnObject;
-                    } else {
-                        return true;
-                    }
-                });
-            } else {
-                return new Promise(function (resolve, reject) {
-                    if (typeof resourceObject.returnObject === "string") {
-                        eval("resolve(" + resourceObject.returnObject + ")");
-                    } else {
-                        resolve(true);
-                    }
-                });
+            switch(resourceObject.type) {
+                case "CSS":
+                case "css":
+                    return new Promise(function(resolve, reject){
+                        var css = document.createElement("link");
+                        css.setAttribute("rel", "stylesheet");
+                        css.setAttribute("type", "text/css");
+                        css.setAttribute("href", resourceObject.url);
+                        document.getElementsByTagName("head")[0].appendChild(css);
+                        resolve(resourceObject);
+                    });
+                    break;
+                case "javascript":
+                case "JavaScript":
+                case "Javascript":
+                case undefined:
+                default:
+                if (!response) {
+                    return loadResource(resourceObject).then(function (resourceObject) {
+                        if (typeof resourceObject.returnObject === "string") {
+                            var returnObject;
+                            eval("returnObject = " + resourceObject.returnObject);
+                            return returnObject;
+                        } else {
+                            return true;
+                        }
+                    });
+                } else {
+                    return new Promise(function (resolve, reject) {
+                        if (typeof resourceObject.returnObject === "string") {
+                            eval("resolve(" + resourceObject.returnObject + ")");
+                        } else {
+                            resolve(true);
+                        }
+                    });
+                }
             }
         }
     }
@@ -158,19 +176,51 @@ var PluginFactory = function (context, dir) {
             }
             return p;
         }
+        
+        function loadStylesheet(url) {
+            var css = document.createElement("link");
+            css.setAttribute("rel", "stylesheet");
+            css.setAttribute("type", "text/css");
+            css.setAttribute("href", url);
+            document.getElementsByTagName("head")[0].appendChild(css);
+        }
+        
+        function recursiveGetTest(resourceObject) {
+            if (resourceObject.hasOwnProperty("length") && resourceObject.length > 0) {
+                return recursiveGetTest(resourceObject[resourceObject.length-1]);
+            } else if (resourceObject.hasOwnProperty("resources")) {
+                return recursiveGetTest(resourceObject.resources);
+            } else {
+                return resourceObject.test;
+            }
+        }
 
         var resourcePromises = [];
         for (var i = 0; i < proto.prototype.resources.length; i++) {
             var resource = proto.prototype.resources[i];
-            var object = {
-                'promise': loadResourceChain(resource),
-                'state': 0,
-                'complete': function () {
-                    this.state = 1;
-                },
-                'test': resource.test
+            switch(resource.type) {
+                case "css":
+                case "CSS":
+                    loadStylesheet(resource.url);
+                    break;
+                case "javascript":
+                case "Javascript":
+                case "JavaScript":
+                case "JS":
+                default:
+                        
+                    var object = {
+                        'promise': loadResourceChain(resource),
+                        'state': 0,
+                        'complete': function () {
+                            this.state = 1;
+                        },
+                        'test': recursiveGetTest(resource)
+                    }
+                    object.promise.then(object.complete.bind(object));
+                    resourcePromises.push(object);
+                    break;
             }
-            object.promise.then(object.complete.bind(object));
         }
 
         this.getResourcePromises = function () {
@@ -179,7 +229,7 @@ var PluginFactory = function (context, dir) {
         this.ready = function () {
             var state = true;
             for (var i = 0; i < resourcePromises.length; i++) {
-                if (resourcePromises[i].state !== 1 && resourcePromises[i].test()) {
+                if (resourcePromises[i].state !== 1 || !resourcePromises[i].test()) {
                     state = false;
                     break;
                 }
