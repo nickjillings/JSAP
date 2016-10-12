@@ -123,6 +123,9 @@ var PluginFactory = function (context, dir) {
         this.proto = proto;
 
         this.createPluginInstance = function (owner) {
+            if (!this.ready) {
+                throw ("Plugin Not Read");
+            }
             var plugin = new proto(this.factory, owner);
             var node = new PluginInstance(currentPluginId++, plugin);
             Object.defineProperties(plugin.__proto__, {
@@ -139,6 +142,49 @@ var PluginFactory = function (context, dir) {
             this.factory.registerPluginInstance(node);
             return node;
         };
+
+        function loadResourceChain(resourceObject, p) {
+            if (!p) {
+                var p = loadResource(resourceObject);
+                p.then(function (resourceObject) {
+                    if (resourceObject.resources !== undefined && resourceObject.resources.length > 0) {
+                        for (var i = 0; i < resourceObject.resources.length; i++) {
+                            p = loadResourceChain(resourceObject.resources[i], p);
+                        }
+                    }
+                });
+            } else {
+                p.then(loadResource(resourceObject));
+            }
+            return p;
+        }
+
+        var resourcePromises = [];
+        for (var i = 0; i < proto.prototype.resources.length; i++) {
+            var resource = proto.prototype.resources[i];
+            var object = {
+                'promise': loadResourceChain(resource),
+                'state': 0,
+                'complete': function () {
+                    this.state = 1;
+                }
+            }
+            object.promise.then(object.complete.bind(object));
+        }
+
+        this.getResourcePromises = function () {
+            return resourcePromises;
+        };
+        this.ready = function () {
+            var state = true;
+            for (var i = 0; i < resourcePromises.length; i++) {
+                if (resourcePromises[i].state !== 1) {
+                    state = false;
+                    break;
+                }
+            }
+            return state;
+        }
     };
 
     this.addPrototype = function (plugin_proto) {
