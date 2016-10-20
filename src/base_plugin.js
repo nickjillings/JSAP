@@ -467,7 +467,7 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
 }
 var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
     var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.FeatureMap;
-    var OutputNode = function (parent, output) {
+    var OutputNode = function (parent, output, index) {
         var extractors = [];
         var Extractor = function (output, frameSize) {
             this.extractor = FeatureInterfaceInstance.plugin.factory.context.createAnalyser();
@@ -477,10 +477,40 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
             Object.defineProperty(this, "frameSize", {
                 'value': frameSize
             });
+
+            function recursivelyProcess(base, list) {
+                var l = list.length,
+                    i, entry;
+                for (i = 0; i < l; i++) {
+                    entry = list[i];
+                    base[entry.name].apply(base, entry.parameters);
+                    if (entry.features && entry.features > 0) {
+                        recursivelyProcess(base.result[entry.name], entry.features);
+                    }
+                }
+            }
+
+            function onaudiocallback(data) {
+                //this == Extractor
+                recursivelyProcess(data, this.features);
+                this.postFeatures(JSON.parse(data.toJSON()));
+            };
+
+            this.extractor.frameCallback(onaudiocallback, this);
         }
         this.addExtractor = function (frameSize) {
             var obj = new Extractor(output, frameSize);
             extractors.push(obj);
+            Object.defineProperty(obj, "postFeatures", {
+                'value': function (frameSize, resultsJSON) {
+                    var obj = {
+                        'outputIndex': index,
+                        'frameSize': frameSize,
+                        'results': resultsJSON
+                    }
+                    this.postFeature(obj);
+                }
+            });
             return obj;
         };
         this.findExtractor = function (frameSize) {
@@ -499,7 +529,12 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                 if (o > FeatureInterfaceInstance.plugin.numOutputs) {
                     throw ("Requested an output that does not exist");
                 }
-                outputNodes[o] = new OutputNode(FeatureInterfaceInstance.plugin, FeatureInterfaceInstance.plugin.outputs[o]);
+                outputNodes[o] = new OutputNode(FeatureInterfaceInstance.plugin, FeatureInterfaceInstance.plugin.outputs[o], o);
+                Object.defineProperty(outputNodes[o], "postFeatures", {
+                    'value': function (resultObject) {
+                        this.postFeatures(resultObject);
+                    }.bind(this);
+                });
             }
             var si;
             for (si = 0; si < featureObject[o].length; si++) {
