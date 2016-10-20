@@ -1761,11 +1761,12 @@ function xtract_tristimulus_3(spectrum, f0) {
     }
     var den = 0.0,
         num = 0.0,
-        temp = 0.0;
+        temp = 0.0,
+        h = 0;
     var N = spectrum.length;
     var K = N >> 1;
-    var amps = spectrum.subarray(0, n);
-    var freqs = spectrum.subarray(n);
+    var amps = spectrum.subarray(0, K);
+    var freqs = spectrum.subarray(K);
 
     for (var i = 0; i < K; i++) {
         temp = amps[i];
@@ -2501,6 +2502,61 @@ function xtract_midicent(f0) {
     note *= 100;
     note = Math.round(0.5 + note);
     return note;
+}
+
+function xtract_spectral_fundamental(spectrum, sample_rate) {
+    // Based on work by Motegi and Shimamura
+    
+    function peak_picking(E, window) {
+        var o = [], N = E.length, n;
+        if (window == undefined) {
+            window = 5;
+        }
+        for (n=window; n < N-window-1; n++) {
+            var max = 1, m;
+            for (m = -window; m < window-1; m++) {
+                if (E[n+m] > E[n]) {
+                    max = 0;
+                    break;
+                }
+            }
+            if (max == 1) {
+                o.push(n);
+            }
+        }
+        return o;
+    }
+    
+    var N = spectrum.length >> 1;
+    var amps = spectrum.subarray(0, N);
+    var freqs = spectrum.subarray(N);
+    var K = N*2;
+    
+    // Create the power spectrum
+    var power = new Float64Array(K);
+    var n;
+    for (n=0; n<N; n++) {
+        power[n] = Math.pow(amps[n],2);
+        power[K-1-n];
+    }
+    
+    // Perform autocorrelation using IFFT
+    var R = new Float64Array(K);
+    inverseTransform(power, R);
+    R = undefined;
+    R = power;
+    power = undefined;
+    
+    // Get the peaks
+    var p = peak_picking(R,5);
+    if (p.length == 0) {
+        return 0;
+    }
+    p = p[0];
+    
+    p = p/sample_rate;
+    p = 1/p;
+    return p;
 }
 
 /* Vector.c */
@@ -4415,6 +4471,9 @@ var SpectrumData = function (N, sampleRate, parent) {
 
     Object.defineProperty(this, "tristimulus_1", {
         'value': function () {
+            if (_f0 == undefined) {
+                this.spectral_fundamental();
+            }
             if (this.result.tristimulus_1 == undefined) {
                 this.result.tristimulus_1 = xtract_tristimulus_1(_data, _f0);
             }
@@ -4424,6 +4483,9 @@ var SpectrumData = function (N, sampleRate, parent) {
 
     Object.defineProperty(this, "tristimulus_2", {
         'value': function () {
+            if (_f0 == undefined) {
+                this.spectral_fundamental();
+            }
             if (this.result.tristimulus_2 == undefined) {
                 this.result.tristimulus_2 = xtract_tristimulus_2(_data, _f0);
             }
@@ -4433,6 +4495,9 @@ var SpectrumData = function (N, sampleRate, parent) {
 
     Object.defineProperty(this, "tristimulus_3", {
         'value': function () {
+            if (_f0 == undefined) {
+                this.spectral_fundamental();
+            }
             if (this.result.tristimulus_3 == undefined) {
                 this.result.tristimulus_3 = xtract_tristimulus_3(_data, _f0);
             }
@@ -4520,6 +4585,16 @@ var SpectrumData = function (N, sampleRate, parent) {
             return this.result.spectral_slope;
         }
     });
+    
+    Object.defineProperty(this, "spectral_fundamental", {
+        'value': function () {
+            if (this.result.spectral_fundamental == undefined) {
+                this.result.spectral_fundamental = xtract_spectral_fundamental(_data, _Fs);
+                this.f0 = this.result.spectral_fundamental;
+            }
+            return this.result.spectral_fundamental;
+        }
+    })
 
     Object.defineProperty(this, "nonzero_count", {
         'value': function () {
@@ -4612,18 +4687,21 @@ var PeakSpectrumData = function (N, sampleRate, parent) {
     Object.defineProperty(this, "spectral_inharmonicity", {
         'value': function () {
             if (this.result.spectral_inharmonicity == undefined) {
-                this.result.spectral_inharmonicity = xtract_spectral_inharmonicity(_data, _f0);
+                this.result.spectral_inharmonicity = xtract_spectral_inharmonicity(this.getData(), this.sampleRate);
             }
             return this.result.spectral_inharmonicity;
         }
     });
 
     Object.defineProperty(this, "harmonic_spectrum", {
-        'value': function (f0, threshold) {
+        'value': function (threshold) {
             if (this.result.harmonic_spectrum == undefined) {
-                this.result.harmonic_spectrum = new HarmonicSpectrumData(_length, _Fs, this);
-                var hs = xtract_harmonic_spectrum(_data, f0, threshold);
-                this.result.harmonic_spectrum.copyDataFrom(hs.subarray(0, _length));
+                if (this.f0 == undefined) {
+                    this.spectral_fundamental(this.getData(), this.sampleRate);
+                }
+                this.result.harmonic_spectrum = new HarmonicSpectrumData(this.length, this.sampleRate, this);
+                var hs = xtract_harmonic_spectrum(this.getData(), this.f0, threshold);
+                this.result.harmonic_spectrum.copyDataFrom(hs.subarray(0, this.length));
             }
             return this.result.harmonic_spectrum;
         }
@@ -4652,7 +4730,10 @@ var HarmonicSpectrumData = function (N, sampleRate, parent) {
     Object.defineProperty(this, "odd_even_ratio", {
         'value': function () {
             if (this.result.odd_even_ratio == undefined) {
-                this.result.odd_even_ratio = xtract_odd_even_ratio(_data, _f0);
+                if (this.f0 == undefined) {
+                    this.spectral_fundamental(this.getData(), this.sampleRate);
+                }
+                this.result.odd_even_ratio = xtract_odd_even_ratio(this.getData(), this.f0);
             }
             return this.result.odd_even_ratio;
         }
@@ -5143,19 +5224,19 @@ SpectrumData.prototype.features = [
 }, {
         name: "Tristimulus 1",
         function: "tristimulus_1",
-        sub_features: [],
+        sub_features: ["spectral_fundamental"],
         parameters: [],
         returns: "number"
 }, {
         name: "Tristimulus 2",
         function: "tristimulus_2",
-        sub_features: [],
+        sub_features: ["spectral_fundamental"],
         parameters: [],
         returns: "number"
 }, {
         name: "Tristimulus 3",
         function: "tristimulus_3",
-        sub_features: [],
+        sub_features: ["spectral_fundamental"],
         parameters: [],
         returns: "number"
 }, {
@@ -5220,6 +5301,12 @@ SpectrumData.prototype.features = [
         parameters: [],
         returns: "number"
 }, {
+        name: "Fundamental Frequency",
+        function: "spectral_fundamental",
+        sub_features: [],
+        parameters: [],
+        returns: "number"
+},{
         name: "Non-Zero count",
         function: "nonzero_count",
         sub_features: [],
