@@ -462,6 +462,28 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
         }
         FactoryFeatureMap.requestFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
     }
+    this.cancelFeaturesFromPlugin = function (source, featureObject) {
+        if (source === undefined) {
+            throw ("Source plugin must be defined");
+        }
+        if (featureObject === undefined) {
+            throw ("FeatureObject must be defined");
+        }
+        if (typeof featureObject.outputIndex !== "number" || typeof featureObject.frameSize !== "number" || typeof featureObject.features !== "object") {
+            throw ("Malformed featureObject");
+        }
+        FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
+    }
+    this.cancelAllFeaturesFromPlugin = function (source) {
+        if (source === undefined) {
+            throw ("Source plugin must be defined");
+        }
+        FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin, source);
+    }
+    this.cancelAllFeatures = function () {
+        FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin);
+    }
+
     this.postFeatures = function (Message) {
         /*
             Called by the Plugin Factory with the feature message
@@ -683,10 +705,10 @@ var PluginFactory = function (context, dir) {
             if (response !== false && response !== true) {
                 throw ("resourceObject.test must return true or false");
             }
-            switch(resourceObject.type) {
+            switch (resourceObject.type) {
                 case "CSS":
                 case "css":
-                    return new Promise(function(resolve, reject){
+                    return new Promise(function (resolve, reject) {
                         var css = document.createElement("link");
                         css.setAttribute("rel", "stylesheet");
                         css.setAttribute("type", "text/css");
@@ -700,25 +722,25 @@ var PluginFactory = function (context, dir) {
                 case "Javascript":
                 case undefined:
                 default:
-                if (!response) {
-                    return loadResource(resourceObject).then(function (resourceObject) {
-                        if (typeof resourceObject.returnObject === "string") {
-                            var returnObject;
-                            eval("returnObject = " + resourceObject.returnObject);
-                            return returnObject;
-                        } else {
-                            return true;
-                        }
-                    });
-                } else {
-                    return new Promise(function (resolve, reject) {
-                        if (typeof resourceObject.returnObject === "string") {
-                            eval("resolve(" + resourceObject.returnObject + ")");
-                        } else {
-                            resolve(true);
-                        }
-                    });
-                }
+                    if (!response) {
+                        return loadResource(resourceObject).then(function (resourceObject) {
+                            if (typeof resourceObject.returnObject === "string") {
+                                var returnObject;
+                                eval("returnObject = " + resourceObject.returnObject);
+                                return returnObject;
+                            } else {
+                                return true;
+                            }
+                        });
+                    } else {
+                        return new Promise(function (resolve, reject) {
+                            if (typeof resourceObject.returnObject === "string") {
+                                eval("resolve(" + resourceObject.returnObject + ")");
+                            } else {
+                                resolve(true);
+                            }
+                        });
+                    }
             }
         }
     }
@@ -828,7 +850,7 @@ var PluginFactory = function (context, dir) {
             }
             return p;
         }
-        
+
         function loadStylesheet(url) {
             var css = document.createElement("link");
             css.setAttribute("rel", "stylesheet");
@@ -836,10 +858,10 @@ var PluginFactory = function (context, dir) {
             css.setAttribute("href", url);
             document.getElementsByTagName("head")[0].appendChild(css);
         }
-        
+
         function recursiveGetTest(resourceObject) {
             if (resourceObject.hasOwnProperty("length") && resourceObject.length > 0) {
-                return recursiveGetTest(resourceObject[resourceObject.length-1]);
+                return recursiveGetTest(resourceObject[resourceObject.length - 1]);
             } else if (resourceObject.hasOwnProperty("resources")) {
                 return recursiveGetTest(resourceObject.resources);
             } else {
@@ -850,7 +872,7 @@ var PluginFactory = function (context, dir) {
         var resourcePromises = [];
         for (var i = 0; i < proto.prototype.resources.length; i++) {
             var resource = proto.prototype.resources[i];
-            switch(resource.type) {
+            switch (resource.type) {
                 case "css":
                 case "CSS":
                     loadStylesheet(resource.url);
@@ -860,7 +882,7 @@ var PluginFactory = function (context, dir) {
                 case "JavaScript":
                 case "JS":
                 default:
-                        
+
                     var object = {
                         'promise': loadResourceChain(resource),
                         'state': 0,
@@ -1066,6 +1088,34 @@ var PluginFactory = function (context, dir) {
                     return (e.outputIndex === outputIndex && e.frameSize === frameSize);
                 });
             }
+
+            this.cancelFeatures = function (requestorInstance, featureObject) {
+                if (featureObject === undefined) {
+                    Mappings.forEach(function (map) {
+                        var requestorIndex = map.requestors.findIndex(function (e) {
+                            return e.getRequestorInstance() === requestorInstance;
+                        });
+                        if (requestorIndex >= 0) {
+                            map.requestors.splice(requestorIndex, 1);
+                        }
+                    });
+                } else {
+                    var map = Mappings.find(function (e) {
+                        return (e.outputIndex == this.outputIndex && e.frameSize == this.frameSize);
+                    }, featureObject);
+                    if (!map) {
+                        return;
+                    }
+                    var requestor = map.requestors.find(function (e) {
+                        return e.getRequestorInstance() === this;
+                    }, requestorInstance);
+                    if (!requestor) {
+                        return;
+                    }
+                    requestor.deleteFeatures(featureObject);
+                }
+                updateSender();
+            }
         }
         var RequestorMap = function (pluginInstance) {
             var Features = [];
@@ -1095,8 +1145,31 @@ var PluginFactory = function (context, dir) {
                 }
             }
 
+            function recursivelyDeleteFeatures(rootArray, featureObject) {
+                var l = featureObject.length,
+                    i;
+                for (i = 0; i < l; i++) {
+                    // Find the feature
+                    var index = rootArray.find(function (e) {
+                        return e.name === this.name;
+                    }, featureObject[i]);
+                    if (index >= 0) {
+                        if (featureObject[index].features && featureObject[index].features.length > 0) {
+                            recursivelyDeleteFeatures(rootArray[index].features, featureObject[index].features);
+                        } else {
+                            Features.splice(index, 0);
+                        }
+                    }
+
+                }
+            }
+
             this.addFeatures = function (featureObject) {
                 recursivelyAddFeatures(Features, featureObject.features);
+            }
+
+            this.deleteFeatures = function (featureObject) {
+                recursivelyDeleteFeatures(Features, featureObject.features);
             }
 
             this.getFeatureList = function () {
@@ -1172,7 +1245,26 @@ var PluginFactory = function (context, dir) {
             }
             sourceMap.requestFeatures(requestor, featureObject);
         };
-        this.deleteFeautres = function (requestor, source, featureObject) {};
+        this.deleteFeatures = function (requestor, source, featureObject) {
+            if (requestor.constructor !== PluginInstance) {
+                requestor = requestor.pluginInstance;
+            }
+            if (source === undefined) {
+                Mappings.forEach(function (sourceMap) {
+                    sourceMap.cancelFeatures(requestor);
+                });
+            } else {
+                if (source.constructor !== PluginInstance) {
+                    source = source.pluginInstance;
+                }
+                // Get the source map
+                var sourceMap = Mappings[findSourceIndex(source)];
+                if (!sourceMap) {
+                    return;
+                }
+                sourceMap.cancelFeatures(requestor, featureObject);
+            }
+        };
         this.getFeatureList = function (requestor, source) {};
         this.postFeatures = function (featureObject) {
             // Receive from the Sender objects

@@ -414,6 +414,28 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
         }
         FactoryFeatureMap.requestFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
     }
+    this.cancelFeaturesFromPlugin = function (source, featureObject) {
+        if (source === undefined) {
+            throw ("Source plugin must be defined");
+        }
+        if (featureObject === undefined) {
+            throw ("FeatureObject must be defined");
+        }
+        if (typeof featureObject.outputIndex !== "number" || typeof featureObject.frameSize !== "number" || typeof featureObject.features !== "object") {
+            throw ("Malformed featureObject");
+        }
+        FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
+    }
+    this.cancelAllFeaturesFromPlugin = function (source) {
+        if (source === undefined) {
+            throw ("Source plugin must be defined");
+        }
+        FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin, source);
+    }
+    this.cancelAllFeatures = function () {
+        FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin);
+    }
+
     this.postFeatures = function (Message) {
         /*
             Called by the Plugin Factory with the feature message
