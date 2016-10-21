@@ -1393,7 +1393,7 @@ var PluginFactory = function (context, dir) {
                     pluginChainStart.connect(plugin_list[index + 1] || pluginChainStop);
                 }
                 plugin_list.splice(index, 1);
-                this.parent.removePlugin(plugin_object.id);
+                this.parent.deletePlugin(plugin_object.id);
             }
         };
 
