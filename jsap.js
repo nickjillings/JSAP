@@ -581,7 +581,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                 Object.defineProperty(outputNodes[o], "postFeatures", {
                     'value': function (resultObject) {
                         this.postFeatures(resultObject);
-                    }.bind(this);
+                    }.bind(this)
                 });
             }
             var si;
