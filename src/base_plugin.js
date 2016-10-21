@@ -658,3 +658,7 @@ PluginUserInterface.prototype.loadResource = function (url) {
         req.send();
     });
 }
+PluginUserInterface.prototype.clearGUI = function () {
+    this.stopCallbacks();
+    this.root.innerHTML = "";
+}

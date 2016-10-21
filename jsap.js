@@ -706,6 +706,10 @@ PluginUserInterface.prototype.loadResource = function (url) {
         req.send();
     });
 }
+PluginUserInterface.prototype.clearGUI = function () {
+    this.stopCallbacks();
+    this.root.innerHTML = "";
+}
 
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
