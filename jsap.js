@@ -785,7 +785,7 @@ var PluginFactory = function (context, dir) {
             if (typeof resourceObject.returnObject !== "string") {
                 throw ("resourceObject.returnObject must be the name of the prototype function");
             }
-            this.loadResource(resourceObject).then(function (plugin) {
+            return this.loadResource(resourceObject).then(function (plugin) {
                 return self.addPrototype(plugin);
             });
         }
@@ -966,6 +966,7 @@ var PluginFactory = function (context, dir) {
                 'value': this
             }
         });
+        return obj;
     };
 
     this.getPrototypes = function () {
