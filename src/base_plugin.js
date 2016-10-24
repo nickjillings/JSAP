@@ -196,51 +196,66 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
           These are accessed by the public facing getter/setter
     */
 
+    var _parentProcessor = owner,
+        _dataType, _minimum, _maximum, _value, _name, _actions, _update, _translate, _trigger, boundParam;
+
     if (arguments.length < 2) {
         throw ("INVALID PARAMETERS: Must always define defaultValue, dataType and name");
     }
+    dataType = dataType.toLowerCase();
+    switch (dataType) {
+        case "number":
+            _dataType = "Number";
+            _minimum = minimum;
+            _maximum = maximum;
+            break;
+        case "string":
+            _dataType = "String";
+            _minimum = minimum;
+            _maximum = maximum;
+            break;
+        case "button":
+            _dataType = "Button";
+            break;
+        case "switch":
+            _dataType = "Switch";
+            break;
+        default:
+            throw ("Invalid dataType");
+    }
 
-    var _parentProcessor = owner;
-
-    //The data type of the parameter
-    var _dataType = dataType;
-
-    //The minimum inclusive value, if the requested value < this, value == this
-    var _minimum = minimum;
-
-    //The maximum inclusive value, if the requested value > this, value == this
-    var _maximum = maximum;
-
-    //The value to be used / changed by the plugin.
-    var _value = defaultValue;
-
-    //The default value to initialise to
-    var _default = defaultValue;
-
-    //The name of the parameter
-    var _name = name;
-
-    // Store for providence
-    var _actions = [];
+    _default = _value = defaultValue;
+    _name = name;
+    _actions = [];
 
     // Update Function
-    var _update = function (value) {
+    _update = function (value) {
         return value
     };
 
     // Translate Function
-    var _translate = function (value) {
+    _translate = function (value) {
         return value;
     };
 
     // Trigger Function
-    var _trigger = function () {};
-
-    var boundParam;
+    _trigger = function () {};
 
     this.bindToAudioParam = function (AudioParameterNode) {
-        boundParam = AudioParameterNode;
-        this.value = _translate(boundParam.value);
+        if ((_dataType == "Number" || _dataType == "Switch") && typeof AudioParameterNode.value == "number") {
+            boundParam = AudioParameterNode;
+            if (AudioParameterNode !== undefined) {
+                this.value = _translate(boundParam.value);
+            }
+            return;
+        } else if (_dataType == "String" && typeof AudioParameterNode.value == "string") {
+            boundParam = AudioParameterNode;
+            if (AudioParameterNode !== undefined) {
+                this.value = _translate(boundParam.value);
+            }
+            return;
+        }
+        throw ("Cannot bind parameter of type " + _dataType + " to an AudioParameter of type " + typeof AudioParameterNode.value + " . Use the trigger instead.");
     }
 
     // Public facing getter/setter to preserve the plugin parameter mappings
@@ -297,21 +312,23 @@ var PluginParameter = function (defaultValue, dataType, name, minimum, maximum, 
             return _value;
         },
         set: function (newValue) {
-            if (newValue >= _maximum && _maximum != undefined) {
-                newValue == _maximum;
-            } else if (newValue <= _minimum && _minimum != undefined) {
-                newValue == _minimum;
+            if (_dataType == "Number") {
+                if (newValue >= _maximum && _maximum != undefined) {
+                    newValue == _maximum;
+                } else if (newValue <= _minimum && _minimum != undefined) {
+                    newValue == _minimum;
+                }
             }
             _value = newValue;
             if (boundParam) {
                 boundParam.value = _update(_value);
             }
             _actions.push({
-                'value': newValue,
+                'value': _value,
                 'time': new Date()
             });
             _trigger();
-            return newValue;
+            return _value;
         }
     });
 
