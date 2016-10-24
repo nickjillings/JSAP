@@ -632,8 +632,9 @@ var PluginFactory = function (context, dir) {
 
         function rebuild() {
             pluginChainStart.disconnect();
+            pluginChainStart.connect(chainStartFeature);
             plugin_list.forEach(function (e) {
-                e.node.disconnect(0);
+                e.node.disconnect();
             });
             var i, l = plugin_list.length;
             var currentNode = pluginChainStart;
@@ -647,8 +648,12 @@ var PluginFactory = function (context, dir) {
                     break;
                 }
             }
-            currentNode.next_node = undefined;
-            currentNode.node.connect(pluginChainStop);
+            if (currentNode !== pluginChainStart) {
+                currentNode.next_node = undefined;
+                currentNode.node.connect(pluginChainStop);
+            } else {
+                currentNode.connect(pluginChainStop);
+            }
         }
 
         this.getPrototypes = function () {
@@ -694,6 +699,9 @@ var PluginFactory = function (context, dir) {
             }
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
+                plugin_list.forEach(function (e) {
+                    e.node.disconnect();
+                });
                 plugin_list.splice(index, 1);
                 this.parent.deletePlugin(plugin_object.id);
                 rebuild();
