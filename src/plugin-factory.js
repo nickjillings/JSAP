@@ -631,28 +631,22 @@ var PluginFactory = function (context, dir) {
         pluginChainStart.connect(chainStop);
 
         function rebuild() {
+            var i = 0,
+                l = plugin_list.length - 1;
+            while (i < l) {
+                var currentNode = plugin_list[i++];
+                var nextNode = plugin_list[i];
+                currentNode.reconnect(nextNode);
+            }
             pluginChainStart.disconnect();
             pluginChainStart.connect(chainStartFeature);
-            plugin_list.forEach(function (e) {
-                e.node.disconnect();
-            });
-            var i, l = plugin_list.length;
-            var currentNode = pluginChainStart;
-            var nextNode = pluginChainStart;
-            while (i < l) {
-                currentNode = nextNode;
-                nextNode = plugin_list[i++];
-                if (nextNode) {
-                    currentNode.reconnect(nextNode);
-                } else {
-                    break;
-                }
-            }
-            if (currentNode !== pluginChainStart) {
-                currentNode.next_node = undefined;
-                currentNode.node.connect(pluginChainStop);
+            // Connect the rebuilt chain
+            if (plugin_list.length == 0) {
+                // Empty
+                pluginChainStart.connect(chainStop);
             } else {
-                currentNode.connect(pluginChainStop);
+                pluginChainStart.connect(plugin_list[0].node.getInputs()[0]);
+                plugin_list[plugin_list.length - 1].node.connect(chainStop);
             }
         }
 
