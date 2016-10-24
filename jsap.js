@@ -1349,14 +1349,19 @@ var PluginFactory = function (context, dir) {
                 e.node.disconnect(0);
             });
             var i, l = plugin_list.length;
+            var currentNode = pluginChainStart;
+            var nextNode = pluginChainStart;
             while (i < l) {
-                var plugin = plugin_list[i++];
-                if (plugin_list[i]) {
-                    plugin.reconnect(plugin_list[i]);
+                currentNode = nextNode;
+                nextNode = plugin_list[i++];
+                if (nextNode) {
+                    currentNode.reconnect(nextNode);
                 } else {
-                    plugin.reconnect(pluginChainStop);
+                    break;
                 }
             }
+            currentNode.next_node = undefined;
+            currentNode.node.connect(pluginChainStop);
         }
 
         this.getPrototypes = function () {
