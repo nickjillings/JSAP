@@ -617,7 +617,7 @@ var PluginFactory = function (context, dir) {
         'value': this
     });
 
-    var SemanticStore = function (storeName) {
+    var LinkedStore = function (storeName) {
         // Store for the semantic terms, each store holds its own data tree
         // Terms are added as key/value paris to a root node
         var root = {};
@@ -751,7 +751,7 @@ var PluginFactory = function (context, dir) {
     var stores = [];
 
     this.createStore = function (storeName) {
-        var node = new SemanticStore(storeName);
+        var node = new LinkedStore(storeName);
         stores.push(node);
         return node;
     }
@@ -766,6 +766,10 @@ var PluginFactory = function (context, dir) {
         });
     }
 
+    // Build the default Stores
+    this.SessionData = new LinkedStore("Session");
+    this.UserData = new LinkedStore("User");
+
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 
         var plugin_list = [],
@@ -773,11 +777,15 @@ var PluginFactory = function (context, dir) {
             pluginChainStop = chainStop,
             factoryName = "",
             state = 1,
-            chainStartFeature = PluginFactory.context.createAnalyser();
+            chainStartFeature = PluginFactory.context.createAnalyser(),
+            semanticStores = [];
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
         pluginChainStart.connect(chainStartFeature);
         pluginChainStart.connect(chainStop);
+
+        this.TrackData = new LinkedStore("Track");
+        this.PluginData = new LinkedStore("Plugin");
 
         function rebuild() {
             var i = 0,
