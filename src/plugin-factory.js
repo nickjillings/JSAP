@@ -630,6 +630,22 @@ var PluginFactory = function (context, dir) {
         pluginChainStart.connect(chainStartFeature);
         pluginChainStart.connect(chainStop);
 
+        function rebuild() {
+            pluginChainStart.disconnect();
+            plugin_list.forEach(function (e) {
+                e.node.disconnect(0);
+            });
+            var i, l = plugin_list.length;
+            while (i < l) {
+                var plugin = plugin_list[i++];
+                if (plugin_list[i]) {
+                    plugin.reconnect(plugin_list[i]);
+                } else {
+                    plugin.reconnect(pluginChainStop);
+                }
+            }
+        }
+
         this.getPrototypes = function () {
             return this.parent.getPrototypes();
         };
@@ -673,14 +689,9 @@ var PluginFactory = function (context, dir) {
             }
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
-                if (index > 0) {
-                    plugin_list[index - 1].reconnect(plugin_list[index + 1] || pluginChainStop);
-                } else {
-                    pluginChainStart.disconnect(plugin_list[index.node]);
-                    pluginChainStart.connect(plugin_list[index + 1] || pluginChainStop);
-                }
                 plugin_list.splice(index, 1);
                 this.parent.deletePlugin(plugin_object.id);
+                rebuild();
             }
         };
 
