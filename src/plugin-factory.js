@@ -703,6 +703,19 @@ var PluginFactory = function (context, dir) {
                     root[term] = value;
                 }
             },
+            'addTerms': {
+                'value': function (termsObject) {
+                    if (typeof termsObject !== "object") {
+                        throw ("addTerms takes an object of term/value pairs");
+                    }
+                    var term;
+                    for (term in termsObject) {
+                        if (termsObject.hasOwnProperty(term)) {
+                            this.addTerm(term, termsObject[term]);
+                        }
+                    }
+                }
+            },
             'deleteTerm': {
                 'value': function (term) {
                     if (typeof term !== "string" && term.length == 0) {
