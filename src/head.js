@@ -171,7 +171,7 @@ var LinkedStore = function (storeName) {
         },
         'toJSON': {
             'value': function () {
-                return JSON.stringify(root);
+                return JSON.parse(JSON.stringify(root));
             }
         },
         'toXML': {
