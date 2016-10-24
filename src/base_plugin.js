@@ -127,6 +127,8 @@ BasePlugin.prototype.getInputs = function () {
 BasePlugin.prototype.start = function () {};
 BasePlugin.prototype.stop = function () {};
 
+BasePlugin.prototype.deconstruct = function () {};
+
 BasePlugin.prototype.getParameterNames = function () {
     var names = [],
         i;

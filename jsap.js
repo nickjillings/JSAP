@@ -175,6 +175,8 @@ BasePlugin.prototype.getInputs = function () {
 BasePlugin.prototype.start = function () {};
 BasePlugin.prototype.stop = function () {};
 
+BasePlugin.prototype.deconstruct = function () {};
+
 BasePlugin.prototype.getParameterNames = function () {
     var names = [],
         i;
@@ -1412,6 +1414,8 @@ var PluginFactory = function (context, dir) {
             }
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
+                plugin_object.stop();
+                plugin_object.deconstruct();
                 plugin_list.forEach(function (e) {
                     e.node.disconnect();
                 });
