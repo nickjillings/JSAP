@@ -1414,8 +1414,8 @@ var PluginFactory = function (context, dir) {
             }
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
-                plugin_object.stop();
-                plugin_object.deconstruct();
+                plugin_object.node.stop();
+                plugin_object.node.deconstruct();
                 plugin_list.forEach(function (e) {
                     e.node.disconnect();
                 });
