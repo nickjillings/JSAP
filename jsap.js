@@ -792,9 +792,11 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
             return obj;
         };
         this.findExtractor = function (frameSize) {
+            var check = frameSize;
             return extractors.find(function (e) {
-                return e.frameSize === this;
-            }, frameSize)
+                // This MUST be == NOT ===
+                return e.frameSize == check;
+            });
         };
         this.deleteExtractor = function (frameSize) {};
     }
