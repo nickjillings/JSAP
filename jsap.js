@@ -766,7 +766,15 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                 this.postFeatures(data.length, JSON.parse(data.toJSON()));
             };
 
-            this.extractor.frameCallback(onaudiocallback, this);
+            this.setFeatures = function (featureList) {
+                this.features = featureList;
+                if (!this.features || this.features.length == 0) {
+                    // No Features
+                    this.extractor.clearCallback();
+                } else {
+                    this.extractor.frameCallback(onaudiocallback, this);
+                }
+            }
         }
         this.addExtractor = function (frameSize) {
             var obj = new Extractor(output, frameSize);
@@ -812,7 +820,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                 if (!extractor) {
                     extractor = outputNodes[o].addExtractor(featureObject[o][si].frameSize);
                 }
-                extractor.features = featureObject[o][si].featureList;
+                extractor.setFeatures(featureObject[o][si].featureList);
             }
         }
     }
