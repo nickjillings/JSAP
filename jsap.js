@@ -1387,7 +1387,7 @@ var PluginFactory = function (context, dir) {
             var Features = [];
             var Receiver = pluginInstance.node.featureMap.Receiver;
             this.getRequestorInstance = function () {
-                return pluginInstace;
+                return pluginInstance;
             }
 
             function recursivelyAddFeatures(rootArray, featureObject) {
