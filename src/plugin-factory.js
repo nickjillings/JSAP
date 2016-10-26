@@ -146,7 +146,11 @@ var PluginFactory = function (context, dir) {
             }
             var plugin = new proto(this.factory, owner);
             var node = new PluginInstance(currentPluginId++, plugin);
-            Object.defineProperties(plugin.__proto__, {
+            var basePluginInstance = plugin;
+            while (basePluginInstance.constructor !== BasePlugin) {
+                basePluginInstance = basePluginInstance.__proto__;
+            }
+            Object.defineProperties(basePluginInstance, {
                 'pluginInstance': {
                     'value': node
                 },
@@ -354,7 +358,7 @@ var PluginFactory = function (context, dir) {
                             list.push(featureNode);
                         }
                         if (featureList[f].features && featureList[f].features.length > 0) {
-                            list.push(recursiveFind(featureNode.features, featureList[f].features));
+                            featureNode.features = recursiveFind(featureList[f].features);
                         }
                     }
                     return list;
@@ -389,12 +393,12 @@ var PluginFactory = function (context, dir) {
                         'frameSize': featureObject.frameSize,
                         'requestors': [],
                         'getFeatureList': function () {
-                            var Features = [],
+                            var F = [],
                                 i;
                             for (i = 0; i < this.requestors.length; i++) {
-                                Features.push(this.requestors[i].getFeatureList());
+                                F = F.concat(this.requestors[i].getFeatureList());
                             }
-                            return Features;
+                            return F;
                         }
                     }
                     Mappings.push(map);
@@ -464,9 +468,9 @@ var PluginFactory = function (context, dir) {
                             'parameters': featureObject[i].parameters,
                             'features': []
                         }
-                        Features.push(featureNode);
+                        rootArray.push(featureNode);
                     }
-                    if (featureObject[i].features !== undefined && featureObject[i].features.lenth > 0) {
+                    if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
                     }
                 }

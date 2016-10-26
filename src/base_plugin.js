@@ -571,7 +571,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
             function onaudiocallback(data) {
                 //this == Extractor
                 recursivelyProcess(data, this.features);
-                this.postFeatures(JSON.parse(data.toJSON()));
+                this.postFeatures(data.length, JSON.parse(data.toJSON()));
             };
 
             this.extractor.frameCallback(onaudiocallback, this);
@@ -586,8 +586,8 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                         'frameSize': frameSize,
                         'results': resultsJSON
                     }
-                    this.postFeature(obj);
-                }
+                    this.postFeatures(obj);
+                }.bind(this)
             });
             return obj;
         };
