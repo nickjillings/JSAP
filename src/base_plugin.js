@@ -413,12 +413,22 @@ var PluginParameter = function (owner, dataType, name, defaultValue, minimum, ma
                     return _value;
                 },
                 set: function (newValue) {
-                    if (_dataType == "Number") {
-                        if (newValue >= _maximum && _maximum != undefined) {
-                            newValue == _maximum;
-                        } else if (newValue <= _minimum && _minimum != undefined) {
-                            newValue == _minimum;
-                        }
+                    switch (_dataType) {
+                        case "String":
+                            if (typeof newValue !== "string") {
+                                newValue = String(newValue);
+                            }
+                            break;
+                        case "Number":
+                            if (typeof newValue !== "number") {
+                                newValue = Number(newValue);
+                            }
+                            if (newValue >= _maximum && _maximum != undefined) {
+                                newValue == _maximum;
+                            } else if (newValue <= _minimum && _minimum != undefined) {
+                                newValue == _minimum;
+                            }
+                            break;
                     }
                     if (_value == newValue) {
                         return _value;
