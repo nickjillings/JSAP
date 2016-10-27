@@ -183,6 +183,12 @@ var PluginFactory = function (context, dir) {
                 },
                 'uniqueID': {
                     value: proto.prototype.uniqueID
+                },
+                'SesionData': {
+                    value: this.factory.SessionData
+                },
+                'UserData': {
+                    value: this.factory.UserData
                 }
             });
             Object.defineProperty(node, "prototypeObject", {
@@ -336,6 +342,14 @@ var PluginFactory = function (context, dir) {
 
     this.createSubFactory = function (chainStart, chainStop) {
         var node = new PluginSubFactory(this, chainStart, chainStop);
+        Object.defineProperties(node, {
+            'SessionData': {
+                value: this.SessionData
+            },
+            'UserData': {
+                value: this.UserData
+            }
+        });
         subFactories.push(node);
         return node;
     };
@@ -767,6 +781,11 @@ var PluginFactory = function (context, dir) {
             }
             cutChain();
             node = prototypeObject.createPluginInstance(this);
+            Object.defineProperties(node, {
+                'TrackData': {
+                    value: this.TrackData
+                }
+            });
             plugin_list.push(node);
             isolate();
             rebuild();
