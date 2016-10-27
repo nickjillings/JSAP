@@ -123,6 +123,9 @@ BasePlugin.prototype.disconnect = function (dest) {
 BasePlugin.prototype.getInputs = function () {
     return this.inputs;
 };
+BasePlugin.prototype.getOutputs = function () {
+    return this.outputs;
+};
 
 BasePlugin.prototype.start = function () {};
 BasePlugin.prototype.stop = function () {};

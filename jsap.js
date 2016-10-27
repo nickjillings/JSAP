@@ -315,6 +315,9 @@ BasePlugin.prototype.disconnect = function (dest) {
 BasePlugin.prototype.getInputs = function () {
     return this.inputs;
 };
+BasePlugin.prototype.getOutputs = function () {
+    return this.outputs;
+};
 
 BasePlugin.prototype.start = function () {};
 BasePlugin.prototype.stop = function () {};
@@ -1061,10 +1064,16 @@ var PluginFactory = function (context, dir) {
                     plugin_node.disconnect(this.next_node.getInputs()[0]);
                 }
                 this.next_node = new_next;
-                plugin_node.connect(this.next_node.getInputs()[0]);
+                if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
+                    plugin_node.connect(this.next_node.getInputs()[0]);
+                }
                 return true;
             }
             return false;
+        };
+
+        this.disconnect = function () {
+            this.reconnect(undefined);
         };
 
         this.destory = function () {
@@ -1664,15 +1673,29 @@ var PluginFactory = function (context, dir) {
                 var nextNode = plugin_list[i];
                 currentNode.reconnect(nextNode);
             }
-            pluginChainStart.disconnect();
-            pluginChainStart.connect(chainStartFeature);
-            // Connect the rebuilt chain
-            if (plugin_list.length == 0) {
-                // Empty
-                pluginChainStart.connect(chainStop);
+        }
+
+        function isolate() {
+            plugin_list.forEach(function (e) {
+                e.disconnect();
+            })
+        }
+
+        function cutChain() {
+            if (plugin_list.length > 0) {
+                pluginChainStart.disconnect(plugin_list[0].node.getInputs()[0]);
+                plugin_list[plugin_list.length - 1].node.getOutputs()[0].disconnect(pluginChainStop);
             } else {
+                pluginChainStart.disconnect(pluginChainStop);
+            }
+        }
+
+        function joinChain() {
+            if (plugin_list.length > 0) {
                 pluginChainStart.connect(plugin_list[0].node.getInputs()[0]);
-                plugin_list[plugin_list.length - 1].node.connect(chainStop);
+                plugin_list[plugin_list.length - 1].node.getOutputs()[0].connect(pluginChainStop);
+            } else {
+                pluginChainStart.connect(pluginChainStop);
             }
         }
 
@@ -1700,16 +1723,12 @@ var PluginFactory = function (context, dir) {
             if (state === 0) {
                 throw ("SubFactory has been destroyed! Cannot add new plugins");
             }
+            cutChain();
             node = prototypeObject.createPluginInstance(this);
-            node.reconnect(pluginChainStop);
-            last_node = plugin_list[plugin_list.length - 1];
-            if (last_node !== undefined) {
-                last_node.reconnect(node);
-            } else {
-                pluginChainStart.disconnect(pluginChainStop);
-                pluginChainStart.connect(node.node.getInputs()[0]);
-            }
             plugin_list.push(node);
+            isolate();
+            rebuild();
+            joinChain();
             return node;
         };
 
@@ -1719,14 +1738,14 @@ var PluginFactory = function (context, dir) {
             }
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
+                cutChain();
                 plugin_object.node.stop();
                 plugin_object.node.deconstruct();
-                plugin_list.forEach(function (e) {
-                    e.node.disconnect();
-                });
                 plugin_list.splice(index, 1);
                 this.parent.deletePlugin(plugin_object.id);
+                isolate();
                 rebuild();
+                joinChain();
             }
         };
 
@@ -1758,22 +1777,20 @@ var PluginFactory = function (context, dir) {
             var obj, index = this.getPluginIndex(plugin_object),
                 holdLow, holdHigh, i;
             if (index >= 0) {
+                cutChain();
+                isolate();
                 obj = plugin_list.splice(index, 1);
                 if (new_index === 0) {
                     plugin_list = obj.concat(plugin_list);
                 } else if (new_index >= plugin_list.length) {
-                    plugin_list = plugin_list.concat(plugin_list);
+                    plugin_list = plugin_list.concat(obj);
                 } else {
                     holdLow = plugin_list.slice(0, index);
                     holdHigh = plugin_list.slice(index);
                     plugin_list = holdLow.concat(obj.concat(holdHigh));
                 }
-                pluginChainStart.disconnect();
-                pluginChainStart.connect(plugin_list[0].node.getInputs()[0]);
-                for (i = 0; i < plugin_list.length - 1; i++) {
-                    plugin_list[i].reconnect(plugin_list[i + 1].node);
-                }
-                plugin_list[plugin_list.length - 1].reconnect(pluginChainStop);
+                rebuild();
+                joinChain();
             }
         };
 
