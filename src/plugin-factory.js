@@ -137,8 +137,20 @@ var PluginFactory = function (context, dir) {
     };
 
     var PluginPrototype = function (proto) {
-        this.name = proto.prototype.name;
-        this.proto = proto;
+        Object.defineProperties(this, {
+            'name': {
+                value: proto.prototype.name
+            },
+            'proto': {
+                value: proto
+            },
+            'version': {
+                value: proto.prototype.version
+            },
+            'uniqueID': {
+                value: proto.prototype.uniqueID
+            }
+        });
 
         this.createPluginInstance = function (owner) {
             if (!this.ready) {
@@ -156,6 +168,15 @@ var PluginFactory = function (context, dir) {
                 },
                 'prototypeObject': {
                     'value': this
+                },
+                'name': {
+                    value: proto.prototype.name
+                },
+                'version': {
+                    value: proto.prototype.version
+                },
+                'uniqueID': {
+                    value: proto.prototype.uniqueID
                 }
             });
             Object.defineProperty(node, "prototypeObject", {
@@ -243,18 +264,38 @@ var PluginFactory = function (context, dir) {
     };
 
     this.addPrototype = function (plugin_proto) {
+        var testObj = {
+            'proto': plugin_proto,
+            'name': plugin_proto.prototype.name,
+            'version': plugin_proto.prototype.version,
+            'uniqueID': plugin_proto.prototype.uniqueID
+        };
         if (typeof plugin_proto !== "function") {
             throw ("The Prototype must be a function!");
         }
-        if (typeof plugin_proto.prototype.name !== "string") {
+        if (typeof testObj.name !== "string" || testObj.name.length == 0) {
             throw ("Malformed plugin. Name not defined");
         }
-        if (plugin_prototypes.find(function (element) {
-                return element.proto === this;
-            }, plugin_proto)) {
+        if (typeof testObj.version !== "string" || testObj.version.length == 0) {
+            throw ("Malformed plugin. Version not defined");
+        }
+        if (typeof testObj.uniqueID !== "string" || testObj.uniqueID.length == 0) {
+            throw ("Malformed plugin. uniqueID not defined");
+        }
+        var obj = plugin_prototypes.find(function (e) {
+            var param;
+            var match = 0;
+            for (param in this) {
+                if (e[param] == this[param]) {
+                    match++;
+                }
+            }
+            return match == 4;
+        }, testObj);
+        if (obj) {
             throw ("The plugin must be unique!");
         }
-        var obj = new PluginPrototype(plugin_proto);
+        obj = new PluginPrototype(plugin_proto);
         plugin_prototypes.push(obj);
         Object.defineProperties(obj, {
             'factory': {
