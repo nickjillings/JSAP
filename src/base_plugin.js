@@ -569,18 +569,6 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                 'value': frameSize
             });
 
-            function recursivelyProcess(base, list) {
-                var l = list.length,
-                    i, entry;
-                for (i = 0; i < l; i++) {
-                    entry = list[i];
-                    base[entry.name].apply(base, entry.parameters);
-                    if (entry.features && entry.features > 0) {
-                        recursivelyProcess(base.result[entry.name], entry.features);
-                    }
-                }
-            }
-
             function onaudiocallback(data) {
                 //this == Extractor
                 recursivelyProcess(data, this.features);
@@ -589,16 +577,74 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
 
             this.setFeatures = function (featureList) {
                 this.features = featureList;
-                if (!this.features || this.features.length == 0) {
-                    // No Features
+                if (this.features.length == 0) {
                     this.extractor.clearCallback();
                 } else {
-                    this.extractor.frameCallback(onaudiocallback, this);
+                    this.extractor.featureCallback(onaudiocallback, this);
                 }
             }
         }
+        var WorkerExtractor = function (output, frameSize) {
+            function onaudiocallback(e) {
+                var c, frames = [];
+                for (c = 0; c < e.inputBuffer.numberOfChannels; c++) {
+                    frames[c] = e.inputBuffer.getChannelData(c);
+                }
+                worker.postMessage({
+                    'state': 2,
+                    'frames': frames
+                });
+            }
+
+            function response(msg) {
+                this.postFeatures(frameSize, msg.data.response);
+            };
+
+            var worker = new Worker("jsap/feature-worker.js");
+            worker.onerror = function (e) {
+                console.error(e);
+            }
+
+            this.setFeatures = function (featureList) {
+                var self = this;
+                this.features = featureList;
+                if (featureList && featureList.length > 0) {
+                    worker.onmessage = function (e) {
+                        if (e.data.state == 1) {
+                            worker.onmessage = response.bind(self);
+                            self.extractor.onaudioprocess = onaudiocallback.bind(self);
+                        } else {
+                            worker.postMessage({
+                                'state': 1,
+                                'sampleRate': FeatureInterfaceInstance.plugin.factory.context.sampleRate,
+                                'featureList': featureList
+                            });
+                        }
+                    }
+                    worker.postMessage({
+                        'state': 0
+                    });
+                } else {
+                    this.extractor.onaudioprocess = undefined;
+                }
+
+            }
+
+            this.extractor = FeatureInterfaceInstance.plugin.factory.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
+            output.connect(this.extractor);
+            this.extractor.connect(FeatureInterfaceInstance.plugin.factory.context.destination);
+
+            Object.defineProperty(this, "frameSize", {
+                'value': frameSize
+            });
+        }
         this.addExtractor = function (frameSize) {
-            var obj = new Extractor(output, frameSize);
+            var obj;
+            if (window.Worker) {
+                obj = new WorkerExtractor(output, frameSize);
+            } else {
+                obj = new Extractor(output, frameSize);
+            }
             extractors.push(obj);
             Object.defineProperty(obj, "postFeatures", {
                 'value': function (frameSize, resultsJSON) {
