@@ -396,11 +396,13 @@ var PluginFactory = function (context, dir) {
 
     this.FeatureMap = function () {
         var Mappings = [];
-        var SourceMap = function (pluginInstace) {
+        var SourceMap = function (Sender, pluginInstace) {
             var Mappings = [];
-            var Sender = pluginInstace.node.featureMap.Sender;
             this.getSourceInstance = function () {
                 return pluginInstace;
+            }
+            this.getSender = function () {
+                return Sender;
             }
 
             function updateSender() {
@@ -608,38 +610,45 @@ var PluginFactory = function (context, dir) {
             }
         }
 
-        function findSourceIndex(pluginInstance) {
+        function findSourceIndex(Sender) {
             return Mappings.findIndex(function (e) {
-                return e.getSourceInstance() === this;
-            }, pluginInstance);
+                return e.getSender() === this;
+            }, Sender);
         }
 
         // GENERAL INTERFACE
-        this.createSourceMap = function (pluginInstance) {
-            var node = new SourceMap(pluginInstance);
+        this.createSourceMap = function (Sender, pluginInstance) {
+            var node = new SourceMap(Sender, pluginInstance);
             Mappings.push(node);
             return node;
         };
-        this.deleteSourceMap = function (pluginInstance) {
-            var index = findSourceIndex(pluginInstance);
+        this.deleteSourceMap = function (Sender) {
+            var index = findSourceIndex(Sender);
             if (index === -1) {
                 throw ("Could not find the source map for the plugin");
             }
             Mappings.splice(index, 1);
         };
 
+        this.getPluginSender = function (plugin) {
+            if (plugin.constructor == PluginInstance) {
+                plugin = plugin.node;
+            }
+            return plugin.featureMap.Sender;
+        }
+
         this.requestFeatures = function (requestor, source, featureObject) {
             if (requestor.constructor != PluginInstance) {
                 requestor = requestor.pluginInstance;
             }
-            if (source.constructor != PluginInstance) {
-                source = source.pluginInstance;
-            }
             // Get the source map
+
             var sourceMap = Mappings[findSourceIndex(source)];
             if (!sourceMap) {
-                sourceMap = new SourceMap(source);
-                Mappings.push(sourceMap);
+                sourceMap = Mappings[findSourceIndex(this.getPluginSender(source))];
+                if (!sourceMap) {
+                    throw ("Could not locate source map");
+                }
             }
             sourceMap.requestFeatures(requestor, featureObject);
         };
@@ -669,7 +678,7 @@ var PluginFactory = function (context, dir) {
             // Trigger distributed search for results transmission
 
             // First get the instance mapping for output/frame
-            var source = Mappings[findSourceIndex(featureObject.plugin)];
+            var source = Mappings[findSourceIndex(this.getPluginSender(featureObject.plugin))];
             if (!source) {
                 throw ("Plugin Instance not loaded!");
             }
@@ -726,6 +735,22 @@ var PluginFactory = function (context, dir) {
 
         this.TrackData = new LinkedStore("Track");
         this.PluginData = new LinkedStore("Plugin");
+
+        var featureChains = {
+            'sourceList': [],
+            'getShareableList': function () {
+                var shrae = [],
+                    l = this.sourceList.length,
+                    i;
+                for (i = 0; i < l; i++) {
+
+                }
+            }
+        };
+
+        this.getFeatureChain = function () {
+
+        }
 
         function rebuild() {
             var i = 0,

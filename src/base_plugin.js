@@ -461,8 +461,8 @@ var PluginParameter = function (owner, dataType, name, defaultValue, minimum, ma
 
 var PluginFeatureInterface = function (BasePluginInstance) {
     this.plugin = BasePluginInstance;
-    this.Receiver = new PluginFeatureInterfaceReceiver(this);
-    this.Sender = new PluginFeatureInterfaceSender(this);
+    this.Receiver = new PluginFeatureInterfaceReceiver(this, BasePluginInstance.factory.FeatureMap);
+    this.Sender = new PluginFeatureInterfaceSender(this, BasePluginInstance.factory.FeatureMap);
     this.addOutput = function (audioNode, index) {
         Sender.extractors.push({
             'index': index,
@@ -480,9 +480,8 @@ var PluginFeatureInterface = function (BasePluginInstance) {
         }
     });
 }
-var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
+var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, FactoryFeatureMap) {
     var c_features = function () {};
-    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.FeatureMap;
     this.requestFeatures = function (featureList) {
         var i;
         for (i = 0; i < featureList.length; i++) {
@@ -556,8 +555,7 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance) {
     });
 
 }
-var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
-    var FactoryFeatureMap = FeatureInterfaceInstance.plugin.factory.FeatureMap;
+var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFeatureMap) {
     var OutputNode = function (parent, output, index) {
         var extractors = [];
         var Extractor = function (output, frameSize) {
@@ -711,6 +709,9 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
             'results': featureObject.results
         });
     }
+
+    // Send to Factory
+    FactoryFeatureMap.createSourceMap(this, FeatureInterfaceInstance.plugin.pluginInstance);
 }
 
 /*
