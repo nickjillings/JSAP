@@ -46,7 +46,7 @@ onmessage = function (message) {
             };
         for (c = 0; c < l; c++) {
             var frame = protoTimeDatas[c];
-            frame.copyDataFrom(messge.data.frames[c]);
+            frame.copyDataFrom(message.data.frames[c]);
             recursiveProcessing(frame, featureList);
             response.results[c] = {
                 'channel': c,
