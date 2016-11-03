@@ -573,7 +573,10 @@ var PluginFactory = function (context, dir) {
                         'plugin': featureObject.plugin,
                         'outputIndex': featureObject.outputIndex,
                         'frameSize': featureObject.frameSize,
-                        'features': {}
+                        'features': {
+                            'numberOfChannels': featureObject.results.numberOfChannels,
+                            'results': []
+                        }
                     },
                     i;
 
@@ -596,8 +599,11 @@ var PluginFactory = function (context, dir) {
                         }
                     }
                 }
-                recursivePostFeatures(message.features, featureObject.results, Features);
-
+                // Perform recursive map for each channel
+                for (i = 0; i < featureObject.results.numberOfChannels; i++) {
+                    message.features.results[i] = {};
+                    recursivePostFeatures(message.features.results[i], featureObject.results.results[i].results, Features);
+                }
                 pluginInstance.node.featureMap.Receiver.postFeatures(message);
             }
         }
