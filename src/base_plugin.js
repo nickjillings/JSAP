@@ -607,6 +607,13 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
 
             this.setFeatures = function (featureList) {
                 var self = this;
+                var configMessage = {
+                    'state': 1,
+                    'sampleRate': FeatureInterfaceInstance.plugin.factory.context.sampleRate,
+                    'featureList': featureList,
+                    'numChannels': output.numberOfOutputs,
+                    'frameSize': this.frameSize
+                }
                 this.features = featureList;
                 if (featureList && featureList.length > 0) {
                     worker.onmessage = function (e) {
@@ -614,11 +621,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance) {
                             worker.onmessage = response.bind(self);
                             self.extractor.onaudioprocess = onaudiocallback.bind(self);
                         } else {
-                            worker.postMessage({
-                                'state': 1,
-                                'sampleRate': FeatureInterfaceInstance.plugin.factory.context.sampleRate,
-                                'featureList': featureList
-                            });
+                            worker.postMessage(configMessage);
                         }
                     }
                     worker.postMessage({

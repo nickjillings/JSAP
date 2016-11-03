@@ -1,15 +1,17 @@
 // Feature worker for JSAP plugins
 // One of these created per feature extractor output
 
-importScripts ('js-xtract/jsXtract.min.js');
+importScripts('js-xtract/jsXtract.min.js');
 
 var state = 0;
 var featureList;
 var sampleRate;
+var protoTimeDatas = [];
 
 function recursiveProcessing(base, list) {
-    var l = list.length, i, entry;
-    for (i=0; i<l; i++) {
+    var l = list.length,
+        i, entry;
+    for (i = 0; i < l; i++) {
         entry = list[i];
         base[entry.name].apply(base, entry.parameters);
         if (entry.features && entry.features.length > 0) {
@@ -26,18 +28,25 @@ onmessage = function (message) {
         featureList = message.data.featureList;
         sampleRate = message.data.sampleRate;
         state = 1;
+        // Pre-build the TimeData objects
+        var i;
+        for (i = 0; i < message.data.numChannels; i++) {
+            protoTimeDatas[i] = new TimeData(message.data.frameSize, sampleRate);
+        }
         postMessage({
             'state': state
         });
     } else if (message.data.state == 2 && state == 1) {
         // Now we have transmitted a frame of audio
         // Begin the processing
-        var c, l = message.data.frames.length, response = {
-            'numberOfChannels': l,
-            'results': []
-        };
-        for (c=0; c<l; c++) {
-            var frame = new TimeData(message.data.frames[c], sampleRate);
+        var c, l = message.data.frames.length,
+            response = {
+                'numberOfChannels': l,
+                'results': []
+            };
+        for (c = 0; c < l; c++) {
+            var frame = protoTimeDatas[i];
+            frame.copyDataFrom(messge.data.frames[c]);
             recursiveProcessing(frame, featureList);
             response.results[c] = {
                 'channel': c,
@@ -55,6 +64,8 @@ onmessage = function (message) {
         featureList = undefined;
         sampleRate = undefined;
         state = 0;
-        postMessage({'state': state});
+        postMessage({
+            'state': state
+        });
     }
 }
