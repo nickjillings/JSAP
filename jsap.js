@@ -1669,13 +1669,13 @@ var PluginFactory = function (context, dir) {
                     sourceMap.cancelFeatures(requestor);
                 });
             } else {
-                if (source.constructor !== PluginInstance) {
-                    source = source.pluginInstance;
-                }
                 // Get the source map
                 var sourceMap = Mappings[findSourceIndex(source)];
                 if (!sourceMap) {
-                    return;
+                    sourceMap = Mappings[findSourceIndex(this.getPluginSender(source))];
+                    if (!sourceMap) {
+                        throw ("Could not locate source map");
+                    }
                 }
                 sourceMap.cancelFeatures(requestor, featureObject);
             }
@@ -1686,9 +1686,12 @@ var PluginFactory = function (context, dir) {
             // Trigger distributed search for results transmission
 
             // First get the instance mapping for output/frame
-            var source = Mappings[findSourceIndex(this.getPluginSender(featureObject.plugin))];
+            var source = Mappings[findSourceIndex(featureObject.plugin)];
             if (!source) {
-                throw ("Plugin Instance not loaded!");
+                source = Mappings[findSourceIndex(this.getPluginSender(featureObject.plugin))];
+                if (!source) {
+                    throw ("Plugin Instance not loaded!");
+                }
             }
             var frameMap = source.findFrameMap(featureObject.outputIndex, featureObject.frameSize);
 
@@ -1729,10 +1732,10 @@ var PluginFactory = function (context, dir) {
 
     // Created for the input of each SubFactory plugin chain
     var SubFactoryFeatureSender = function (owner, FactoryFeatureMap) {
-        var OutputNode = function (parent, output, index) {
+        var OutputNode = function (parent, output) {
             var extractors = [];
             var Extractor = function (output, frameSize) {
-                this.extractor = FeatureInterfaceInstance.plugin.factory.context.createAnalyser();
+                this.extractor = output.context.createAnalyser();
                 this.extractor.fftSize = frameSize;
                 output.connect(this.extractor);
                 this.features = [];
@@ -1780,7 +1783,7 @@ var PluginFactory = function (context, dir) {
                     var self = this;
                     var configMessage = {
                         'state': 1,
-                        'sampleRate': FeatureInterfaceInstance.plugin.factory.context.sampleRate,
+                        'sampleRate': output.context.sampleRate,
                         'featureList': featureList,
                         'numChannels': output.numberOfOutputs,
                         'frameSize': this.frameSize
@@ -1804,9 +1807,9 @@ var PluginFactory = function (context, dir) {
 
                 }
 
-                this.extractor = FeatureInterfaceInstance.plugin.factory.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
+                this.extractor = output.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
                 output.connect(this.extractor);
-                this.extractor.connect(FeatureInterfaceInstance.plugin.factory.context.destination);
+                this.extractor.connect(output.context.destination);
 
                 Object.defineProperty(this, "frameSize", {
                     'value': frameSize
@@ -1823,7 +1826,7 @@ var PluginFactory = function (context, dir) {
                 Object.defineProperty(obj, "postFeatures", {
                     'value': function (frameSize, resultsJSON) {
                         var obj = {
-                            'outputIndex': index,
+                            'outputIndex': 0,
                             'frameSize': frameSize,
                             'results': resultsJSON
                         }
@@ -1845,12 +1848,12 @@ var PluginFactory = function (context, dir) {
         this.updateFeatures = function (featureObject) {
             var o;
             for (o = 0; o < featureObject.length; o++) {
-                if (outputNodes[o] === undefined) {
+                if (outputNodes === undefined) {
                     if (o > 1) {
                         throw ("Requested an output that does not exist");
                     }
-                    outputNodes[o] = new OutputNode(owner, owner.chainStart, o);
-                    Object.defineProperty(outputNodes[o], "postFeatures", {
+                    outputNodes = new OutputNode(owner, owner.chainStart);
+                    Object.defineProperty(outputNodes, "postFeatures", {
                         'value': function (resultObject) {
                             this.postFeatures(resultObject);
                         }.bind(this)
@@ -1858,9 +1861,9 @@ var PluginFactory = function (context, dir) {
                 }
                 var si;
                 for (si = 0; si < featureObject[o].length; si++) {
-                    var extractor = outputNodes[o].findExtractor(featureObject[o][si].frameSize);
+                    var extractor = outputNodes.findExtractor(featureObject[o][si].frameSize);
                     if (!extractor) {
-                        extractor = outputNodes[o].addExtractor(featureObject[o][si].frameSize);
+                        extractor = outputNodes.addExtractor(featureObject[o][si].frameSize);
                     }
                     extractor.setFeatures(featureObject[o][si].featureList);
                 }
@@ -1874,8 +1877,8 @@ var PluginFactory = function (context, dir) {
                 'outputIndex': outputIndex,
                 'results':[]}
             */
-            FeatureInterfaceInstance.plugin.factory.FeatureMap.postFeatures({
-                'plugin': FeatureInterfaceInstance.plugin.pluginInstance,
+            FactoryFeatureMap.postFeatures({
+                'plugin': this,
                 'outputIndex': featureObject.outputIndex,
                 'frameSize': featureObject.frameSize,
                 'results': featureObject.results
