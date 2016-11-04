@@ -1903,18 +1903,6 @@ var PluginFactory = function (context, dir) {
         this.TrackData = new LinkedStore("Track");
         this.PluginData = new LinkedStore("Plugin");
 
-        var featureChains = {
-            'sourceList': [],
-            'getShareableList': function () {
-                var shrae = [],
-                    l = this.sourceList.length,
-                    i;
-                for (i = 0; i < l; i++) {
-
-                }
-            }
-        };
-
         this.featureSender = new SubFactoryFeatureSender(this, this.parent.FeatureMap);
 
         this.getFeatureChain = function () {
