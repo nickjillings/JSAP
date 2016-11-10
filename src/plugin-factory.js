@@ -1029,8 +1029,8 @@ var PluginFactory = function (context, dir) {
                 } else if (new_index >= plugin_list.length) {
                     plugin_list = plugin_list.concat(obj);
                 } else {
-                    holdLow = plugin_list.slice(0, index);
-                    holdHigh = plugin_list.slice(index);
+                    holdLow = plugin_list.slice(0, new_index);
+                    holdHigh = plugin_list.slice(new_index);
                     plugin_list = holdLow.concat(obj.concat(holdHigh));
                 }
                 rebuild();
