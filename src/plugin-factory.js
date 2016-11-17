@@ -900,7 +900,7 @@ var PluginFactory = function (context, dir) {
             pluginChainStop = chainStop,
             factoryName = "",
             state = 1,
-            chainStartFeature = PluginFactory.context.createAnalyser(),
+            chainStartFeature = new SubFactoryFeatureSender(this, this.parent.FeatureMap),
             semanticStores = [];
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
@@ -910,7 +910,7 @@ var PluginFactory = function (context, dir) {
         this.TrackData = new LinkedStore("Track");
         this.PluginData = new LinkedStore("Plugin");
 
-        this.featureSender = new SubFactoryFeatureSender(this, this.parent.FeatureMap);
+        this.featureSender = chainStartFeature;
 
         this.getFeatureChain = function () {
 
@@ -948,7 +948,7 @@ var PluginFactory = function (context, dir) {
             } else {
                 pluginChainStart.connect(pluginChainStop);
             }
-            this.featureSender.rejoinExtractors();
+            chainStartFeature.rejoinExtractors();
         }
 
         this.getPrototypes = function () {
