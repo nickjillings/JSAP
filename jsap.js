@@ -1882,6 +1882,10 @@ var PluginFactory = function (context, dir) {
             }
         }
 
+        this.rejoinExtractors = function () {
+            outputNodes.rejoinExtractors();
+        }
+
         this.postFeatures = function (featureObject) {
             /*
                 Called by the individual extractor instances:
