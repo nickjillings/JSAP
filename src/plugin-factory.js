@@ -750,7 +750,7 @@ var PluginFactory = function (context, dir) {
                     }
                 }
                 this.rejoinExtractor = function () {
-                    this.extractor.connect(output);
+                    output.connect(this.extractor);
                 }
             }
             var WorkerExtractor = function (output, frameSize) {
@@ -803,7 +803,7 @@ var PluginFactory = function (context, dir) {
                 }
 
                 this.rejoinExtractor = function () {
-                    this.extractor.connect(output);
+                    output.connect(this.extractor);
                 }
 
                 this.extractor = output.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
