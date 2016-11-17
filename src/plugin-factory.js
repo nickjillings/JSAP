@@ -900,7 +900,7 @@ var PluginFactory = function (context, dir) {
             pluginChainStop = chainStop,
             factoryName = "",
             state = 1,
-            chainStartFeature = new SubFactoryFeatureSender(this, this.parent.FeatureMap),
+            chainStartFeature = new SubFactoryFeatureSender(this, PluginFactory.FeatureMap),
             semanticStores = [];
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
