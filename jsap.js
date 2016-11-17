@@ -1908,16 +1908,17 @@ var PluginFactory = function (context, dir) {
             pluginChainStop = chainStop,
             factoryName = "",
             state = 1,
-            chainStartFeature = new SubFactoryFeatureSender(this, this.parent.FeatureMap);,
-        semanticStores = [];
+            chainStartFeature = PluginFactory.context.createAnalyser(),
+            semanticStores = [];
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
+        pluginChainStart.connect(chainStartFeature);
         pluginChainStart.connect(chainStop);
 
         this.TrackData = new LinkedStore("Track");
         this.PluginData = new LinkedStore("Plugin");
 
-        this.featureSender = chainStartFeature;
+        this.featureSender = new SubFactoryFeatureSender(this, this.parent.FeatureMap);
 
         this.getFeatureChain = function () {
 
@@ -1955,7 +1956,7 @@ var PluginFactory = function (context, dir) {
             } else {
                 pluginChainStart.connect(pluginChainStop);
             }
-            chainStartFeature.rejoinExtractors();
+            this.featureSender.rejoinExtractors();
         }
 
         this.getPrototypes = function () {
