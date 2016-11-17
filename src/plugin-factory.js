@@ -749,6 +749,9 @@ var PluginFactory = function (context, dir) {
                         this.extractor.featureCallback(onaudiocallback, this);
                     }
                 }
+                this.rejoinExtractor = function () {
+                    this.extractor.connect(output);
+                }
             }
             var WorkerExtractor = function (output, frameSize) {
                 function onaudiocallback(e) {
@@ -799,6 +802,10 @@ var PluginFactory = function (context, dir) {
 
                 }
 
+                this.rejoinExtractor = function () {
+                    this.extractor.connect(output);
+                }
+
                 this.extractor = output.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
                 output.connect(this.extractor);
                 this.extractor.connect(output.context.destination);
@@ -834,6 +841,11 @@ var PluginFactory = function (context, dir) {
                     return e.frameSize == check;
                 });
             };
+            this.rejoinExtractors = function () {
+                extractors.forEach(function (e) {
+                    e.rejoinExtractor();
+                });
+            }
             this.deleteExtractor = function (frameSize) {};
         }
         var outputNodes;
@@ -936,6 +948,7 @@ var PluginFactory = function (context, dir) {
             } else {
                 pluginChainStart.connect(pluginChainStop);
             }
+            this.featureSender.rejoinExtractors();
         }
 
         this.getPrototypes = function () {
