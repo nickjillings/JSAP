@@ -1912,7 +1912,6 @@ var PluginFactory = function (context, dir) {
             semanticStores = [];
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
-        pluginChainStart.connect(chainStartFeature);
         pluginChainStart.connect(chainStop);
 
         this.TrackData = new LinkedStore("Track");
