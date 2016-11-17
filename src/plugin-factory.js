@@ -875,7 +875,9 @@ var PluginFactory = function (context, dir) {
         }
 
         this.rejoinExtractors = function () {
-            outputNodes.rejoinExtractors();
+            if (outputNodes) {
+                outputNodes.rejoinExtractors();
+            }
         }
 
         this.postFeatures = function (featureObject) {
