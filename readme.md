@@ -2,13 +2,13 @@
 
 ## Introduction
 
-JSAP is a new audio effects framework for the HTML 5web audio API. JSAP effects are similar to desktop audio workstation plugins.
+JSAP is a new audio effects framework for the HTML 5 web audio API for building audio plugins. The standard defines both the host and plugin parts.
 
 ## Usage
 
 JSAP is made up of two parts, the plugins and the factory. The factory enables a website (host) to integrate and use JSAP plugin instances with ease. The plugins themselves are built on top of a BasePlugin JavaScript object, binding certain functions together.
 
-To include the JSAP library into a host, simply include the 'jsap.js' file, for example:
+To include the JSAP library into a host, simply include the 'jsap.js' file in your project, for example:
 
 ```html
 <script src="jsap.js"></script>
@@ -20,7 +20,7 @@ The documentation overviews the following items:
 
 ### Plugin Design
 - Basic Plugins
-    - Web Audio API Effects
+    - [Hello World](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/HelloWorld.md)
     - Parameters
     - Input and Ouputs
     - Graphical User Interfaces
@@ -31,11 +31,12 @@ The documentation overviews the following items:
 
 ### Plugin Factory
 - Architecture
-- Adding Plugin Prototypes
-- Constructing Plugins
+- Integrating into a Project
+- Adding Plugin Prototypes & Constructing
+- The SubFactory
 
 ## Issues
-If you find any problems, solutions, bumps and scrapes, please raise an issue report [here](https://github.com/nickjillings/jsap/issues). 
+If you find any problems, corrections, bumps and scrapes, please raise an issue report [here](https://github.com/nickjillings/jsap/issues). 
 
 ## Citing
 This work was presented at the AES 141st Convention in Los Angeles, USA and at the 2nd Workshop on Intelligent Music Production. Please cite this paper in any academic works:
