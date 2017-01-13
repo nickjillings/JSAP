@@ -477,7 +477,7 @@ var ParameterManager = function (owner) {
                 if (!parameter) {
                     return;
                 }
-                parameter.value = value;
+                parameter.value = v;
             }
         },
         'setParameterByObject': {
