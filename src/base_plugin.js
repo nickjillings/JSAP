@@ -124,26 +124,26 @@ BasePlugin.prototype.stop = function () {};
 BasePlugin.prototype.deconstruct = function () {};
 
 BasePlugin.prototype.getParameterNames = function () {
-    this.parameters.getParameterNames();
+    return this.parameters.getParameterNames();
 };
 
 BasePlugin.prototype.getParameterByName = function (name) {
-    this.parameters.getParameterByName(name);
+    return this.parameters.getParameterByName(name);
 };
 
 BasePlugin.prototype.getParameterObject = function () {
-    this.parameters.getParameterObject();
+    return this.parameters.getParameterObject();
 };
 
 BasePlugin.prototype.setParameterByName = function (name, value) {
-    this.parameters.setParameterByName(name, value);
+    return this.parameters.setParameterByName(name, value);
 };
 
 BasePlugin.prototype.setParameterByObject = function (object) {
     // Set a parameter by passing a paired tuple object of the parameter name with the value
     // For instance, the Volume Control could use object = {volume: 0.5}
     // The LowPass could use object = {gain: 0.5, frequency: 1000, Q: 1.3}
-    this.parameters.setParameterByObject(object);
+    return this.parameters.setParameterByObject(object);
 };
 
 var ParameterManager = function (owner) {
