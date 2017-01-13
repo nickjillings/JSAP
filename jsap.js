@@ -356,12 +356,7 @@ var ParameterManager = function (owner) {
     function buildParameterObject() {
         var obj = {};
         parameterList.forEach(function (e) {
-            obj[e.name] = {
-                'value': e.value,
-                'type': e.type,
-                'minimum': e.minimum,
-                'maximum': e.maximum
-            };
+            obj[e.name] = e;
         });
         return obj;
     }
