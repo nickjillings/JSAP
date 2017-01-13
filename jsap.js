@@ -638,6 +638,11 @@ var ParameterManager = function (owner) {
     }
 
     Object.defineProperties(this, {
+        'createPlugin': {
+            'value': function (dataType, name, defaultValue, minimum, maximum) {
+                return createPlugin(dataType, name, defaultValue, minimum, maximum);
+            }
+        },
         'getParameterName': {
             'value': function () {
                 var names = [],
