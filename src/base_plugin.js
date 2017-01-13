@@ -174,7 +174,7 @@ var ParameterManager = function (owner) {
         return obj;
     }
 
-    function createPlugin(dataType, name, defaultValue, minimum, maximum) {
+    function createParameter(dataType, name, defaultValue, minimum, maximum) {
         var p = new PluginParameter(owner, dataType, name, defaultValue, minimum, maximum);
         parameterList.push(p);
         return p;
@@ -446,7 +446,7 @@ var ParameterManager = function (owner) {
     }
 
     Object.defineProperties(this, {
-        'createPlugin': {
+        'createParameter': {
             'value': function (dataType, name, defaultValue, minimum, maximum) {
                 return createPlugin(dataType, name, defaultValue, minimum, maximum);
             }
