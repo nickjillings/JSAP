@@ -489,6 +489,14 @@ var ParameterManager = function (owner) {
                     }
                 }
             }
+        },
+        'parameters': {
+            'get': function () {
+                return parameterList;
+            },
+            'set': function () {
+                throw ("Cannot set read only array");
+            }
         }
     });
 }
