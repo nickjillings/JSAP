@@ -1278,30 +1278,32 @@ var PluginFactory = function (context, dir) {
         }
 
         var resourcePromises = [];
-        for (var i = 0; i < proto.prototype.resources.length; i++) {
-            var resource = proto.prototype.resources[i];
-            switch (resource.type) {
-                case "css":
-                case "CSS":
-                    loadStylesheet(resource.url);
-                    break;
-                case "javascript":
-                case "Javascript":
-                case "JavaScript":
-                case "JS":
-                default:
+        if (proto.prototype.resources) {
+            for (var i = 0; i < proto.prototype.resources.length; i++) {
+                var resource = proto.prototype.resources[i];
+                switch (resource.type) {
+                    case "css":
+                    case "CSS":
+                        loadStylesheet(resource.url);
+                        break;
+                    case "javascript":
+                    case "Javascript":
+                    case "JavaScript":
+                    case "JS":
+                    default:
 
-                    var object = {
-                        'promise': loadResourceChain(resource),
-                        'state': 0,
-                        'complete': function () {
-                            this.state = 1;
-                        },
-                        'test': recursiveGetTest(resource)
-                    }
-                    object.promise.then(object.complete.bind(object));
-                    resourcePromises.push(object);
-                    break;
+                        var object = {
+                            'promise': loadResourceChain(resource),
+                            'state': 0,
+                            'complete': function () {
+                                this.state = 1;
+                            },
+                            'test': recursiveGetTest(resource)
+                        }
+                        object.promise.then(object.complete.bind(object));
+                        resourcePromises.push(object);
+                        break;
+                }
             }
         }
 
