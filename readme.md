@@ -21,11 +21,11 @@ The documentation overviews the following items:
 ### Plugin Design
 - Basic Plugins
     - [Hello World](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/HelloWorld.md)
-    - Parameters
-    - Input and Ouputs
+    - [Parameters](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/Parameters.md)
+    - [Input and Ouputs](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/IO.md)
     - Graphical User Interfaces
 - Advanced Plugins
-    - Feature Extraction
+    - [Feature Extraction](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/FeatureExtraction.md)
     - Adaptive Plugins
     - Cross-Adaptive Plugins
 
