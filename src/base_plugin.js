@@ -121,6 +121,8 @@ BasePlugin.prototype.getOutputs = function () {
 BasePlugin.prototype.start = function () {};
 BasePlugin.prototype.stop = function () {};
 
+BasePlugin.prototype.onloaded = function () {};
+BasePlugin.prototype.onunloaded = function () {};
 BasePlugin.prototype.deconstruct = function () {};
 
 BasePlugin.prototype.getParameterNames = function () {

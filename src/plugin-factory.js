@@ -993,6 +993,7 @@ var PluginFactory = function (context, dir) {
             isolate();
             rebuild();
             joinChain();
+            node.node.onloaded.call(node.node);
             return node;
         };
 
@@ -1003,8 +1004,9 @@ var PluginFactory = function (context, dir) {
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
                 cutChain();
-                plugin_object.node.stop();
-                plugin_object.node.deconstruct();
+                plugin_object.node.stop.call(plugin_object.node);
+                plugin_object.node.onloaded.call(plugin_object.node);
+                plugin_object.node.deconstruct.call(plugin_object.node);
                 plugin_list.splice(index, 1);
                 this.parent.deletePlugin(plugin_object.id);
                 isolate();
@@ -1044,6 +1046,7 @@ var PluginFactory = function (context, dir) {
                 cutChain();
                 isolate();
                 obj = plugin_list.splice(index, 1);
+                plugin_object.node.onunloaded.call(plugin_object.node);
                 if (new_index === 0) {
                     plugin_list = obj.concat(plugin_list);
                 } else if (new_index >= plugin_list.length) {
@@ -1055,6 +1058,7 @@ var PluginFactory = function (context, dir) {
                 }
                 rebuild();
                 joinChain();
+                plugin_object.node.onloaded.call(plugin_object.node);
             }
         };
 
