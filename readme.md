@@ -23,6 +23,7 @@ The documentation overviews the following items:
     - [Hello World](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/HelloWorld.md)
     - [Parameters](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/Parameters.md)
     - [Input and Ouputs](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/IO.md)
+    - [Base Plugin](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/BasePlugin.md)
     - Graphical User Interfaces
 - Advanced Plugins
     - [Feature Extraction](http://dmtlab.bcu.ac.uk/nickjillings/docs/index.php?src=jsap/plugins/FeatureExtraction.md)
