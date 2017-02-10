@@ -540,6 +540,12 @@ var ParameterManager = function (owner) {
             }
         });
 
+        Object.defineProperty(this, "destroy", {
+            'value': function () {
+                _parentProcessor = _dataType = _minimum = _maximum = _value = _name = _actions = _update = _translate = _trigger = boundParam = undefined;
+            }
+        })
+
         switch (_dataType) {
             case "Switch":
                 Object.defineProperty(this, "onclick", {
@@ -665,6 +671,29 @@ var ParameterManager = function (owner) {
                     return;
                 }
                 parameter.value = v;
+            }
+        },
+        'deleteParameter': {
+            'value': function (o) {
+                var index = parameterList.findIndex(function (e) {
+                    return e === o
+                }, o);
+                if (index >= 0) {
+                    // Does exist
+                    parameterList.splice(index, 1);
+                    o.destroy();
+                    return true;
+                }
+                return false;
+            }
+        },
+        'deleteAllParameters': {
+            'value': function (o) {
+                parameterList.forEach(function (e) {
+                    e.destroy();
+                });
+                parameterList = [];
+                return true;
             }
         },
         'setParameterByObject': {
