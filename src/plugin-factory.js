@@ -9,6 +9,7 @@ var PluginFactory = function (context, dir) {
         plugin_prototypes = [],
         pluginsList = [],
         currentPluginId = 0,
+        audioStarted = false,
         script,
         self = this;
 
@@ -376,6 +377,9 @@ var PluginFactory = function (context, dir) {
             throw ("Plugin Instance not unique");
         }
         pluginsList.push(instance);
+        if (audioStarted) {
+            instance.node.start.call(instance.node);
+        }
         return true;
     }
 
@@ -386,6 +390,23 @@ var PluginFactory = function (context, dir) {
     this.deletePlugin = function (id) {
         if (id >= 0 && id < pluginsList.length) {
             pluginsList.splice(id, 1);
+        }
+    };
+
+    this.audioStart = function () {
+        if (!audioStarted) {
+            pluginsList.forEach(function (n) {
+                n.node.start.call(n.node);
+            });
+            audioStarted = true;
+        }
+    };
+    this.audioStop = function () {
+        if (audioStarted) {
+            pluginsList.forEach(function (n) {
+                n.node.stop.call(n.node);
+            });
+            audioStarted = false;
         }
     };
 
