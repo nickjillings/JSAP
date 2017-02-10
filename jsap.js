@@ -331,11 +331,11 @@ BasePlugin.prototype.setParameterByName = function (name, value) {
     return this.parameters.setParameterByName(name, value);
 };
 
-BasePlugin.prototype.setParameterByObject = function (object) {
+BasePlugin.prototype.setParametersByObject = function (object) {
     // Set a parameter by passing a paired tuple object of the parameter name with the value
     // For instance, the Volume Control could use object = {volume: 0.5}
     // The LowPass could use object = {gain: 0.5, frequency: 1000, Q: 1.3}
-    return this.parameters.setParameterByObject(object);
+    return this.parameters.setParametersByObject(object);
 };
 
 var ParameterManager = function (owner) {
@@ -696,7 +696,7 @@ var ParameterManager = function (owner) {
                 return true;
             }
         },
-        'setParameterByObject': {
+        'setParametersByObject': {
             'value': function (object) {
                 var key;
                 for (key in object) {
