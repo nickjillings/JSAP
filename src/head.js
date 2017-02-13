@@ -1,7 +1,8 @@
+/*globals document */
 if (!Array.prototype.find) {
     Array.prototype.find = function (predicate) {
         'use strict';
-        if (this == null) {
+        if (this === null) {
             throw new TypeError('Array.prototype.find called on null or undefined');
         }
         if (typeof predicate !== 'function') {
@@ -25,7 +26,7 @@ if (!Array.prototype.find) {
 if (!Array.prototype.findIndex) {
     Array.prototype.findIndex = function (predicate) {
         'use strict';
-        if (this == null) {
+        if (this === null) {
             throw new TypeError('Array.prototype.findIndex called on null or undefined');
         }
         if (typeof predicate !== 'function') {
@@ -117,7 +118,7 @@ var LinkedStore = function (storeName) {
                 return storeName;
             },
             'set': function (name) {
-                if (storeName == undefined) {
+                if (storeName === undefined) {
                     name = storeName;
                 } else {
                     throw ("Name is already set");
@@ -126,7 +127,7 @@ var LinkedStore = function (storeName) {
         },
         'addTerm': {
             'value': function (term, value) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 root[term] = value;
@@ -147,7 +148,7 @@ var LinkedStore = function (storeName) {
         },
         'deleteTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 root[term] = undefined;
@@ -155,7 +156,7 @@ var LinkedStore = function (storeName) {
         },
         'getTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 return root[term];
@@ -163,7 +164,7 @@ var LinkedStore = function (storeName) {
         },
         'hasTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 return root.hasOwnProperty(term);
@@ -188,4 +189,4 @@ var LinkedStore = function (storeName) {
             }
         }
     });
-}
+};

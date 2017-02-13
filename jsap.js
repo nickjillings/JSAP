@@ -1,7 +1,8 @@
+/*globals document */
 if (!Array.prototype.find) {
     Array.prototype.find = function (predicate) {
         'use strict';
-        if (this == null) {
+        if (this === null) {
             throw new TypeError('Array.prototype.find called on null or undefined');
         }
         if (typeof predicate !== 'function') {
@@ -25,7 +26,7 @@ if (!Array.prototype.find) {
 if (!Array.prototype.findIndex) {
     Array.prototype.findIndex = function (predicate) {
         'use strict';
-        if (this == null) {
+        if (this === null) {
             throw new TypeError('Array.prototype.findIndex called on null or undefined');
         }
         if (typeof predicate !== 'function') {
@@ -117,7 +118,7 @@ var LinkedStore = function (storeName) {
                 return storeName;
             },
             'set': function (name) {
-                if (storeName == undefined) {
+                if (storeName === undefined) {
                     name = storeName;
                 } else {
                     throw ("Name is already set");
@@ -126,7 +127,7 @@ var LinkedStore = function (storeName) {
         },
         'addTerm': {
             'value': function (term, value) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 root[term] = value;
@@ -147,7 +148,7 @@ var LinkedStore = function (storeName) {
         },
         'deleteTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 root[term] = undefined;
@@ -155,7 +156,7 @@ var LinkedStore = function (storeName) {
         },
         'getTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 return root[term];
@@ -163,7 +164,7 @@ var LinkedStore = function (storeName) {
         },
         'hasTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length == 0) {
+                if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
                 }
                 return root.hasOwnProperty(term);
@@ -188,10 +189,10 @@ var LinkedStore = function (storeName) {
             }
         }
     });
-}
+};
 
 // Add getInputs to all AudioNodes to ease deployment
-
+/*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 AudioNode.prototype.getInputs = function () {
     return [this];
 };
@@ -219,11 +220,11 @@ var BasePlugin = function (factory, owner) {
         }
         inputList.splice(i, 1);
         return true;
-    }
+    };
     this.addOutput = function (node) {
         outputList.push(node);
         return this.outputs;
-    }
+    };
     this.deleteOutput = function (node) {
         var i = outputList.findIndex(function (e) {
             return e === this;
@@ -233,7 +234,7 @@ var BasePlugin = function (factory, owner) {
         }
         outputList.splice(i, 1);
         return true;
-    }
+    };
 
     Object.defineProperty(this, "numInputs", {
         get: function () {
@@ -253,7 +254,7 @@ var BasePlugin = function (factory, owner) {
     });
     Object.defineProperty(this, "numParameters", {
         get: function () {
-            return parameterList.length;
+            return this.parameters.parameters.length;
         },
         set: function () {
             throw ("Cannot set the number of parameters of BasePlugin");
@@ -375,7 +376,7 @@ var ParameterManager = function (owner) {
         */
 
         var _parentProcessor = owner,
-            _dataType, _minimum, _maximum, _value, _name, _actions, _update, _translate, _trigger, boundParam;
+            _dataType, _minimum, _maximum, _value, _name, _actions, _update, _translate, _trigger, boundParam, _default;
 
         if (arguments.length < 3) {
             throw ("INVALID PARAMETERS: Must always define owner, dataType and name");
@@ -408,7 +409,7 @@ var ParameterManager = function (owner) {
 
         // Update Function
         _update = function (value) {
-            return value
+            return value;
         };
 
         // Translate Function
@@ -434,7 +435,7 @@ var ParameterManager = function (owner) {
                 return;
             }
             throw ("Cannot bind parameter of type " + _dataType + " to an AudioParameter of type " + typeof AudioParameterNode.value + " . Use the trigger instead.");
-        }
+        };
 
         function addAction(event) {
             // Add an action to the list
@@ -449,7 +450,7 @@ var ParameterManager = function (owner) {
                     }
                     break;
                 case "Switch":
-                    if (event == 1 || event == true) {
+                    if (event == 1 || event === true) {
                         event = 1;
                     } else {
                         event = 0;
@@ -504,7 +505,7 @@ var ParameterManager = function (owner) {
                 if (typeof func != "function") {
                     throw ("Must pass in a valid function");
                 }
-                if (func(0) == undefined) {
+                if (func(0) === undefined) {
                     throw ("Function must return a value");
                 }
                 _update = func;
@@ -519,7 +520,7 @@ var ParameterManager = function (owner) {
                 if (typeof func != "function") {
                     throw ("Must pass in a valid function");
                 }
-                if (func(0) == undefined) {
+                if (func(0) === undefined) {
                     throw ("Function must return a value");
                 }
                 _translate = func;
@@ -546,12 +547,12 @@ var ParameterManager = function (owner) {
             'value': function () {
                 _parentProcessor = _dataType = _minimum = _maximum = _value = _name = _actions = _update = _translate = _trigger = boundParam = undefined;
             }
-        })
+        });
 
         switch (_dataType) {
             case "Switch":
                 Object.defineProperty(this, "onclick", {
-                    'value': function (evnent) {
+                    'value': function (event) {
                         _value++;
                         if (_value >= maximum) {
                             _value = minimum;
@@ -561,6 +562,7 @@ var ParameterManager = function (owner) {
                         return _value;
                     }
                 });
+                break;
             case "Number":
                 Object.defineProperty(this, "minimum", {
                     get: function () {
@@ -579,6 +581,7 @@ var ParameterManager = function (owner) {
                         throw ("Cannot set the maximum value of PluginParameter");
                     }
                 });
+                break;
             case "String":
                 Object.defineProperty(this, "default", {
                     get: function () {
@@ -607,10 +610,10 @@ var ParameterManager = function (owner) {
                                 if (typeof newValue !== "number") {
                                     newValue = Number(newValue);
                                 }
-                                if (newValue >= _maximum && _maximum != undefined) {
-                                    newValue == _maximum;
-                                } else if (newValue <= _minimum && _minimum != undefined) {
-                                    newValue == _minimum;
+                                if (newValue >= _maximum && _maximum !== undefined) {
+                                    newValue = _maximum;
+                                } else if (newValue <= _minimum && _minimum !== undefined) {
+                                    newValue = _minimum;
                                 }
                                 break;
                         }
@@ -678,7 +681,7 @@ var ParameterManager = function (owner) {
         'deleteParameter': {
             'value': function (o) {
                 var index = parameterList.findIndex(function (e) {
-                    return e === o
+                    return e === o;
                 }, o);
                 if (index >= 0) {
                     // Does exist
@@ -717,7 +720,7 @@ var ParameterManager = function (owner) {
             }
         }
     });
-}
+};
 
 var PluginFeatureInterface = function (BasePluginInstance) {
     this.plugin = BasePluginInstance;
@@ -729,17 +732,18 @@ var PluginFeatureInterface = function (BasePluginInstance) {
             'node': audioNode,
             'frameSize': []
         });
-    }
+    };
 
     Object.defineProperty(this, "onfeatures", {
         'get': function () {
             return this.Receiver.onfeatures;
         },
         'set': function (func) {
-            return this.Receiver.onfeatures = func;
+            this.Receiver.onfeatures = func;
+            return func;
         }
     });
-}
+};
 var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, FactoryFeatureMap) {
     var c_features = function () {};
     this.requestFeatures = function (featureList) {
@@ -751,7 +755,7 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, Factory
                 'features': featureList[i].features
             });
         }
-    }
+    };
     this.requestFeaturesFromPlugin = function (source, featureObject) {
         if (source === undefined) {
             throw ("Source plugin must be defined");
@@ -763,7 +767,7 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, Factory
             throw ("Malformed featureObject");
         }
         FactoryFeatureMap.requestFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
-    }
+    };
     this.cancelFeaturesFromPlugin = function (source, featureObject) {
         if (source === undefined) {
             throw ("Source plugin must be defined");
@@ -775,16 +779,16 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, Factory
             throw ("Malformed featureObject");
         }
         FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin, source, featureObject);
-    }
+    };
     this.cancelAllFeaturesFromPlugin = function (source) {
         if (source === undefined) {
             throw ("Source plugin must be defined");
         }
         FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin, source);
-    }
+    };
     this.cancelAllFeatures = function () {
         FactoryFeatureMap.deleteFeatures(FeatureInterfaceInstance.plugin);
-    }
+    };
 
     this.postFeatures = function (Message) {
         /*
@@ -799,7 +803,7 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, Factory
         if (typeof c_features === "function") {
             c_features(Message);
         }
-    }
+    };
 
     Object.defineProperty(this, "onfeatures", {
         'get': function () {
@@ -814,7 +818,7 @@ var PluginFeatureInterfaceReceiver = function (FeatureInterfaceInstance, Factory
         }
     });
 
-}
+};
 var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFeatureMap) {
     var OutputNode = function (parent, output, index) {
         var extractors = [];
@@ -831,17 +835,17 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                 //this == Extractor
                 recursivelyProcess(data, this.features);
                 this.postFeatures(data.length, JSON.parse(data.toJSON()));
-            };
+            }
 
             this.setFeatures = function (featureList) {
                 this.features = featureList;
-                if (this.features.length == 0) {
+                if (this.features.length === 0) {
                     this.extractor.clearCallback();
                 } else {
                     this.extractor.featureCallback(onaudiocallback, this);
                 }
-            }
-        }
+            };
+        };
         var WorkerExtractor = function (output, frameSize) {
             function onaudiocallback(e) {
                 var c, frames = [];
@@ -856,12 +860,12 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
 
             function response(msg) {
                 this.postFeatures(frameSize, msg.data.response);
-            };
+            }
 
             var worker = new Worker("jsap/feature-worker.js");
             worker.onerror = function (e) {
                 console.error(e);
-            }
+            };
 
             this.setFeatures = function (featureList) {
                 var self = this;
@@ -871,7 +875,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                     'featureList': featureList,
                     'numChannels': output.numberOfOutputs,
                     'frameSize': this.frameSize
-                }
+                };
                 this.features = featureList;
                 if (featureList && featureList.length > 0) {
                     worker.onmessage = function (e) {
@@ -881,7 +885,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                         } else {
                             worker.postMessage(configMessage);
                         }
-                    }
+                    };
                     worker.postMessage({
                         'state': 0
                     });
@@ -889,7 +893,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                     this.extractor.onaudioprocess = undefined;
                 }
 
-            }
+            };
 
             this.extractor = FeatureInterfaceInstance.plugin.factory.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
             output.connect(this.extractor);
@@ -898,7 +902,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
             Object.defineProperty(this, "frameSize", {
                 'value': frameSize
             });
-        }
+        };
         this.addExtractor = function (frameSize) {
             var obj;
             if (window.Worker) {
@@ -913,7 +917,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                         'outputIndex': index,
                         'frameSize': frameSize,
                         'results': resultsJSON
-                    }
+                    };
                     this.postFeatures(obj);
                 }.bind(this)
             });
@@ -927,7 +931,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
             });
         };
         this.deleteExtractor = function (frameSize) {};
-    }
+    };
     var outputNodes = [];
     this.updateFeatures = function (featureObject) {
         // [] Output -> {} 'framesize' -> {} 'features'
@@ -953,7 +957,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                 extractor.setFeatures(featureObject[o][si].featureList);
             }
         }
-    }
+    };
 
     this.postFeatures = function (featureObject) {
         /*
@@ -968,11 +972,11 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
             'frameSize': featureObject.frameSize,
             'results': featureObject.results
         });
-    }
+    };
 
     // Send to Factory
     FactoryFeatureMap.createSourceMap(this, FeatureInterfaceInstance.plugin.pluginInstance);
-}
+};
 
 /*
     This is an optional module which will attempt to create a graphical implementation.
@@ -1034,26 +1038,26 @@ PluginUserInterface.prototype.getHeight = function () {
 };
 PluginUserInterface.prototype.beginCallbacks = function (ms) {
     // Any registered callbacks are started by the host
-    if (ms == undefined) {
+    if (ms === undefined) {
         ms = 250;
     } //Default of 250ms update period
-    if (this.intervalFunction == null) {
+    if (this.intervalFunction === null) {
         this.updateInterval = ms;
         this.intervalFunction = window.setInterval(function () {
-            this.update()
+            this.update();
         }.bind(this), 250);
     }
-}
+};
 PluginUserInterface.prototype.stopCallbacks = function () {
     // Any registered callbacks are stopped by the host
-    if (this.intervalFunction != null) {
+    if (this.intervalFunction !== null) {
         window.clearInterval(this.intervalFunction);
         this.updateInterval = null;
         this.intervalFunction = null;
     }
-}
+};
 PluginUserInterface.prototype.loadResource = function (url) {
-    return p = new Promise(function (resolve, reject) {
+    var p = new Promise(function (resolve, reject) {
         var req = new XMLHttpRequest();
         req.open('GET', url);
         req.onload = function () {
@@ -1068,15 +1072,16 @@ PluginUserInterface.prototype.loadResource = function (url) {
         };
         req.send();
     });
-}
+    return p;
+};
 PluginUserInterface.prototype.clearGUI = function () {
     this.stopCallbacks();
     this.root.innerHTML = "";
-}
+};
 
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
-
+/*globals Promise, document, console, LinkedStore, Worker, window */
 
 var PluginFactory = function (context, dir) {
 
@@ -1119,17 +1124,15 @@ var PluginFactory = function (context, dir) {
                         document.getElementsByTagName("head")[0].appendChild(css);
                         resolve(resourceObject);
                     });
-                    break;
                 case "javascript":
                 case "JavaScript":
                 case "Javascript":
                 case undefined:
-                default:
                     if (!response) {
                         return loadResource(resourceObject).then(function (resourceObject) {
                             if (typeof resourceObject.returnObject === "string") {
                                 var returnObject;
-                                eval("returnObject = " + resourceObject.returnObject);
+                                eval("returnObject = " + resourceObject.returnObject); // jshint ignore:line
                                 return returnObject;
                             } else {
                                 return true;
@@ -1138,15 +1141,19 @@ var PluginFactory = function (context, dir) {
                     } else {
                         return new Promise(function (resolve, reject) {
                             if (typeof resourceObject.returnObject === "string") {
-                                eval("resolve(" + resourceObject.returnObject + ")");
+                                eval("resolve(" + resourceObject.returnObject + ")"); // jshint ignore:line
                             } else {
                                 resolve(true);
                             }
                         });
                     }
+                    break;
+                default:
+                    console.error(resourceObject.type);
+                    break;
             }
         }
-    }
+    };
 
     this.loadPluginScript = function (resourceObject) {
         if (resourceObject) {
@@ -1157,7 +1164,7 @@ var PluginFactory = function (context, dir) {
                 return self.addPrototype(plugin);
             });
         }
-    }
+    };
 
     function loadResource(resourceObject) {
         return new Promise(function (resolve, reject) {
@@ -1166,9 +1173,9 @@ var PluginFactory = function (context, dir) {
             document.getElementsByTagName("head")[0].appendChild(script);
             script.onload = function () {
                 resolve(resourceObject);
-            }
+            };
         });
-    };
+    }
 
     if (dir === undefined) {
         dir = "jsap/";
@@ -1179,11 +1186,11 @@ var PluginFactory = function (context, dir) {
 
         this.reconnect = function (new_next) {
             if (new_next !== this.next_node) {
-                if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
+                if (this.next_node !== undefined && typeof this.next_node.getInputs == "function") {
                     plugin_node.disconnect(this.next_node.getInputs()[0]);
                 }
                 this.next_node = new_next;
-                if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
+                if (this.next_node !== undefined && typeof this.next_node.getInputs == "function") {
                     plugin_node.connect(this.next_node.getInputs()[0]);
                 }
                 return true;
@@ -1264,7 +1271,7 @@ var PluginFactory = function (context, dir) {
                 'UserData': {
                     value: this.factory.UserData
                 }
-            })
+            });
             Object.defineProperty(node, "prototypeObject", {
                 'value': this
             });
@@ -1274,11 +1281,11 @@ var PluginFactory = function (context, dir) {
 
         function loadResourceChain(resourceObject, p) {
             if (!p) {
-                var p = loadResource(resourceObject);
-                p.then(function (resourceObject) {
+                var k = loadResource(resourceObject);
+                k.then(function (resourceObject) {
                     if (resourceObject.resources !== undefined && resourceObject.resources.length > 0) {
                         for (var i = 0; i < resourceObject.resources.length; i++) {
-                            p = loadResourceChain(resourceObject.resources[i], p);
+                            k = loadResourceChain(resourceObject.resources[i], k);
                         }
                     }
                 });
@@ -1319,8 +1326,6 @@ var PluginFactory = function (context, dir) {
                     case "Javascript":
                     case "JavaScript":
                     case "JS":
-                    default:
-
                         var object = {
                             'promise': loadResourceChain(resource),
                             'state': 0,
@@ -1328,9 +1333,12 @@ var PluginFactory = function (context, dir) {
                                 this.state = 1;
                             },
                             'test': recursiveGetTest(resource)
-                        }
+                        };
                         object.promise.then(object.complete.bind(object));
                         resourcePromises.push(object);
+                        break;
+                    default:
+                        console.error(resource.type);
                         break;
                 }
             }
@@ -1348,7 +1356,7 @@ var PluginFactory = function (context, dir) {
                 }
             }
             return state;
-        }
+        };
     };
 
     this.addPrototype = function (plugin_proto) {
@@ -1361,13 +1369,13 @@ var PluginFactory = function (context, dir) {
         if (typeof plugin_proto !== "function") {
             throw ("The Prototype must be a function!");
         }
-        if (typeof testObj.name !== "string" || testObj.name.length == 0) {
+        if (typeof testObj.name !== "string" || testObj.name.length === 0) {
             throw ("Malformed plugin. Name not defined");
         }
-        if (typeof testObj.version !== "string" || testObj.version.length == 0) {
+        if (typeof testObj.version !== "string" || testObj.version.length === 0) {
             throw ("Malformed plugin. Version not defined");
         }
-        if (typeof testObj.uniqueID !== "string" || testObj.uniqueID.length == 0) {
+        if (typeof testObj.uniqueID !== "string" || testObj.uniqueID.length === 0) {
             throw ("Malformed plugin. uniqueID not defined");
         }
         var obj = plugin_prototypes.find(function (e) {
@@ -1445,7 +1453,7 @@ var PluginFactory = function (context, dir) {
 
     this.registerPluginInstance = function (instance) {
         if (pluginsList.find(function (p) {
-                return p === this
+                return p === this;
             }, instance)) {
             throw ("Plugin Instance not unique");
         }
@@ -1454,7 +1462,7 @@ var PluginFactory = function (context, dir) {
             instance.node.start.call(instance.node);
         }
         return true;
-    }
+    };
 
     this.createPluginInstance = function (PluginPrototype) {
         throw ("DEPRECATED - Use PluginPrototype.createPluginInstance(owner);");
@@ -1496,10 +1504,10 @@ var PluginFactory = function (context, dir) {
             var Mappings = [];
             this.getSourceInstance = function () {
                 return pluginInstace;
-            }
+            };
             this.getSender = function () {
                 return Sender;
-            }
+            };
 
             function updateSender() {
                 function recursiveFind(featureList) {
@@ -1508,7 +1516,7 @@ var PluginFactory = function (context, dir) {
                         var featureNode = list.find(function (e) {
                             return e.name === this.name;
                         }, featureList[f]);
-                        if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length != 0)) {
+                        if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length !== 0)) {
                             featureNode = {
                                 'name': featureList[f].name,
                                 'parameters': featureList[f].parameters,
@@ -1524,7 +1532,7 @@ var PluginFactory = function (context, dir) {
                 }
                 var i, outputList = [];
                 for (i = 0; i < Mappings.length; i++) {
-                    if (outputList[Mappings[i].outputIndex] == undefined) {
+                    if (outputList[Mappings[i].outputIndex] === undefined) {
                         outputList[Mappings[i].outputIndex] = [];
                     }
                     var frameList = outputList[Mappings[i].outputIndex].find(function (e) {
@@ -1559,7 +1567,7 @@ var PluginFactory = function (context, dir) {
                             }
                             return F;
                         }
-                    }
+                    };
                     Mappings.push(map);
                 }
                 var requestor = map.requestors.find(function (e) {
@@ -1571,13 +1579,13 @@ var PluginFactory = function (context, dir) {
                 }
                 requestor.addFeatures(featureObject);
                 updateSender();
-            }
+            };
 
             this.findFrameMap = function (outputIndex, frameSize) {
                 return Mappings.find(function (e) {
                     return (e.outputIndex === outputIndex && e.frameSize === frameSize);
                 });
-            }
+            };
 
             this.cancelFeatures = function (requestorInstance, featureObject) {
                 if (featureObject === undefined) {
@@ -1605,14 +1613,14 @@ var PluginFactory = function (context, dir) {
                     requestor.deleteFeatures(featureObject);
                 }
                 updateSender();
-            }
-        }
+            };
+        };
         var RequestorMap = function (pluginInstance) {
             var Features = [];
             var Receiver = pluginInstance.node.featureMap.Receiver;
             this.getRequestorInstance = function () {
                 return pluginInstance;
-            }
+            };
 
             function recursivelyAddFeatures(rootArray, featureObject) {
                 var i;
@@ -1626,7 +1634,7 @@ var PluginFactory = function (context, dir) {
                             'name': featureObject[i].name,
                             'parameters': featureObject[i].parameters,
                             'features': []
-                        }
+                        };
                         rootArray.push(featureNode);
                     }
                     if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
@@ -1656,15 +1664,15 @@ var PluginFactory = function (context, dir) {
 
             this.addFeatures = function (featureObject) {
                 recursivelyAddFeatures(Features, featureObject.features);
-            }
+            };
 
             this.deleteFeatures = function (featureObject) {
                 recursivelyDeleteFeatures(Features, featureObject.features);
-            }
+            };
 
             this.getFeatureList = function () {
                 return Features;
-            }
+            };
 
             this.postFeatures = function (featureObject) {
                 var message = {
@@ -1681,11 +1689,13 @@ var PluginFactory = function (context, dir) {
                 function recursivePostFeatures(rootNode, resultsList, FeatureList) {
                     // Add the results tree where necessary
                     var i, param;
+
+                    function ao(e) {
+                        return e.name == param;
+                    }
                     for (param in resultsList) {
                         if (resultsList.hasOwnProperty(param)) {
-                            var node = FeatureList.find(function (e) {
-                                return e.name == param;
-                            });
+                            var node = FeatureList.find(ao);
                             if (node) {
                                 if (resultsList[param].constructor === Object && node.results) {
                                     rootNode[param] = {};
@@ -1703,8 +1713,8 @@ var PluginFactory = function (context, dir) {
                     recursivePostFeatures(message.features.results[i], featureObject.results.results[i].results, Features);
                 }
                 pluginInstance.node.featureMap.Receiver.postFeatures(message);
-            }
-        }
+            };
+        };
 
         function findSourceIndex(Sender) {
             return Mappings.findIndex(function (e) {
@@ -1731,7 +1741,7 @@ var PluginFactory = function (context, dir) {
                 plugin = plugin.node;
             }
             return plugin.featureMap.Sender;
-        }
+        };
 
         this.requestFeatures = function (requestor, source, featureObject) {
             if (requestor.constructor != PluginInstance) {
@@ -1802,17 +1812,17 @@ var PluginFactory = function (context, dir) {
         var node = new LinkedStore(storeName);
         stores.push(node);
         return node;
-    }
+    };
 
     this.getStores = function () {
         return stores;
-    }
+    };
 
     this.findStore = function (storeName) {
         return stores.find(function (a) {
             return a.name == storeName;
         });
-    }
+    };
 
     // Build the default Stores
     this.SessionData = new LinkedStore("Session");
@@ -1835,20 +1845,20 @@ var PluginFactory = function (context, dir) {
                     //this == Extractor
                     recursivelyProcess(data, this.features);
                     this.postFeatures(data.length, JSON.parse(data.toJSON()));
-                };
+                }
 
                 this.setFeatures = function (featureList) {
                     this.features = featureList;
-                    if (this.features.length == 0) {
+                    if (this.features.length === 0) {
                         this.extractor.clearCallback();
                     } else {
                         this.extractor.featureCallback(onaudiocallback, this);
                     }
-                }
+                };
                 this.rejoinExtractor = function () {
                     output.connect(this.extractor);
-                }
-            }
+                };
+            };
             var WorkerExtractor = function (output, frameSize) {
                 function onaudiocallback(e) {
                     var c, frames = [];
@@ -1863,12 +1873,12 @@ var PluginFactory = function (context, dir) {
 
                 function response(msg) {
                     this.postFeatures(frameSize, msg.data.response);
-                };
+                }
 
                 var worker = new Worker("jsap/feature-worker.js");
                 worker.onerror = function (e) {
                     console.error(e);
-                }
+                };
 
                 this.setFeatures = function (featureList) {
                     var self = this;
@@ -1878,7 +1888,7 @@ var PluginFactory = function (context, dir) {
                         'featureList': featureList,
                         'numChannels': output.numberOfOutputs,
                         'frameSize': this.frameSize
-                    }
+                    };
                     this.features = featureList;
                     if (featureList && featureList.length > 0) {
                         worker.onmessage = function (e) {
@@ -1888,7 +1898,7 @@ var PluginFactory = function (context, dir) {
                             } else {
                                 worker.postMessage(configMessage);
                             }
-                        }
+                        };
                         worker.postMessage({
                             'state': 0
                         });
@@ -1896,11 +1906,11 @@ var PluginFactory = function (context, dir) {
                         this.extractor.onaudioprocess = undefined;
                     }
 
-                }
+                };
 
                 this.rejoinExtractor = function () {
                     output.connect(this.extractor);
-                }
+                };
 
                 this.extractor = output.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
                 output.connect(this.extractor);
@@ -1909,7 +1919,7 @@ var PluginFactory = function (context, dir) {
                 Object.defineProperty(this, "frameSize", {
                     'value': frameSize
                 });
-            }
+            };
             this.addExtractor = function (frameSize) {
                 var obj;
                 if (window.Worker) {
@@ -1924,7 +1934,7 @@ var PluginFactory = function (context, dir) {
                             'outputIndex': 0,
                             'frameSize': frameSize,
                             'results': resultsJSON
-                        }
+                        };
                         this.postFeatures(obj);
                     }.bind(this)
                 });
@@ -1941,9 +1951,9 @@ var PluginFactory = function (context, dir) {
                 extractors.forEach(function (e) {
                     e.rejoinExtractor();
                 });
-            }
+            };
             this.deleteExtractor = function (frameSize) {};
-        }
+        };
         var outputNodes;
         this.updateFeatures = function (featureObject) {
             var o;
@@ -1968,13 +1978,13 @@ var PluginFactory = function (context, dir) {
                     extractor.setFeatures(featureObject[o][si].featureList);
                 }
             }
-        }
+        };
 
         this.rejoinExtractors = function () {
             if (outputNodes) {
                 outputNodes.rejoinExtractors();
             }
-        }
+        };
 
         this.postFeatures = function (featureObject) {
             /*
@@ -1989,11 +1999,11 @@ var PluginFactory = function (context, dir) {
                 'frameSize': featureObject.frameSize,
                 'results': featureObject.results
             });
-        }
+        };
 
         // Send to Factory
         FactoryFeatureMap.createSourceMap(this, undefined);
-    }
+    };
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 
@@ -2015,7 +2025,7 @@ var PluginFactory = function (context, dir) {
 
         this.getFeatureChain = function () {
 
-        }
+        };
 
         function rebuild() {
             var i = 0,
@@ -2030,7 +2040,7 @@ var PluginFactory = function (context, dir) {
         function isolate() {
             plugin_list.forEach(function (e) {
                 e.disconnect();
-            })
+            });
         }
 
         function cutChain() {

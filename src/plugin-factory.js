@@ -1,6 +1,6 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
-
+/*globals Promise, document, console, LinkedStore, Worker, window */
 
 var PluginFactory = function (context, dir) {
 
@@ -43,17 +43,15 @@ var PluginFactory = function (context, dir) {
                         document.getElementsByTagName("head")[0].appendChild(css);
                         resolve(resourceObject);
                     });
-                    break;
                 case "javascript":
                 case "JavaScript":
                 case "Javascript":
                 case undefined:
-                default:
                     if (!response) {
                         return loadResource(resourceObject).then(function (resourceObject) {
                             if (typeof resourceObject.returnObject === "string") {
                                 var returnObject;
-                                eval("returnObject = " + resourceObject.returnObject);
+                                eval("returnObject = " + resourceObject.returnObject); // jshint ignore:line
                                 return returnObject;
                             } else {
                                 return true;
@@ -62,15 +60,19 @@ var PluginFactory = function (context, dir) {
                     } else {
                         return new Promise(function (resolve, reject) {
                             if (typeof resourceObject.returnObject === "string") {
-                                eval("resolve(" + resourceObject.returnObject + ")");
+                                eval("resolve(" + resourceObject.returnObject + ")"); // jshint ignore:line
                             } else {
                                 resolve(true);
                             }
                         });
                     }
+                    break;
+                default:
+                    console.error(resourceObject.type);
+                    break;
             }
         }
-    }
+    };
 
     this.loadPluginScript = function (resourceObject) {
         if (resourceObject) {
@@ -81,7 +83,7 @@ var PluginFactory = function (context, dir) {
                 return self.addPrototype(plugin);
             });
         }
-    }
+    };
 
     function loadResource(resourceObject) {
         return new Promise(function (resolve, reject) {
@@ -90,9 +92,9 @@ var PluginFactory = function (context, dir) {
             document.getElementsByTagName("head")[0].appendChild(script);
             script.onload = function () {
                 resolve(resourceObject);
-            }
+            };
         });
-    };
+    }
 
     if (dir === undefined) {
         dir = "jsap/";
@@ -103,11 +105,11 @@ var PluginFactory = function (context, dir) {
 
         this.reconnect = function (new_next) {
             if (new_next !== this.next_node) {
-                if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
+                if (this.next_node !== undefined && typeof this.next_node.getInputs == "function") {
                     plugin_node.disconnect(this.next_node.getInputs()[0]);
                 }
                 this.next_node = new_next;
-                if (this.next_node != undefined && typeof this.next_node.getInputs == "function") {
+                if (this.next_node !== undefined && typeof this.next_node.getInputs == "function") {
                     plugin_node.connect(this.next_node.getInputs()[0]);
                 }
                 return true;
@@ -188,7 +190,7 @@ var PluginFactory = function (context, dir) {
                 'UserData': {
                     value: this.factory.UserData
                 }
-            })
+            });
             Object.defineProperty(node, "prototypeObject", {
                 'value': this
             });
@@ -198,11 +200,11 @@ var PluginFactory = function (context, dir) {
 
         function loadResourceChain(resourceObject, p) {
             if (!p) {
-                var p = loadResource(resourceObject);
-                p.then(function (resourceObject) {
+                var k = loadResource(resourceObject);
+                k.then(function (resourceObject) {
                     if (resourceObject.resources !== undefined && resourceObject.resources.length > 0) {
                         for (var i = 0; i < resourceObject.resources.length; i++) {
-                            p = loadResourceChain(resourceObject.resources[i], p);
+                            k = loadResourceChain(resourceObject.resources[i], k);
                         }
                     }
                 });
@@ -243,8 +245,6 @@ var PluginFactory = function (context, dir) {
                     case "Javascript":
                     case "JavaScript":
                     case "JS":
-                    default:
-
                         var object = {
                             'promise': loadResourceChain(resource),
                             'state': 0,
@@ -252,9 +252,12 @@ var PluginFactory = function (context, dir) {
                                 this.state = 1;
                             },
                             'test': recursiveGetTest(resource)
-                        }
+                        };
                         object.promise.then(object.complete.bind(object));
                         resourcePromises.push(object);
+                        break;
+                    default:
+                        console.error(resource.type);
                         break;
                 }
             }
@@ -272,7 +275,7 @@ var PluginFactory = function (context, dir) {
                 }
             }
             return state;
-        }
+        };
     };
 
     this.addPrototype = function (plugin_proto) {
@@ -285,13 +288,13 @@ var PluginFactory = function (context, dir) {
         if (typeof plugin_proto !== "function") {
             throw ("The Prototype must be a function!");
         }
-        if (typeof testObj.name !== "string" || testObj.name.length == 0) {
+        if (typeof testObj.name !== "string" || testObj.name.length === 0) {
             throw ("Malformed plugin. Name not defined");
         }
-        if (typeof testObj.version !== "string" || testObj.version.length == 0) {
+        if (typeof testObj.version !== "string" || testObj.version.length === 0) {
             throw ("Malformed plugin. Version not defined");
         }
-        if (typeof testObj.uniqueID !== "string" || testObj.uniqueID.length == 0) {
+        if (typeof testObj.uniqueID !== "string" || testObj.uniqueID.length === 0) {
             throw ("Malformed plugin. uniqueID not defined");
         }
         var obj = plugin_prototypes.find(function (e) {
@@ -369,7 +372,7 @@ var PluginFactory = function (context, dir) {
 
     this.registerPluginInstance = function (instance) {
         if (pluginsList.find(function (p) {
-                return p === this
+                return p === this;
             }, instance)) {
             throw ("Plugin Instance not unique");
         }
@@ -378,7 +381,7 @@ var PluginFactory = function (context, dir) {
             instance.node.start.call(instance.node);
         }
         return true;
-    }
+    };
 
     this.createPluginInstance = function (PluginPrototype) {
         throw ("DEPRECATED - Use PluginPrototype.createPluginInstance(owner);");
@@ -420,10 +423,10 @@ var PluginFactory = function (context, dir) {
             var Mappings = [];
             this.getSourceInstance = function () {
                 return pluginInstace;
-            }
+            };
             this.getSender = function () {
                 return Sender;
-            }
+            };
 
             function updateSender() {
                 function recursiveFind(featureList) {
@@ -432,7 +435,7 @@ var PluginFactory = function (context, dir) {
                         var featureNode = list.find(function (e) {
                             return e.name === this.name;
                         }, featureList[f]);
-                        if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length != 0)) {
+                        if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length !== 0)) {
                             featureNode = {
                                 'name': featureList[f].name,
                                 'parameters': featureList[f].parameters,
@@ -448,7 +451,7 @@ var PluginFactory = function (context, dir) {
                 }
                 var i, outputList = [];
                 for (i = 0; i < Mappings.length; i++) {
-                    if (outputList[Mappings[i].outputIndex] == undefined) {
+                    if (outputList[Mappings[i].outputIndex] === undefined) {
                         outputList[Mappings[i].outputIndex] = [];
                     }
                     var frameList = outputList[Mappings[i].outputIndex].find(function (e) {
@@ -483,7 +486,7 @@ var PluginFactory = function (context, dir) {
                             }
                             return F;
                         }
-                    }
+                    };
                     Mappings.push(map);
                 }
                 var requestor = map.requestors.find(function (e) {
@@ -495,13 +498,13 @@ var PluginFactory = function (context, dir) {
                 }
                 requestor.addFeatures(featureObject);
                 updateSender();
-            }
+            };
 
             this.findFrameMap = function (outputIndex, frameSize) {
                 return Mappings.find(function (e) {
                     return (e.outputIndex === outputIndex && e.frameSize === frameSize);
                 });
-            }
+            };
 
             this.cancelFeatures = function (requestorInstance, featureObject) {
                 if (featureObject === undefined) {
@@ -529,14 +532,14 @@ var PluginFactory = function (context, dir) {
                     requestor.deleteFeatures(featureObject);
                 }
                 updateSender();
-            }
-        }
+            };
+        };
         var RequestorMap = function (pluginInstance) {
             var Features = [];
             var Receiver = pluginInstance.node.featureMap.Receiver;
             this.getRequestorInstance = function () {
                 return pluginInstance;
-            }
+            };
 
             function recursivelyAddFeatures(rootArray, featureObject) {
                 var i;
@@ -550,7 +553,7 @@ var PluginFactory = function (context, dir) {
                             'name': featureObject[i].name,
                             'parameters': featureObject[i].parameters,
                             'features': []
-                        }
+                        };
                         rootArray.push(featureNode);
                     }
                     if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
@@ -580,15 +583,15 @@ var PluginFactory = function (context, dir) {
 
             this.addFeatures = function (featureObject) {
                 recursivelyAddFeatures(Features, featureObject.features);
-            }
+            };
 
             this.deleteFeatures = function (featureObject) {
                 recursivelyDeleteFeatures(Features, featureObject.features);
-            }
+            };
 
             this.getFeatureList = function () {
                 return Features;
-            }
+            };
 
             this.postFeatures = function (featureObject) {
                 var message = {
@@ -605,11 +608,13 @@ var PluginFactory = function (context, dir) {
                 function recursivePostFeatures(rootNode, resultsList, FeatureList) {
                     // Add the results tree where necessary
                     var i, param;
+
+                    function ao(e) {
+                        return e.name == param;
+                    }
                     for (param in resultsList) {
                         if (resultsList.hasOwnProperty(param)) {
-                            var node = FeatureList.find(function (e) {
-                                return e.name == param;
-                            });
+                            var node = FeatureList.find(ao);
                             if (node) {
                                 if (resultsList[param].constructor === Object && node.results) {
                                     rootNode[param] = {};
@@ -627,8 +632,8 @@ var PluginFactory = function (context, dir) {
                     recursivePostFeatures(message.features.results[i], featureObject.results.results[i].results, Features);
                 }
                 pluginInstance.node.featureMap.Receiver.postFeatures(message);
-            }
-        }
+            };
+        };
 
         function findSourceIndex(Sender) {
             return Mappings.findIndex(function (e) {
@@ -655,7 +660,7 @@ var PluginFactory = function (context, dir) {
                 plugin = plugin.node;
             }
             return plugin.featureMap.Sender;
-        }
+        };
 
         this.requestFeatures = function (requestor, source, featureObject) {
             if (requestor.constructor != PluginInstance) {
@@ -726,17 +731,17 @@ var PluginFactory = function (context, dir) {
         var node = new LinkedStore(storeName);
         stores.push(node);
         return node;
-    }
+    };
 
     this.getStores = function () {
         return stores;
-    }
+    };
 
     this.findStore = function (storeName) {
         return stores.find(function (a) {
             return a.name == storeName;
         });
-    }
+    };
 
     // Build the default Stores
     this.SessionData = new LinkedStore("Session");
@@ -759,20 +764,20 @@ var PluginFactory = function (context, dir) {
                     //this == Extractor
                     recursivelyProcess(data, this.features);
                     this.postFeatures(data.length, JSON.parse(data.toJSON()));
-                };
+                }
 
                 this.setFeatures = function (featureList) {
                     this.features = featureList;
-                    if (this.features.length == 0) {
+                    if (this.features.length === 0) {
                         this.extractor.clearCallback();
                     } else {
                         this.extractor.featureCallback(onaudiocallback, this);
                     }
-                }
+                };
                 this.rejoinExtractor = function () {
                     output.connect(this.extractor);
-                }
-            }
+                };
+            };
             var WorkerExtractor = function (output, frameSize) {
                 function onaudiocallback(e) {
                     var c, frames = [];
@@ -787,12 +792,12 @@ var PluginFactory = function (context, dir) {
 
                 function response(msg) {
                     this.postFeatures(frameSize, msg.data.response);
-                };
+                }
 
                 var worker = new Worker("jsap/feature-worker.js");
                 worker.onerror = function (e) {
                     console.error(e);
-                }
+                };
 
                 this.setFeatures = function (featureList) {
                     var self = this;
@@ -802,7 +807,7 @@ var PluginFactory = function (context, dir) {
                         'featureList': featureList,
                         'numChannels': output.numberOfOutputs,
                         'frameSize': this.frameSize
-                    }
+                    };
                     this.features = featureList;
                     if (featureList && featureList.length > 0) {
                         worker.onmessage = function (e) {
@@ -812,7 +817,7 @@ var PluginFactory = function (context, dir) {
                             } else {
                                 worker.postMessage(configMessage);
                             }
-                        }
+                        };
                         worker.postMessage({
                             'state': 0
                         });
@@ -820,11 +825,11 @@ var PluginFactory = function (context, dir) {
                         this.extractor.onaudioprocess = undefined;
                     }
 
-                }
+                };
 
                 this.rejoinExtractor = function () {
                     output.connect(this.extractor);
-                }
+                };
 
                 this.extractor = output.context.createScriptProcessor(frameSize, output.numberOfOutputs, 1);
                 output.connect(this.extractor);
@@ -833,7 +838,7 @@ var PluginFactory = function (context, dir) {
                 Object.defineProperty(this, "frameSize", {
                     'value': frameSize
                 });
-            }
+            };
             this.addExtractor = function (frameSize) {
                 var obj;
                 if (window.Worker) {
@@ -848,7 +853,7 @@ var PluginFactory = function (context, dir) {
                             'outputIndex': 0,
                             'frameSize': frameSize,
                             'results': resultsJSON
-                        }
+                        };
                         this.postFeatures(obj);
                     }.bind(this)
                 });
@@ -865,9 +870,9 @@ var PluginFactory = function (context, dir) {
                 extractors.forEach(function (e) {
                     e.rejoinExtractor();
                 });
-            }
+            };
             this.deleteExtractor = function (frameSize) {};
-        }
+        };
         var outputNodes;
         this.updateFeatures = function (featureObject) {
             var o;
@@ -892,13 +897,13 @@ var PluginFactory = function (context, dir) {
                     extractor.setFeatures(featureObject[o][si].featureList);
                 }
             }
-        }
+        };
 
         this.rejoinExtractors = function () {
             if (outputNodes) {
                 outputNodes.rejoinExtractors();
             }
-        }
+        };
 
         this.postFeatures = function (featureObject) {
             /*
@@ -913,11 +918,11 @@ var PluginFactory = function (context, dir) {
                 'frameSize': featureObject.frameSize,
                 'results': featureObject.results
             });
-        }
+        };
 
         // Send to Factory
         FactoryFeatureMap.createSourceMap(this, undefined);
-    }
+    };
 
     var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
 
@@ -939,7 +944,7 @@ var PluginFactory = function (context, dir) {
 
         this.getFeatureChain = function () {
 
-        }
+        };
 
         function rebuild() {
             var i = 0,
@@ -954,7 +959,7 @@ var PluginFactory = function (context, dir) {
         function isolate() {
             plugin_list.forEach(function (e) {
                 e.disconnect();
-            })
+            });
         }
 
         function cutChain() {
