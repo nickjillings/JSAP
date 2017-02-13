@@ -1,5 +1,9 @@
 # JSAP - JavaScript Audio Plugin
 
+[![Code Climate](https://codeclimate.com/github/nickjillings/JSAP/badges/gpa.svg)](https://codeclimate.com/github/nickjillings/JSAP)
+
+
+
 ## Introduction
 
 JSAP is a new audio effects framework for the HTML 5 web audio API for building audio plugins. The standard defines both the host and plugin parts.
