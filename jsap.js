@@ -1242,10 +1242,7 @@ var PluginFactory = function (context, dir) {
             var plugin = new proto(this.factory, owner);
             var node = new PluginInstance(currentPluginId++, plugin);
             var basePluginInstance = plugin;
-            while (basePluginInstance.constructor !== BasePlugin) {
-                basePluginInstance = basePluginInstance.__proto__;
-            }
-            Object.defineProperties(basePluginInstance, {
+            Object.defineProperties(plugin, {
                 'pluginInstance': {
                     'value': node
                 },
@@ -1267,7 +1264,7 @@ var PluginFactory = function (context, dir) {
                 'UserData': {
                     value: this.factory.UserData
                 }
-            });
+            })
             Object.defineProperty(node, "prototypeObject", {
                 'value': this
             });
