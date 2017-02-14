@@ -1,6 +1,6 @@
 // Feature worker for JSAP plugins
 // One of these created per feature extractor output
-
+/*globals importScripts, onmessage, TimeData, postMessage*/
 importScripts('js-xtract/jsXtract.min.js');
 
 var state = 0;
@@ -23,7 +23,7 @@ function recursiveProcessing(base, list) {
 onmessage = function (message) {
 
     // First message is the configuration for the featureLists
-    if (message.data.state == 1 && state == 0) {
+    if (message.data.state == 1 && state === 0) {
         // Payload should be a list of features
         featureList = message.data.featureList;
         sampleRate = message.data.sampleRate;
@@ -51,7 +51,7 @@ onmessage = function (message) {
             response.results[c] = {
                 'channel': c,
                 'results': JSON.parse(frame.toJSON())
-            }
+            };
         }
         // Now we have the data, return the frame
         postMessage({
@@ -59,7 +59,7 @@ onmessage = function (message) {
             'time': message.data.time,
             'response': response
         });
-    } else if (message.data.state == 0) {
+    } else if (message.data.state === 0) {
         // Clear
         featureList = undefined;
         sampleRate = undefined;
@@ -68,4 +68,4 @@ onmessage = function (message) {
             'state': state
         });
     }
-}
+};
