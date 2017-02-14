@@ -1,6 +1,7 @@
 // Feature worker for JSAP plugins
 // One of these created per feature extractor output
 /*globals importScripts, onmessage, TimeData, postMessage*/
+/*eslint-env browser */
 importScripts('js-xtract/jsXtract.min.js');
 
 var state = 0;

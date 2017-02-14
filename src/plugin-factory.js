@@ -1,6 +1,7 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 /*globals Promise, document, console, LinkedStore, Worker, window */
+/*eslint-env browser */
 
 var PluginFactory = function (context, dir) {
 

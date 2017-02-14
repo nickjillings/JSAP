@@ -1,4 +1,5 @@
 /*globals document */
+/*eslint-env browser */
 if (!Array.prototype.find) {
     Array.prototype.find = function (predicate) {
         'use strict';
@@ -193,6 +194,7 @@ var LinkedStore = function (storeName) {
 
 // Add getInputs to all AudioNodes to ease deployment
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
+/*eslint-env browser */
 AudioNode.prototype.getInputs = function () {
     return [this];
 };
@@ -1099,6 +1101,7 @@ PluginUserInterface.prototype.clearGUI = function () {
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 /*globals Promise, document, console, LinkedStore, Worker, window */
+/*eslint-env browser */
 
 var PluginFactory = function (context, dir) {
 

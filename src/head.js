@@ -1,4 +1,5 @@
 /*globals document */
+/*eslint-env browser */
 if (!Array.prototype.find) {
     Array.prototype.find = function (predicate) {
         'use strict';
