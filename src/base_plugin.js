@@ -349,13 +349,93 @@ var ParameterManager = function (owner) {
                 'value': function () {
                     _parentProcessor = _dataType = _minimum = _maximum = _value = _name = _actions = _update = _translate = _trigger = boundParam = undefined;
                 }
-            }
-        });
-
-        switch (_dataType) {
-            case "Switch":
-                Object.defineProperty(this, "onclick", {
-                    'value': function (event) {
+            },
+            "minimum": {
+                get: function () {
+                    if (_dataType === "Number") {
+                        return _minimum;
+                    }
+                    return undefined;
+                },
+                set: function () {
+                    throw ("Cannot set the minimum value of PluginParameter");
+                }
+            },
+            "maximum": {
+                get: function () {
+                    if (_dataType === "Number") {
+                        return maximum;
+                    }
+                    return undefined;
+                },
+                set: function () {
+                    throw ("Cannot set the maximum value of PluginParameter");
+                }
+            },
+            "default": {
+                get: function () {
+                    if (_dataType === "String" || _dataType === "Number") {
+                        return _default;
+                    }
+                    return undefined;
+                },
+                set: function () {
+                    throw ("Cannot set the default value of PluginParameter");
+                }
+            },
+            "value": {
+                get: function () {
+                    if (_dataType === "String") {
+                        if (boundParam) {
+                            _value = _translate(boundParam.value);
+                        }
+                        return _value;
+                    } else if (_dataType === "Number" || _dataType === "Switch") {
+                        return _value;
+                    }
+                    return undefined;
+                },
+                set: function (newValue) {
+                    if (_dataType !== "Switch" || _dataType !== "String" || _dataType !== "Number") {
+                        throw ("Cannot read non-value PluginParameter");
+                    }
+                    if (_dataType === "Switch") {
+                        _value++;
+                        if (_value >= _maximum) {
+                            _value = minimum;
+                        }
+                    } else {
+                        switch (_dataType) {
+                            case "String":
+                                if (typeof newValue !== "string") {
+                                    newValue = String(newValue);
+                                }
+                                break;
+                            case "Number":
+                                if (typeof newValue !== "number") {
+                                    newValue = Number(newValue);
+                                }
+                                if (_maximum !== undefined) {
+                                    newValue = Math.min(newValue, _maximum);
+                                }
+                                if (_minimum !== undefined) {
+                                    newValue = Math.max(newValue, _minimum);
+                                }
+                                break;
+                        }
+                        _value = newValue;
+                        if (boundParam) {
+                            boundParam.value = _update(_value);
+                        }
+                    }
+                    addAction(_value);
+                    _trigger();
+                    return _value;
+                }
+            },
+            "onclick": {
+                "value": function (event) {
+                    if (_dataType === "Switch") {
                         _value++;
                         if (_value >= maximum) {
                             _value = minimum;
@@ -363,88 +443,16 @@ var ParameterManager = function (owner) {
                         addAction(event);
                         _trigger();
                         return _value;
-                    }
-                });
-                break;
-            case "Number":
-                Object.defineProperties(this, {
-                    "minimium": {
-                        get: function () {
-                            return _minimum;
-                        },
-                        set: function () {
-                            throw ("Cannot set the minimum value of PluginParameter");
-                        }
-                    },
-                    "maximum": {
-                        get: function () {
-                            return _maximum;
-                        },
-                        set: function () {
-                            throw ("Cannot set the maximum value of PluginParameter");
-                        }
-                    }
-                });
-            case "String":
-                Object.defineProperties(this, {
-                    "default": {
-                        get: function () {
-                            return _default;
-                        },
-                        set: function () {
-                            throw ("Cannot set the default value of PluginParameter");
-                        }
-                    },
-                    "value": {
-                        get: function () {
-                            if (boundParam) {
-                                _value = _translate(boundParam.value);
-                            }
-                            return _value;
-                        },
-                        set: function (newValue) {
-                            switch (_dataType) {
-                                case "String":
-                                    if (typeof newValue !== "string") {
-                                        newValue = String(newValue);
-                                    }
-                                    break;
-                                case "Number":
-                                    if (typeof newValue !== "number") {
-                                        newValue = Number(newValue);
-                                    }
-                                    if (newValue >= _maximum && _maximum !== undefined) {
-                                        newValue = _maximum;
-                                    } else if (newValue <= _minimum && _minimum !== undefined) {
-                                        newValue = _minimum;
-                                    }
-                                    break;
-                            }
-                            if (_value == newValue) {
-                                return _value;
-                            }
-                            _value = newValue;
-                            if (boundParam) {
-                                boundParam.value = _update(_value);
-                            }
-                            addAction(_value);
-                            _trigger();
-                            return _value;
-                        }
-                    }
-                });
-                break;
-            case "Button":
-                Object.defineProperty(this, "onclick", {
-                    'value': function (event) {
+                    } else if (_dataType === "Button") {
                         _value = event;
                         addAction(event);
                         _trigger();
                         return event;
                     }
-                });
-                break;
-        }
+                    throw ("Cannot use onclick on PluginParameter");
+                }
+            }
+        });
     }
 
     Object.defineProperties(this, {
@@ -530,13 +538,6 @@ var PluginFeatureInterface = function (BasePluginInstance) {
     this.plugin = BasePluginInstance;
     this.Receiver = new PluginFeatureInterfaceReceiver(this, BasePluginInstance.factory.FeatureMap);
     this.Sender = new PluginFeatureInterfaceSender(this, BasePluginInstance.factory.FeatureMap);
-    this.addOutput = function (audioNode, index) {
-        Sender.extractors.push({
-            'index': index,
-            'node': audioNode,
-            'frameSize': []
-        });
-    };
 
     Object.defineProperty(this, "onfeatures", {
         'get': function () {
