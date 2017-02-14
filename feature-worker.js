@@ -23,7 +23,7 @@ function recursiveProcessing(base, list) {
 onmessage = function (message) {
 
     // First message is the configuration for the featureLists
-    if (message.data.state == 1 && state === 0) {
+    if (message.data.state === 1 && state === 0) {
         // Payload should be a list of features
         featureList = message.data.featureList;
         sampleRate = message.data.sampleRate;
@@ -36,7 +36,7 @@ onmessage = function (message) {
         postMessage({
             'state': state
         });
-    } else if (message.data.state == 2 && state == 1) {
+    } else if (message.data.state === 2 && state === 1) {
         // Now we have transmitted a frame of audio
         // Begin the processing
         var c, l = message.data.frames.length,
