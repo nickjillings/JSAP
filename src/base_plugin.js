@@ -153,13 +153,13 @@ var ParameterManager = function (owner) {
 
     function findPlugin(name) {
         return parameterList.find(function (e) {
-            return e.name == name;
+            return e.name === name;
         });
     }
 
     function findPluginIndex(name) {
         return parameterList.findIndex(function (e) {
-            return e.name == name;
+            return e.name === name;
         });
     }
 
@@ -228,13 +228,13 @@ var ParameterManager = function (owner) {
         _trigger = function () {};
 
         this.bindToAudioParam = function (AudioParameterNode) {
-            if ((_dataType == "Number" || _dataType == "Switch") && typeof AudioParameterNode.value == "number") {
+            if ((_dataType === "Number" || _dataType === "Switch") && typeof AudioParameterNode.value === "number") {
                 boundParam = AudioParameterNode;
                 if (AudioParameterNode !== undefined) {
                     this.value = _translate(boundParam.value);
                 }
                 return;
-            } else if (_dataType == "String" && typeof AudioParameterNode.value == "string") {
+            } else if (_dataType === "String" && typeof AudioParameterNode.value === "string") {
                 boundParam = AudioParameterNode;
                 if (AudioParameterNode !== undefined) {
                     this.value = _translate(boundParam.value);
@@ -249,7 +249,7 @@ var ParameterManager = function (owner) {
             switch (_dataType) {
                 case "Number":
                 case "String":
-                    if (typeof event == _dataType.toLowerCase()) {
+                    if (typeof event === _dataType.toLowerCase()) {
                         _actions.push({
                             'time': new Date(),
                             'value': event
@@ -257,7 +257,7 @@ var ParameterManager = function (owner) {
                     }
                     break;
                 case "Switch":
-                    if (event == 1 || event === true) {
+                    if (event === 1 || event === true) {
                         event = 1;
                     } else {
                         event = 0;
@@ -307,7 +307,7 @@ var ParameterManager = function (owner) {
                     return _update;
                 },
                 set: function (func) {
-                    if (typeof func != "function") {
+                    if (typeof func !== "function") {
                         throw ("Must pass in a valid function");
                     }
                     if (func(0) === undefined) {
@@ -321,7 +321,7 @@ var ParameterManager = function (owner) {
                     return _translate;
                 },
                 set: function (func) {
-                    if (typeof func != "function") {
+                    if (typeof func !== "function") {
                         throw ("Must pass in a valid function");
                     }
                     if (func(0) === undefined) {
@@ -335,10 +335,10 @@ var ParameterManager = function (owner) {
                     return _trigger;
                 },
                 set: function (func, arg_this) {
-                    if (typeof func != "function") {
+                    if (typeof func !== "function") {
                         throw ("Must pass in a valid function");
                     }
-                    if (typeof arg_this == "object") {
+                    if (typeof arg_this === "object") {
                         _trigger = func.bind(arg_this);
                     } else {
                         _trigger = func.bind(owner);
@@ -649,7 +649,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
             }
 
             function onaudiocallback(data) {
-                //this == Extractor
+                //this === Extractor
                 var message = {
                     'numberOfChannels': 1,
                     'results': []
@@ -704,7 +704,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                 this.features = featureList;
                 if (featureList && featureList.length > 0) {
                     worker.onmessage = function (e) {
-                        if (e.data.state == 1) {
+                        if (e.data.state === 1) {
                             worker.onmessage = response.bind(self);
                             self.extractor.onaudioprocess = onaudiocallback.bind(self);
                         } else {
@@ -751,8 +751,8 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
         this.findExtractor = function (frameSize) {
             var check = frameSize;
             return extractors.find(function (e) {
-                // This MUST be == NOT ===
-                return e.frameSize == check;
+                // This MUST be === NOT ===
+                return e.frameSize === check;
             });
         };
         this.deleteExtractor = function (frameSize) {};
@@ -886,7 +886,7 @@ PluginUserInterface.prototype.loadResource = function (url) {
         var req = new XMLHttpRequest();
         req.open('GET', url);
         req.onload = function () {
-            if (req.status == 200) {
+            if (req.status === 200) {
                 resolve(req.response);
             } else {
                 reject(Error(req.statusText));
