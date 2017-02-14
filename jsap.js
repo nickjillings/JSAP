@@ -1105,8 +1105,10 @@ var PluginFactory = function (context, dir) {
                         return loadResource(resourceObject).then(function (resourceObject) {
                             if (typeof resourceObject.returnObject === "string") {
                                 var returnObject;
-                                eval("returnObject = " + resourceObject.returnObject); // jshint ignore:line
-                                return returnObject;
+                                if (window.hasOwnProperty(resourceObject.returnObject)) {
+                                    return window[resourceObject.returnObject];
+                                }
+                                return false;
                             } else {
                                 return true;
                             }
@@ -1114,7 +1116,11 @@ var PluginFactory = function (context, dir) {
                     } else {
                         return new Promise(function (resolve, reject) {
                             if (typeof resourceObject.returnObject === "string") {
-                                eval("resolve(" + resourceObject.returnObject + ")"); // jshint ignore:line
+                                if (window.hasOwnProperty(resourceObject.returnObject)) {
+                                    resolve(window[resourceObject.returnObject]);
+                                } else {
+                                    reject(false);
+                                }
                             } else {
                                 resolve(true);
                             }
@@ -1262,10 +1268,10 @@ var PluginFactory = function (context, dir) {
                         }
                     }
                 });
+                return k;
             } else {
-                p.then(loadResource(resourceObject));
+                return p.then(loadResource(resourceObject));
             }
-            return p;
         }
 
         function loadStylesheet(url) {
@@ -1937,7 +1943,7 @@ var PluginFactory = function (context, dir) {
                 var check = frameSize;
                 return extractors.find(function (e) {
                     // This MUST be == NOT ===
-                    return e.frameSize == check;
+                    return Number(e.frameSize) === Number(check);
                 });
             };
             this.rejoinExtractors = function () {
