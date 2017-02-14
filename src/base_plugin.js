@@ -43,58 +43,57 @@ var BasePlugin = function (factory, owner) {
         return true;
     };
 
-    Object.defineProperty(this, "numInputs", {
-        get: function () {
-            return inputList.length;
-        },
-        set: function () {
-            throw ("Cannot set the number of inputs of BasePlugin");
-        }
-    });
-    Object.defineProperty(this, "numOutputs", {
-        get: function () {
-            return outputList.length;
-        },
-        set: function () {
-            throw ("Cannot set the number of outputs of BasePlugin");
-        }
-    });
-    Object.defineProperty(this, "numParameters", {
-        get: function () {
-            return this.parameters.parameters.length;
-        },
-        set: function () {
-            throw ("Cannot set the number of parameters of BasePlugin");
-        }
-    });
-
-    Object.defineProperty(this, "owner", {
-        get: function () {
-            return pOwner;
-        },
-        set: function (owner) {
-            if (typeof owner === "object") {
-                pOwner = owner;
+    Object.defineProperties(this, {
+        "numInputs": {
+            get: function () {
+                return inputList.length;
+            },
+            set: function () {
+                throw ("Cannot set the number of inputs of BasePlugin");
             }
-            return pOwner;
-        }
-    });
-
-    Object.defineProperty(this, "inputs", {
-        get: function (index) {
-            return inputList;
         },
-        set: function () {
-            throw ("Illegal attempt to modify BasePlugin");
-        }
-    });
-
-    Object.defineProperty(this, "outputs", {
-        get: function (index) {
-            return outputList;
+        "numOutputs": {
+            get: function () {
+                return outputList.length;
+            },
+            set: function () {
+                throw ("Cannot set the number of outputs of BasePlugin");
+            }
         },
-        set: function () {
-            throw ("Illegal attempt to modify BasePlugin");
+        "numParameters": {
+            get: function () {
+                return this.parameters.parameters.length;
+            },
+            set: function () {
+                throw ("Cannot set the number of parameters of BasePlugin");
+            }
+        },
+        "owner": {
+            get: function () {
+                return pOwner;
+            },
+            set: function (owner) {
+                if (typeof owner === "object") {
+                    pOwner = owner;
+                }
+                return pOwner;
+            }
+        },
+        "inputs": {
+            get: function (index) {
+                return inputList;
+            },
+            set: function () {
+                throw ("Illegal attempt to modify BasePlugin");
+            }
+        },
+        "outputs": {
+            get: function (index) {
+                return outputList;
+            },
+            set: function () {
+                throw ("Illegal attempt to modify BasePlugin");
+            }
         }
     });
 };
@@ -277,82 +276,78 @@ var ParameterManager = function (owner) {
         }
 
         // Public facing getter/setter to preserve the plugin parameter mappings
-        Object.defineProperty(this, "dataType", {
-            get: function () {
-                return _dataType;
-            },
-            set: function () {
-                throw ("Cannot set the dataType of PluginParameter");
-            }
-        });
-
-        Object.defineProperty(this, "name", {
-            get: function () {
-                return _name;
-            },
-            set: function () {
-                throw ("Cannot set the name of PluginParameter");
-            }
-        });
-
-        Object.defineProperty(this, "actions", {
-            get: function () {
-                return _actions;
-            },
-            set: function () {
-                throw ("Cannot set private variable 'actions'");
-            }
-        });
-
-        Object.defineProperty(this, "update", {
-            get: function () {
-                return _update;
-            },
-            set: function (func) {
-                if (typeof func != "function") {
-                    throw ("Must pass in a valid function");
+        Object.defineProperties(this, {
+            "dataType": {
+                get: function () {
+                    return _dataType;
+                },
+                set: function () {
+                    throw ("Cannot set the dataType of PluginParameter");
                 }
-                if (func(0) === undefined) {
-                    throw ("Function must return a value");
-                }
-                _update = func;
-            }
-        });
-
-        Object.defineProperty(this, "translate", {
-            get: function () {
-                return _translate;
             },
-            set: function (func) {
-                if (typeof func != "function") {
-                    throw ("Must pass in a valid function");
+            "name": {
+                get: function () {
+                    return _name;
+                },
+                set: function () {
+                    throw ("Cannot set the name of PluginParameter");
                 }
-                if (func(0) === undefined) {
-                    throw ("Function must return a value");
-                }
-                _translate = func;
-            }
-        });
-
-        Object.defineProperty(this, "trigger", {
-            get: function () {
-                return _trigger;
             },
-            set: function (func, arg_this) {
-                if (typeof func != "function") {
-                    throw ("Must pass in a valid function");
+            "actions": {
+                get: function () {
+                    return _actions;
+                },
+                set: function () {
+                    throw ("Cannot set private variable 'actions'");
                 }
-                if (typeof arg_this == "object") {
-                    _trigger = func.bind(arg_this);
-                } else {
-                    _trigger = func.bind(owner);
+            },
+            "update": {
+                get: function () {
+                    return _update;
+                },
+                set: function (func) {
+                    if (typeof func != "function") {
+                        throw ("Must pass in a valid function");
+                    }
+                    if (func(0) === undefined) {
+                        throw ("Function must return a value");
+                    }
+                    _update = func;
                 }
-            }
-        });
-
-        Object.defineProperty(this, "destroy", {
-            'value': function () {
-                _parentProcessor = _dataType = _minimum = _maximum = _value = _name = _actions = _update = _translate = _trigger = boundParam = undefined;
+            },
+            "translate": {
+                get: function () {
+                    return _translate;
+                },
+                set: function (func) {
+                    if (typeof func != "function") {
+                        throw ("Must pass in a valid function");
+                    }
+                    if (func(0) === undefined) {
+                        throw ("Function must return a value");
+                    }
+                    _translate = func;
+                }
+            },
+            "trigger": {
+                get: function () {
+                    return _trigger;
+                },
+                set: function (func, arg_this) {
+                    if (typeof func != "function") {
+                        throw ("Must pass in a valid function");
+                    }
+                    if (typeof arg_this == "object") {
+                        _trigger = func.bind(arg_this);
+                    } else {
+                        _trigger = func.bind(owner);
+                    }
+                }
+            },
+            "destroy": {
+                'value': function () {
+                    _parentProcessor = _dataType = _minimum = _maximum = _value = _name = _actions = _update = _translate = _trigger = boundParam = undefined;
+                }
             }
         });
 
@@ -371,69 +366,71 @@ var ParameterManager = function (owner) {
                 });
                 break;
             case "Number":
-                Object.defineProperty(this, "minimum", {
-                    get: function () {
-                        return _minimum;
+                Object.defineProperties(this, {
+                    "minimium": {
+                        get: function () {
+                            return _minimum;
+                        },
+                        set: function () {
+                            throw ("Cannot set the minimum value of PluginParameter");
+                        }
                     },
-                    set: function () {
-                        throw ("Cannot set the minimum value of PluginParameter");
-                    }
-                });
-
-                Object.defineProperty(this, "maximum", {
-                    get: function () {
-                        return _maximum;
-                    },
-                    set: function () {
-                        throw ("Cannot set the maximum value of PluginParameter");
+                    "maximum": {
+                        get: function () {
+                            return _maximum;
+                        },
+                        set: function () {
+                            throw ("Cannot set the maximum value of PluginParameter");
+                        }
                     }
                 });
                 break;
             case "String":
-                Object.defineProperty(this, "default", {
-                    get: function () {
-                        return _default;
-                    },
-                    set: function () {
-                        throw ("Cannot set the default value of PluginParameter");
-                    }
-                });
-
-                Object.defineProperty(this, "value", {
-                    get: function () {
-                        if (boundParam) {
-                            _value = _translate(boundParam.value);
+                Object.defineProperties(this, {
+                    "default": {
+                        get: function () {
+                            return _default;
+                        },
+                        set: function () {
+                            throw ("Cannot set the default value of PluginParameter");
                         }
-                        return _value;
                     },
-                    set: function (newValue) {
-                        switch (_dataType) {
-                            case "String":
-                                if (typeof newValue !== "string") {
-                                    newValue = String(newValue);
-                                }
-                                break;
-                            case "Number":
-                                if (typeof newValue !== "number") {
-                                    newValue = Number(newValue);
-                                }
-                                if (newValue >= _maximum && _maximum !== undefined) {
-                                    newValue = _maximum;
-                                } else if (newValue <= _minimum && _minimum !== undefined) {
-                                    newValue = _minimum;
-                                }
-                                break;
-                        }
-                        if (_value == newValue) {
+                    "value": {
+                        get: function () {
+                            if (boundParam) {
+                                _value = _translate(boundParam.value);
+                            }
+                            return _value;
+                        },
+                        set: function (newValue) {
+                            switch (_dataType) {
+                                case "String":
+                                    if (typeof newValue !== "string") {
+                                        newValue = String(newValue);
+                                    }
+                                    break;
+                                case "Number":
+                                    if (typeof newValue !== "number") {
+                                        newValue = Number(newValue);
+                                    }
+                                    if (newValue >= _maximum && _maximum !== undefined) {
+                                        newValue = _maximum;
+                                    } else if (newValue <= _minimum && _minimum !== undefined) {
+                                        newValue = _minimum;
+                                    }
+                                    break;
+                            }
+                            if (_value == newValue) {
+                                return _value;
+                            }
+                            _value = newValue;
+                            if (boundParam) {
+                                boundParam.value = _update(_value);
+                            }
+                            addAction(_value);
+                            _trigger();
                             return _value;
                         }
-                        _value = newValue;
-                        if (boundParam) {
-                            boundParam.value = _update(_value);
-                        }
-                        addAction(_value);
-                        _trigger();
-                        return _value;
                     }
                 });
                 break;
