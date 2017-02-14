@@ -579,7 +579,6 @@ var ParameterManager = function (owner) {
                         }
                     }
                 });
-                break;
             case "String":
                 Object.defineProperties(this, {
                     "default": {
