@@ -760,9 +760,21 @@ var PluginFactory = function (context, dir) {
                     'value': frameSize
                 });
 
+                function recursiveProcessing(base, list) {
+                    var l = list.length,
+                        i, entry;
+                    for (i = 0; i < l; i++) {
+                        entry = list[i];
+                        base[entry.name].apply(base, entry.parameters);
+                        if (entry.features && entry.features.length > 0) {
+                            recursiveProcessing(base.result[entry.name], entry.features);
+                        }
+                    }
+                }
+
                 function onaudiocallback(data) {
                     //this == Extractor
-                    recursivelyProcess(data, this.features);
+                    recursiveProcessing(data, this.features);
                     this.postFeatures(data.length, JSON.parse(data.toJSON()));
                 }
 
@@ -771,7 +783,7 @@ var PluginFactory = function (context, dir) {
                     if (this.features.length === 0) {
                         this.extractor.clearCallback();
                     } else {
-                        this.extractor.featureCallback(onaudiocallback, this);
+                        this.extractor.frameCallback(onaudiocallback, this);
                     }
                 };
                 this.rejoinExtractor = function () {

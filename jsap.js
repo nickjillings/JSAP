@@ -590,40 +590,40 @@ var ParameterManager = function (owner) {
                     },
                     "value": {
                         get: function () {
-                        if (boundParam) {
-                            _value = _translate(boundParam.value);
-                        }
-                        return _value;
-                    },
-                    set: function (newValue) {
-                        switch (_dataType) {
-                            case "String":
-                                if (typeof newValue !== "string") {
-                                    newValue = String(newValue);
-                                }
-                                break;
-                            case "Number":
-                                if (typeof newValue !== "number") {
-                                    newValue = Number(newValue);
-                                }
-                                if (newValue >= _maximum && _maximum !== undefined) {
-                                    newValue = _maximum;
-                                } else if (newValue <= _minimum && _minimum !== undefined) {
-                                    newValue = _minimum;
-                                }
-                                break;
-                        }
-                        if (_value == newValue) {
+                            if (boundParam) {
+                                _value = _translate(boundParam.value);
+                            }
+                            return _value;
+                        },
+                        set: function (newValue) {
+                            switch (_dataType) {
+                                case "String":
+                                    if (typeof newValue !== "string") {
+                                        newValue = String(newValue);
+                                    }
+                                    break;
+                                case "Number":
+                                    if (typeof newValue !== "number") {
+                                        newValue = Number(newValue);
+                                    }
+                                    if (newValue >= _maximum && _maximum !== undefined) {
+                                        newValue = _maximum;
+                                    } else if (newValue <= _minimum && _minimum !== undefined) {
+                                        newValue = _minimum;
+                                    }
+                                    break;
+                            }
+                            if (_value == newValue) {
+                                return _value;
+                            }
+                            _value = newValue;
+                            if (boundParam) {
+                                boundParam.value = _update(_value);
+                            }
+                            addAction(_value);
+                            _trigger();
                             return _value;
                         }
-                        _value = newValue;
-                        if (boundParam) {
-                            boundParam.value = _update(_value);
-                        }
-                        addAction(_value);
-                        _trigger();
-                        return _value;
-                    }
                     }
                 });
                 break;
@@ -828,9 +828,21 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                 'value': frameSize
             });
 
+            function recursiveProcessing(base, list) {
+                var l = list.length,
+                    i, entry;
+                for (i = 0; i < l; i++) {
+                    entry = list[i];
+                    base[entry.name].apply(base, entry.parameters);
+                    if (entry.features && entry.features.length > 0) {
+                        recursiveProcessing(base.result[entry.name], entry.features);
+                    }
+                }
+            }
+
             function onaudiocallback(data) {
                 //this == Extractor
-                recursivelyProcess(data, this.features);
+                recursiveProcessing(data, this.features);
                 this.postFeatures(data.length, JSON.parse(data.toJSON()));
             }
 
@@ -839,7 +851,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                 if (this.features.length === 0) {
                     this.extractor.clearCallback();
                 } else {
-                    this.extractor.featureCallback(onaudiocallback, this);
+                    this.extractor.frameCallback(onaudiocallback, this);
                 }
             };
         };
@@ -1838,9 +1850,21 @@ var PluginFactory = function (context, dir) {
                     'value': frameSize
                 });
 
+                function recursiveProcessing(base, list) {
+                    var l = list.length,
+                        i, entry;
+                    for (i = 0; i < l; i++) {
+                        entry = list[i];
+                        base[entry.name].apply(base, entry.parameters);
+                        if (entry.features && entry.features.length > 0) {
+                            recursiveProcessing(base.result[entry.name], entry.features);
+                        }
+                    }
+                }
+
                 function onaudiocallback(data) {
                     //this == Extractor
-                    recursivelyProcess(data, this.features);
+                    recursiveProcessing(data, this.features);
                     this.postFeatures(data.length, JSON.parse(data.toJSON()));
                 }
 
@@ -1849,7 +1873,7 @@ var PluginFactory = function (context, dir) {
                     if (this.features.length === 0) {
                         this.extractor.clearCallback();
                     } else {
-                        this.extractor.featureCallback(onaudiocallback, this);
+                        this.extractor.frameCallback(onaudiocallback, this);
                     }
                 };
                 this.rejoinExtractor = function () {
