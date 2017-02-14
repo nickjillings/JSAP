@@ -649,8 +649,16 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
 
             function onaudiocallback(data) {
                 //this == Extractor
+                var message = {
+                    'numberOfChannels': 1,
+                    'results': []
+                };
                 recursiveProcessing(data, this.features);
-                this.postFeatures(data.length, JSON.parse(data.toJSON()));
+                message.results[0] = {
+                    'channel': 0,
+                    'results': JSON.parse(data.toJSON())
+                };
+                this.postFeatures(data.length, message);
             }
 
             this.setFeatures = function (featureList) {
