@@ -11,4 +11,8 @@ engines:
 ratings:
   paths:
   - "src/*.js"
-exclude_paths: []
+  - "feature-worker.js"
+exclude_paths:
+- "jsap.js"
+- "js-xtract/*"
+- "templates/*"
