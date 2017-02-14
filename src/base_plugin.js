@@ -396,7 +396,7 @@ var ParameterManager = function (owner) {
                     return undefined;
                 },
                 set: function (newValue) {
-                    if (_dataType !== "Switch" || _dataType !== "String" || _dataType !== "Number") {
+                    if (_dataType !== "Switch" && _dataType !== "String" && _dataType !== "Number") {
                         throw ("Cannot read non-value PluginParameter");
                     }
                     if (_dataType === "Switch") {

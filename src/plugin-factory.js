@@ -106,11 +106,11 @@ var PluginFactory = function (context, dir) {
 
         this.reconnect = function (new_next) {
             if (new_next !== this.next_node) {
-                if (this.next_node !== undefined && typeof this.next_node.getInputs == "function") {
+                if (this.next_node !== undefined && typeof this.next_node.getInputs === "function") {
                     plugin_node.disconnect(this.next_node.getInputs()[0]);
                 }
                 this.next_node = new_next;
-                if (this.next_node !== undefined && typeof this.next_node.getInputs == "function") {
+                if (this.next_node !== undefined && typeof this.next_node.getInputs === "function") {
                     plugin_node.connect(this.next_node.getInputs()[0]);
                 }
                 return true;
@@ -302,11 +302,11 @@ var PluginFactory = function (context, dir) {
             var param;
             var match = 0;
             for (param in this) {
-                if (e[param] == this[param]) {
+                if (e[param] === this[param]) {
                     match++;
                 }
             }
-            return match == 4;
+            return match === 4;
         }, testObj);
         if (obj) {
             throw ("The plugin must be unique!");
@@ -472,7 +472,7 @@ var PluginFactory = function (context, dir) {
 
             this.requestFeatures = function (requestorInstance, featureObject) {
                 var map = Mappings.find(function (e) {
-                    return (e.outputIndex == this.outputIndex && e.frameSize == this.frameSize);
+                    return (e.outputIndex === this.outputIndex && e.frameSize === this.frameSize);
                 }, featureObject);
                 if (!map) {
                     map = {
@@ -519,7 +519,7 @@ var PluginFactory = function (context, dir) {
                     });
                 } else {
                     var map = Mappings.find(function (e) {
-                        return (e.outputIndex == this.outputIndex && e.frameSize == this.frameSize);
+                        return (e.outputIndex === this.outputIndex && e.frameSize === this.frameSize);
                     }, featureObject);
                     if (!map) {
                         return;
@@ -611,7 +611,7 @@ var PluginFactory = function (context, dir) {
                     var i, param;
 
                     function ao(e) {
-                        return e.name == param;
+                        return e.name === param;
                     }
                     for (param in resultsList) {
                         if (resultsList.hasOwnProperty(param)) {
@@ -657,14 +657,14 @@ var PluginFactory = function (context, dir) {
         };
 
         this.getPluginSender = function (plugin) {
-            if (plugin.constructor == PluginInstance) {
+            if (plugin.constructor === PluginInstance) {
                 plugin = plugin.node;
             }
             return plugin.featureMap.Sender;
         };
 
         this.requestFeatures = function (requestor, source, featureObject) {
-            if (requestor.constructor != PluginInstance) {
+            if (requestor.constructor !== PluginInstance) {
                 requestor = requestor.pluginInstance;
             }
             // Get the source map
@@ -740,7 +740,7 @@ var PluginFactory = function (context, dir) {
 
     this.findStore = function (storeName) {
         return stores.find(function (a) {
-            return a.name == storeName;
+            return a.name === storeName;
         });
     };
 
@@ -774,7 +774,7 @@ var PluginFactory = function (context, dir) {
                 }
 
                 function onaudiocallback(data) {
-                    //this == Extractor
+                    //this === Extractor
                     var message = {
                         'numberOfChannels': 1,
                         'results': []
@@ -832,7 +832,7 @@ var PluginFactory = function (context, dir) {
                     this.features = featureList;
                     if (featureList && featureList.length > 0) {
                         worker.onmessage = function (e) {
-                            if (e.data.state == 1) {
+                            if (e.data.state === 1) {
                                 worker.onmessage = response.bind(self);
                                 self.extractor.onaudioprocess = onaudiocallback.bind(self);
                             } else {
