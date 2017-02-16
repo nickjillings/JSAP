@@ -5544,12 +5544,6 @@ var PeakSpectrumData = function (N, sampleRate, parent) {
     SpectrumData.call(this, N);
 
     Object.defineProperties(this, {
-        "features": {
-            'get': function () {
-                return this.constructor.prototype.features;
-            },
-            'set': function () {}
-        },
         "spectral_inharmonicity": {
             'value': function () {
                 if (this.result.spectral_inharmonicity === undefined) {
@@ -5589,12 +5583,6 @@ var HarmonicSpectrumData = function (N, sampleRate, parent) {
     PeakSpectrumData.call(this, N);
 
     Object.defineProperties(this, {
-        "features": {
-            'get': function () {
-                return this.constructor.prototype.features;
-            },
-            'set': function () {}
-        },
         "odd_even_ratio": {
             'value': function () {
                 if (this.result.odd_even_ratio === undefined) {
