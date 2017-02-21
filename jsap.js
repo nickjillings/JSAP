@@ -298,13 +298,13 @@ BasePlugin.prototype.setParametersByObject = function (object) {
 var ParameterManager = function (owner) {
     var parameterList = [];
 
-    function findPlugin(name) {
+    function findParameter(name) {
         return parameterList.find(function (e) {
             return e.name === name;
         });
     }
 
-    function findPluginIndex(name) {
+    function findParameterIndex(name) {
         return parameterList.findIndex(function (e) {
             return e.name === name;
         });
@@ -318,16 +318,322 @@ var ParameterManager = function (owner) {
         return obj;
     }
 
-    function createParameter(dataType, name, defaultValue, minimum, maximum) {
-        var p = new PluginParameter(owner, dataType, name, defaultValue, minimum, maximum);
-        parameterList.push(p);
-        return p;
+    function addParameter(param) {
+        var exists = parameterList.findIndex(function (e) {
+            return e === param;
+        }, param);
+        if (exists === -1) {
+            parameterList.push(param);
+        }
+        return param;
     }
 
+    function PluginParameter(owner, name, dataType) {
+        var update, translate, trigger, audioParam, _ActionList = [];
+        update = translate = function (v) {
+            return v;
+        };
+        trigger = function () {};
+        Object.defineProperties(this, {
+            "name": {
+                "value": name
+            },
+            "owner": {
+                "value": owner
+            },
+            "update": {
+                "get": function () {
+                    return update;
+                },
+                "set": function (f) {
+                    if (typeof f !== "function") {
+                        throw ("Must be a callback function");
+                    }
+                    if (f(0) === undefined) {
+                        throw ("Function must return a value");
+                    }
+                    update = f;
+                }
+            },
+            "translate": {
+                "get": function () {
+                    return translate;
+                },
+                "set": function (f) {
+                    if (typeof f !== "function") {
+                        throw ("Must be a callback function");
+                    }
+                    if (f(0) === undefined) {
+                        throw ("Function must return a value");
+                    }
+                    translate = f;
+                }
+            },
+            "trigger": {
+                "get": function () {
+                    return trigger;
+                },
+                "set": function (f, arg_this) {
+                    if (typeof f !== "function") {
+                        throw ("Must be a callback function");
+                    }
+                    if (typeof arg_this === "object") {
+                        trigger = f.bind(arg_this);
+                    } else {
+                        trigger = f;
+                    }
+                }
+            },
+            "bindToAudioParam": {
+                "value": function (ap) {
+                    if (typeof ap !== "object" || ap.hasOwnProperty("value") === false) {
+                        throw ("Must be an AudioParam object from an AudioNode");
+                    }
+                    audioParam = ap;
+                }
+            },
+            "boundAudioParam": {
+                "get": function () {
+                    return audioParam;
+                }
+            },
+            "actionList": {
+                "value": _ActionList
+            }
+        });
+    }
+
+    function NumberParameter(owner, name, defaultValue, minimum, maximum) {
+        PluginParameter.call(this, owner, name, "Number");
+        var _value = defaultValue,
+            _stepSize;
+
+        function addAction(v) {
+            var entry = {
+                'time': new Date(),
+                'value': v
+            };
+            this.actionList.push(entry);
+        }
+
+        Object.defineProperties(this, {
+            "destroy": {
+                "value": function () {
+                    owner = name = defaultValue = minimum = maximum = _value = _stepSize = undefined;
+                }
+            },
+            "minimum": {
+                "value": minimum
+            },
+            "maximum": {
+                "value": maximum
+            },
+            "defaultValue": {
+                "value": defaultValue
+            },
+            "value": {
+                "get": function () {
+                    if (this.boundAudioParam) {
+                        return this.translate(this.boundAudioParam.value);
+                    }
+                    return _value;
+                },
+                "set": function (v) {
+                    if (this.minimum) {
+                        v = Math.max(v, this.minimum);
+                    }
+                    if (this.maximum) {
+                        v = Math.min(v, this.maximum);
+                    }
+                    if (_stepSize) {
+                        v = Math.round(v / _stepSize);
+                        v = v * _stepSize;
+                    }
+                    if (this.boundAudioParam) {
+                        this.boundAudioParam.value = this.update(v);
+                    }
+                    _value = v;
+                    this.trigger();
+                }
+            },
+            "stepSize": {
+                "get": function () {
+                    return _stepSize;
+                },
+                "set": function (n) {
+                    if (!isFinite(n) || n < 0) {
+                        throw ("Invalid step size");
+                    }
+                    _stepSize = n;
+                }
+            }
+        });
+    }
+    NumberParameter.prototype = Object.create(PluginParameter.prototype);
+    NumberParameter.prototype.constructor = NumberParameter;
+
+    function StringParameter(owner, name, defaultValue, maxLength) {
+        PluginParameter.call(this, owner, name, "String");
+        var _value = defaultValue;
+
+        function addAction(v) {
+            var entry = {
+                'time': new Date(),
+                'value': v
+            };
+            this.actionList.push(entry);
+        }
+
+        Object.defineProperties(this, {
+            "destroy": {
+                "value": function () {
+                    owner = name = defaultValue = maxLength = _value = undefined;
+                }
+            },
+            "maxLength": {
+                "value": maxLength
+            },
+            "defaultValue": {
+                "value": defaultValue
+            },
+            "value": {
+                "get": function () {
+                    if (this.boundAudioParam) {
+                        return this.translate(this.boundAudioParam.value);
+                    }
+                    return _value;
+                },
+                "set": function (v) {
+                    if (maxLength) {
+                        if (v.length > maxLength) {
+                            throw ("String longer than " + maxLength + " characters");
+                        }
+                    }
+                    if (this.boundAudioParam) {
+                        this.boundAudioParam.value = this.update(v);
+                    }
+                    _value = v;
+                    this.trigger();
+                }
+            }
+        });
+    }
+    StringParameter.prototype = Object.create(PluginParameter.prototype);
+    StringParameter.prototype.constructor = StringParameter;
+
+    function ButtonParameter(owner, name) {
+        PluginParameter.call(this, owner, name, "Button");
+        var onclick = function () {};
+
+        function addAction(v) {
+            var entry = {
+                'time': new Date(),
+                'value': "clicked"
+            };
+            this.actionList.push(entry);
+        }
+
+        Object.defineProperties(this, {
+            "destroy": {
+                "value": function () {
+                    owner = name = undefined;
+                }
+            },
+            "onclick": {
+                "get": function () {
+                    return onclick;
+                },
+                "set": function (f) {
+                    if (typeof f !== "function") {
+                        throw ("onclick must be a function");
+                    }
+                    onclick = f;
+                }
+            }
+        });
+    }
+    ButtonParameter.prototype = Object.create(PluginParameter.prototype);
+    ButtonParameter.prototype.constructor = ButtonParameter;
+
+    function SwitchParameter(owner, name, defaultValue, minState, maxState) {
+        PluginParameter.call(this, owner, name, "Button");
+        var onclick = function () {};
+        var _value = defaultValue;
+
+        function addAction(v) {
+            var entry = {
+                'time': new Date(),
+                'value': v
+            };
+            this.actionList.push(entry);
+        }
+
+        function setV(v) {
+            if (this.boundAudioParam) {
+                this.boundAudioParam.value = this.update(v);
+            }
+            addAction(v);
+            this.trigger();
+            _value = v;
+            return v;
+        }
+
+        Object.defineProperties(this, {
+            "destroy": {
+                "value": function () {
+                    owner = name = undefined;
+                }
+            },
+            "defaultValue": {
+                "value": defaultValue
+            },
+            "minState": {
+                "value": minState
+            },
+            "maxState": {
+                "value": maxState
+            },
+            "value": {
+                "get": function () {
+                    if (this.boundAudioParam) {
+                        return this.translate(this.boundAudioParam.value);
+                    }
+                    return _value;
+                },
+                "set": function (v) {
+                    if (v < minState) {
+                        throw ("Set value is less than " + minState);
+                    }
+                    if (v > maxState) {
+                        throw ("Set value is greater than " + maxState);
+                    }
+                    return setV(v);
+                }
+            },
+            "increment": {
+                "value": function () {
+                    var v = _value++;
+                    if (v > maxState) {
+                        v = minState;
+                    }
+                    return setV(v);
+                }
+            },
+            "deccrement": {
+                "value": function () {
+                    var v = _value--;
+                    if (v < minState) {
+                        v = maxState;
+                    }
+                    return setV(v);
+                }
+            }
+        });
+    }
+    SwitchParameter.prototype = Object.create(PluginParameter.prototype);
+    SwitchParameter.prototype.constructor = SwitchParameter;
+    /*
     function PluginParameter(owner, dataType, name, defaultValue, minimum, maximum) {
-        /* Plugin Private Variables
-              These are accessed by the public facing getter/setter
-        */
 
         var _parentProcessor = owner,
             _dataType, _minimum, _maximum, _value, _name, _actions, _update, _translate, _trigger, boundParam, _default;
@@ -601,11 +907,63 @@ var ParameterManager = function (owner) {
             }
         });
     }
-
+*/
     Object.defineProperties(this, {
+        'createNumberParameter': {
+            "value": function (name, defaultValue, minimum, maximum) {
+                if (typeof name !== "string" || typeof defaultValue !== "number" || (minimum !== undefined && typeof minimum !== "number") || (maximum !== undefined && typeof maximum !== "number")) {
+                    throw ("Invlid constructor");
+                }
+                if (findParameterIndex(name) !== -1) {
+                    throw ("Parameter with name '" + name + "' already exists");
+                }
+                var param = new NumberParameter(name, defaultValue, minimum, maximum);
+                addParameter(param);
+                return param;
+            }
+        },
+        'createStringParameter': {
+            "value": function (name, defaultValue, maxLength) {
+                if (typeof name !== "string" || typeof defaultValue !== "number" || (maxLength !== undefined && typeof maxLength !== "number")) {
+                    throw ("Invlid constructor");
+                }
+                if (findParameterIndex(name) !== -1) {
+                    throw ("Parameter with name '" + name + "' already exists");
+                }
+                var param = new StringParameter(owner, name, defaultValue, maxLength);
+                addParameter(param);
+                return param;
+            }
+        },
+        'createButtonParameter': {
+            "value": function (name) {
+                if (typeof name !== "string") {
+                    throw ("Invalid constructor");
+                }
+                if (findParameterIndex(name) !== -1) {
+                    throw ("Parameter with name '" + name + "' already exists");
+                }
+                var param = new ButtonParameter(owner, name);
+                addParameter(param);
+                return param;
+            }
+        },
+        'createSwitchParameter': {
+            "value": function (name, defaultValue, minState, maxState) {
+                if (typeof name !== "string" || typeof defaultValue !== "number" || typeof minState !== "number" || typeof maxState !== "number") {
+                    throw ("Invlid constructor");
+                }
+                if (findParameterIndex(name) !== -1) {
+                    throw ("Parameter with name '" + name + "' already exists");
+                }
+                var param = new SwitchParameter(owner, name, defaultValue, minState, maxState);
+                addParameter(param);
+                return param;
+            }
+        },
         'createParameter': {
-            'value': function (dataType, name, defaultValue, minimum, maximum) {
-                return createParameter(dataType, name, defaultValue, minimum, maximum);
+            'value': function () {
+                throw ("This function is now deprecated");
             }
         },
         'getParameterName': {
@@ -620,7 +978,7 @@ var ParameterManager = function (owner) {
         },
         'getParameterByName': {
             'value': function (name) {
-                return findPlugin(name);
+                return findParameter(name);
             }
         },
         'getParameterObject': {
@@ -630,7 +988,7 @@ var ParameterManager = function (owner) {
         },
         'setParameterByName': {
             'value': function (n, v) {
-                var parameter = findPlugin(n);
+                var parameter = findParameter(n);
                 if (!parameter) {
                     return;
                 }
