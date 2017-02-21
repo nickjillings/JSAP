@@ -239,7 +239,7 @@ var ParameterManager = function (owner) {
             },
             "bindToAudioParam": {
                 "value": function (ap) {
-                    if (typeof ap !== "object" || ap.hasOwnProperty("value") === false) {
+                    if (typeof ap !== "object" || ap.value === undefined) {
                         throw ("Must be an AudioParam object from an AudioNode");
                     }
                     audioParam = ap;
@@ -770,7 +770,7 @@ var ParameterManager = function (owner) {
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
-                var param = new NumberParameter(name, defaultValue, minimum, maximum);
+                var param = new NumberParameter(owner, name, defaultValue, minimum, maximum);
                 addParameter(param);
                 return param;
             }
