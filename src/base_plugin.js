@@ -226,15 +226,11 @@ var ParameterManager = function (owner) {
                 "get": function () {
                     return trigger;
                 },
-                "set": function (f, arg_this) {
+                "set": function (f) {
                     if (typeof f !== "function") {
                         throw ("Must be a callback function");
                     }
-                    if (typeof arg_this === "object") {
-                        trigger = f.bind(arg_this);
-                    } else {
-                        trigger = f;
-                    }
+                    trigger = f;
                 }
             },
             "bindToAudioParam": {
