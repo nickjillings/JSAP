@@ -2572,6 +2572,103 @@ var PluginFactory = function (context, dir) {
 /*globals window, console, Float32Array, Float64Array, Int32Array */
 /*globals inverseTransform, transform */
 
+var jsXtract = (function () {
+
+    function searchMapProperties(map, properties) {
+        var match = map.find(function (e) {
+            for (var prop in properties) {
+                if (e[prop] !== properties[prop]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return match;
+    }
+
+    var dct_map = {
+        parent: this,
+        store: [],
+        createCoefficients: function (N) {
+            var match = searchMapProperties(this.store, {
+                N: N
+            });
+            if (!match) {
+                match = {
+                    N: N,
+                    data: xtract_init_dct(N)
+                };
+                this.store.push(match);
+            }
+            return match.data;
+        }
+    };
+
+    var mfcc_map = {
+        parent: this,
+        store: [],
+        createCoefficients: function (N, nyquist, style, freq_min, freq_max, freq_bands) {
+            var search = {
+                N: N,
+                nyquist: nyquist,
+                style: style,
+                freq_min: freq_min,
+                freq_max: freq_max,
+                freq_bands: freq_bands
+            };
+            var match = searchMapProperties(this.store, search);
+            if (!match) {
+                match = search;
+                match.data = xtract_init_mfcc(N, nyquist, style, freq_min, freq_max, freq_bands);
+                this.store.push(match);
+            }
+            return match.data;
+        }
+    };
+
+    var bark_map = {
+        parent: this,
+        store: [],
+        createCoefficients: function (N, sampleRate, numBands) {
+            var search = {
+                N: N,
+                sampleRate: sampleRate,
+                numBands: numBands
+            };
+            var match = searchMapProperties(this.store, search);
+            if (!match) {
+                match = search;
+                match.data = xtract_init_bark(N, sampleRate, numBands);
+                this.store.push(match);
+            }
+            return match.data;
+        }
+    };
+
+    var pub_obj = {};
+    Object.defineProperties(pub_obj, {
+        "createDctCoefficients": {
+            "value": function (N) {
+                return dct_map.createCoefficients(N);
+            }
+        },
+        "createMfccCoefficients": {
+            "value": function (N, nyquist, style, freq_min, freq_max, freq_bands) {
+                return mfcc_map.createCoefficients(N, nyquist, style, freq_min, freq_max, freq_bands);
+            }
+        },
+        "createBarkCoefficients": {
+            "value": function (N, sampleRate, numBands) {
+                if (typeof numBands !== "number" || numBands < 0 || numBands > 26) {
+                    numBands = 26;
+                }
+                return bark_map.createCoefficients(N, sampleRate, numBands);
+            }
+        }
+    });
+    return pub_obj;
+})();
+
 function xtract_is_denormal(num) {
     if (Math.abs(num) <= 2.2250738585072014e-308) {
         return true;
@@ -2580,16 +2677,31 @@ function xtract_is_denormal(num) {
 }
 
 function xtract_array_sum(data) {
-    var sum = 0;
-    for (var n = 0; n < data.length; n++) {
+    if (data.reduce) {
+        return data.reduce(function (a, b) {
+            return a += b;
+        }, 0);
+    }
+    var sum = 0,
+        l = data.length;
+    for (var n = 0; n < l; n++) {
         sum += data[n];
     }
     return sum;
 }
 
 function xtract_array_min(data) {
-    var min = Infinity;
-    for (var n = 0; n < data.length; n++) {
+    if (data.reduce) {
+        return data.reduce(function (a, b) {
+            if (b < a) {
+                return b;
+            }
+            return a;
+        }, Infinity);
+    }
+    var min = Infinity,
+        l = data.length;
+    for (var n = 0; n < l; n++) {
         if (data[n] < min) {
             min = data[n];
         }
@@ -2598,8 +2710,17 @@ function xtract_array_min(data) {
 }
 
 function xtract_array_max(data) {
-    var max = data[0];
-    for (var n = 1; n < data.length; n++) {
+    if (data.reduce) {
+        return data.reduce(function (a, b) {
+            if (b > a) {
+                return b;
+            }
+            return a;
+        }, Infinity);
+    }
+    var max = data[0],
+        l = data.length;
+    for (var n = 1; n < l; n++) {
         if (data[n] > max) {
             max = data[n];
         }
@@ -2607,15 +2728,17 @@ function xtract_array_max(data) {
     return max;
 }
 
-function xtract_array_normalise(data) {
-    var max = xtract_array_max(data);
-    if (max === 1.0) {
-        return data;
-    }
-    for (var n = 0; n < data.length; n++) {
-        data[n] /= max;
+function xtract_array_scale(data, factor) {
+    var i = 0,
+        l = data.length;
+    for (i = 0; i < l; i++) {
+        data[i] *= factor;
     }
     return data;
+}
+
+function xtract_array_normalise(data) {
+    return xtract_array_scale(data, 1.0 / xtract_array_max(data));
 }
 
 function xtract_array_bound(data, min, max) {
@@ -2878,10 +3001,16 @@ function xtract_variance(array, mean) {
         mean = xtract_mean(array);
     }
     var result = 0.0;
-    for (var n = 0; n < array.length; n++) {
-        result += Math.pow(array[n] - mean, 2);
+    if (array.reduce) {
+        result = array.reduce(function (a, b) {
+            a += Math.pow(b - mean, 2);
+        }, 0);
+    } else {
+        for (var n = 0; n < array.length; n++) {
+            result += Math.pow(array[n] - mean, 2);
+        }
     }
-    result = result /= (array.length - 1);
+    result /= (array.length - 1);
     return result;
 }
 
@@ -2897,11 +3026,16 @@ function xtract_average_deviation(array, mean) {
         mean = xtract_mean(array);
     }
     var result = 0.0;
-    for (var n = 0; n < array.length; n++) {
-        result += Math.abs(array[n] - mean);
+    if (array.reduce) {
+        result = array.reduce(function (a, b) {
+            return a += Math.abs(b - mean);
+        }, 0);
+    } else {
+        for (var n = 0; n < array.length; n++) {
+            result += Math.abs(array[n] - mean);
+        }
     }
-    result /= array.length;
-    return result;
+    return result / array.length;
 }
 
 function xtract_skewness(array, mean, standard_deviation) {
@@ -2912,8 +3046,14 @@ function xtract_skewness(array, mean, standard_deviation) {
         standard_deviation = xtract_standard_deviation(array, xtract_variance(array, mean));
     }
     var result = 0.0;
-    for (var n = 0; n < array.length; n++) {
-        result += Math.pow((array[n] - mean) / standard_deviation, 3);
+    if (array.reduce) {
+        result = array.reduce(function (a, b) {
+            return a += Math.pow((a - mean) / standard_deviation, 3);
+        }, 0);
+    } else {
+        for (var n = 0; n < array.length; n++) {
+            result += Math.pow((array[n] - mean) / standard_deviation, 3);
+        }
     }
     result /= array.length;
     return result;
@@ -2927,8 +3067,14 @@ function xtract_kurtosis(array, mean, standard_deviation) {
         standard_deviation = xtract_standard_deviation(array, xtract_variance(array, mean));
     }
     var result = 0.0;
-    for (var n = 0; n < array.length; n++) {
-        result += Math.pow((array[n] - mean) / standard_deviation, 4);
+    if (array.reduce) {
+        result = array.reduce(function (a, b) {
+            return a += Math.pow((a - mean) / standard_deviation, 4);
+        }, 0);
+    } else {
+        for (var n = 0; n < array.length; n++) {
+            result += Math.pow((array[n] - mean) / standard_deviation, 4);
+        }
     }
     result /= array.length;
     return result;
@@ -2939,11 +3085,7 @@ function xtract_spectral_centroid(spectrum) {
     var n = N >> 1;
     var amps = spectrum.subarray(0, n);
     var freqs = spectrum.subarray(n);
-    var Amps = new Float64Array(n);
-    for (var i = 0; i < n; i++) {
-        Amps[i] = amps[i];
-    }
-    amps = xtract_array_normalise(Amps);
+    amps = xtract_array_normalise(amps);
     var A_d = xtract_array_sum(amps) / n;
     if (A_d === 0.0) {
         return 0.0;
@@ -3225,8 +3367,14 @@ function xtract_rolloff(spectrum, sampleRate, threshold) {
 
 function xtract_loudness(barkBandsArray) {
     var result = 0;
-    for (var n = 0; n < barkBandsArray.length; n++) {
-        result += Math.pow(barkBandsArray[n], 0.23);
+    if (barkBandsArray.reduce) {
+        result = barkBandsArray.reduce(function (a, b) {
+            return a += Math.pow(b, 0.23);
+        }, 0);
+    } else {
+        for (var n = 0; n < barkBandsArray.length; n++) {
+            result += Math.pow(barkBandsArray[n], 0.23);
+        }
     }
     return result;
 }
@@ -3240,7 +3388,6 @@ function xtract_flatness(spectrum) {
     var N = spectrum.length;
     var K = N >> 1;
     var amps = spectrum.subarray(0, K);
-
     for (var n = 0; n < K; n++) {
         if (amps[n] !== 0.0) {
             if (xtract_is_denormal(num)) {
@@ -3296,6 +3443,11 @@ function xtract_noisiness(h, p) {
 
 function xtract_rms_amplitude(timeArray) {
     var result = 0;
+    if (timeArray.reduce) {
+        result = timeArray.reduce(function (a, b) {
+            return a += b * b;
+        }, 0);
+    }
     for (var n = 0; n < timeArray.length; n++) {
         result += timeArray[n] * timeArray[n];
     }
@@ -3395,29 +3547,59 @@ function xtract_spectral_slope(spectrum) {
 }
 
 function xtract_lowest_value(data, threshold) {
-    if (typeof threshold !== "number") {
-        threshold = -Infinity;
-    }
-    var result = +Infinity;
-    for (var n = 0; n < data.length; n++) {
-        if (data[n] > threshold) {
-            result = Math.min(result, data[n]);
+    if (data.filter && data.reduce) {
+        var interim;
+        if (typeof threshold !== "number") {
+            interim = data.filter(function (a) {
+                return a > threshold;
+            });
+            if (interim.length === 0) {
+                return +Infinity;
+            }
+        } else {
+            interim = data;
         }
+        return xtract_array_min(interim);
+    } else {
+        if (typeof threshold !== "number") {
+            threshold = -Infinity;
+        }
+        var result = +Infinity;
+        for (var n = 0; n < data.length; n++) {
+            if (data[n] > threshold) {
+                result = Math.min(result, data[n]);
+            }
+        }
+        return result;
     }
-    return result;
 }
 
 function xtract_highest_value(data, threshold) {
-    if (typeof threshold !== "number") {
-        threshold = +Infinity;
-    }
-    var result = -Infinity;
-    for (var n = 0; n < data.length; n++) {
-        if (data[n] >= threshold) {
-            result = Math.max(result, data[n]);
+    if (data.filter && data.reduce) {
+        var interim;
+        if (typeof threshold !== "number") {
+            interim = data.filter(function (a) {
+                return a >= threshold;
+            });
+            if (interim.length === 0) {
+                return +Infinity;
+            }
+        } else {
+            interim = data;
         }
+        return xtract_array_max(interim);
+    } else {
+        if (typeof threshold !== "number") {
+            threshold = -Infinity;
+        }
+        var result = +Infinity;
+        for (var n = 0; n < data.length; n++) {
+            if (data[n] >= threshold) {
+                result = Math.max(result, data[n]);
+            }
+        }
+        return result;
     }
-    return result;
 }
 
 function xtract_sum(data) {
@@ -3426,6 +3608,14 @@ function xtract_sum(data) {
 
 function xtract_nonzero_count(data) {
     var count = 0;
+    if (data.reduce) {
+        return data.reduce(function (a, b) {
+            if (b !== 0) {
+                a++;
+            }
+            return a;
+        });
+    }
     for (var n = 0; n < data.length; n++) {
         if (data[n] !== 0) {
             count++;
@@ -4085,10 +4275,19 @@ function xtract_mfcc(spectrum, mfcc) {
 function xtract_dct(array) {
     var N = array.length;
     var result = new Float64Array(N);
-    for (var n = 0; n < N; n++) {
-        var nN = n / N;
-        for (var m = 0; m < N; m++) {
-            result[n] += array[m] * Math.cos(Math.PI * nN * (m + 0.5));
+    if (array.reduce) {
+        result.forEach(function (e, i, a) {
+            var nN = i / N;
+            a[i] = array.reduce(function (r, d, m) {
+                return r += d * Math.cos(Math.PI * nN * (m + 0.5));
+            });
+        });
+    } else {
+        for (var n = 0; n < N; n++) {
+            var nN = n / N;
+            for (var m = 0; m < N; m++) {
+                result[n] += array[m] * Math.cos(Math.PI * nN * (m + 0.5));
+            }
         }
     }
     return result;
@@ -4101,9 +4300,17 @@ function xtract_dct_2(array, dct) {
     }
     var result = new Float64Array(N);
     result[0] = xtract_array_sum(array);
-    for (var k = 1; k < N; k++) {
-        for (var n = 0; n < N; n++) {
-            result[k] += array[n] * dct.wt[k][n];
+    if (result.forEach && array.reduce) {
+        result.forEach(function (e, k, ar) {
+            ar[k] = array.reduce(function (a, b, n) {
+                return a += b * dct.wt[k][n];
+            });
+        });
+    } else {
+        for (var k = 1; k < N; k++) {
+            for (var n = 0; n < N; n++) {
+                result[k] += array[n] * dct.wt[k][n];
+            }
         }
     }
     return result;
@@ -4943,101 +5150,6 @@ function convolveComplex(xreal, ximag, yreal, yimag, outreal, outimag) {
 /*globals xtract_init_dct, xtract_init_mfcc, xtract_init_bark */
 
 // Create the Singleton
-var jsXtract = (function () {
-
-    function searchMapProperties(map, properties) {
-        var match = map.find(function (e) {
-            for (var prop in properties) {
-                if (e[prop] !== properties[prop]) {
-                    return false;
-                }
-            }
-            return true;
-        });
-        return match;
-    }
-
-    var dct_map = {
-        parent: this,
-        store: [],
-        createCoefficients: function (N) {
-            var match = searchMapProperties(this.store, {
-                N: N
-            });
-            if (!match) {
-                match = {
-                    N: N,
-                    data: xtract_init_dct(N)
-                };
-                this.store.push(match);
-            }
-            return match.data;
-        }
-    };
-
-    var mfcc_map = {
-        parent: this,
-        store: [],
-        createCoefficients: function (N, nyquist, style, freq_min, freq_max, freq_bands) {
-            var search = {
-                N: N,
-                nyquist: nyquist,
-                style: style,
-                freq_min: freq_min,
-                freq_max: freq_max,
-                freq_bands: freq_bands
-            };
-            var match = searchMapProperties(this.store, search);
-            if (!match) {
-                match = search;
-                match.data = xtract_init_mfcc(N, nyquist, style, freq_min, freq_max, freq_bands);
-                this.store.push(match);
-            }
-            return match.data;
-        }
-    };
-
-    var bark_map = {
-        parent: this,
-        store: [],
-        createCoefficients: function (N, sampleRate, numBands) {
-            var search = {
-                N: N,
-                sampleRate: sampleRate,
-                numBands: numBands
-            };
-            var match = searchMapProperties(this.store, search);
-            if (!match) {
-                match = search;
-                match.data = xtract_init_bark(N, sampleRate, numBands);
-                this.store.push(match);
-            }
-            return match.data;
-        }
-    };
-    var pub_obj = {};
-    Object.defineProperties(pub_obj, {
-        "createDctCoefficients": {
-            "value": function (N) {
-                return dct_map.createCoefficients(N);
-            }
-        },
-        "createMfccCoefficients": {
-            "value": function (N, nyquist, style, freq_min, freq_max, freq_bands) {
-                return mfcc_map.createCoefficients(N, nyquist, style, freq_min, freq_max, freq_bands);
-            }
-        },
-        "createBarkCoefficients": {
-            "value": function (N, sampleRate, numBands) {
-                if (typeof numBands !== "number" || numBands < 0 || numBands > 26) {
-                    numBands = 26;
-                }
-                return bark_map.createCoefficients(N, sampleRate, numBands);
-            }
-        }
-    });
-    return pub_obj;
-})();
 var DataProto = function (N, sampleRate) {
     var _result = {},
         _data = new Float64Array(N);
