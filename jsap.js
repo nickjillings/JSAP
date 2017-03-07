@@ -2697,7 +2697,7 @@ function xtract_array_min(data) {
                 return b;
             }
             return a;
-        }, Infinity);
+        }, data[0]);
     }
     var min = Infinity,
         l = data.length;
@@ -2716,7 +2716,7 @@ function xtract_array_max(data) {
                 return b;
             }
             return a;
-        }, Infinity);
+        }, data[0]);
     }
     var max = data[0],
         l = data.length;
