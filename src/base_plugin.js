@@ -44,6 +44,8 @@ var BasePlugin = function (factory, owner) {
         return true;
     };
 
+    this.start = this.stop = this.onloaded = this.onunloaded = this.deconstruct = function () {};
+
     Object.defineProperties(this, {
         "numInputs": {
             get: function () {
@@ -95,57 +97,57 @@ var BasePlugin = function (factory, owner) {
             set: function () {
                 throw ("Illegal attempt to modify BasePlugin");
             }
+        },
+        "connect": {
+            "value": function (dest) {
+                this.outputs[0].connect(dest.inpt ? dest.input : dest);
+            }
+        },
+        "disconnect": {
+            "value": function (dest) {
+                if (dest === undefined) {
+                    this.outputs[0].disconnect();
+                } else {
+                    this.outputs[0].disconnect(dest.input ? dest.input : dest);
+                }
+            }
+        },
+        "getInputs": {
+            "value": function () {
+                return this.inputs;
+            }
+        },
+        "getOutputs": {
+            "value": function () {
+                return this.outputs;
+            }
+        },
+        "getParameterName": {
+            "value": function () {
+                return this.parameters.getParameterNames();
+            }
+        },
+        "getParameterByName": {
+            "value": function () {
+                return this.parameters.getParameterByName();
+            }
+        },
+        "getParameterObject": {
+            "value": function () {
+                return this.parameters.getParameterObject();
+            }
+        },
+        "setParameterByName": {
+            "value": function (name, value) {
+                return this.parameters.setParameterByName(name, value);
+            }
+        },
+        "setParametersByObject": {
+            "value": function (object) {
+                return this.parameters.setParametersByObject(object);
+            }
         }
     });
-};
-
-BasePlugin.prototype.connect = function (dest) {
-    this.outputs[0].connect(dest.inpt ? dest.input : dest);
-};
-
-BasePlugin.prototype.disconnect = function (dest) {
-    if (dest === undefined) {
-        this.outputs[0].disconnect();
-    } else {
-        this.outputs[0].disconnect(dest.input ? dest.input : dest);
-    }
-};
-
-BasePlugin.prototype.getInputs = function () {
-    return this.inputs;
-};
-BasePlugin.prototype.getOutputs = function () {
-    return this.outputs;
-};
-
-BasePlugin.prototype.start = function () {};
-BasePlugin.prototype.stop = function () {};
-
-BasePlugin.prototype.onloaded = function () {};
-BasePlugin.prototype.onunloaded = function () {};
-BasePlugin.prototype.deconstruct = function () {};
-
-BasePlugin.prototype.getParameterNames = function () {
-    return this.parameters.getParameterNames();
-};
-
-BasePlugin.prototype.getParameterByName = function (name) {
-    return this.parameters.getParameterByName(name);
-};
-
-BasePlugin.prototype.getParameterObject = function () {
-    return this.parameters.getParameterObject();
-};
-
-BasePlugin.prototype.setParameterByName = function (name, value) {
-    return this.parameters.setParameterByName(name, value);
-};
-
-BasePlugin.prototype.setParametersByObject = function (object) {
-    // Set a parameter by passing a paired tuple object of the parameter name with the value
-    // For instance, the Volume Control could use object = {volume: 0.5}
-    // The LowPass could use object = {gain: 0.5, frequency: 1000, Q: 1.3}
-    return this.parameters.setParametersByObject(object);
 };
 
 var ParameterManager = function (owner) {
