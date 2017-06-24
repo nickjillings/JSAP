@@ -922,7 +922,7 @@ var ParameterManager = function (owner) {
         },
         'createStringParameter': {
             "value": function (name, defaultValue, maxLength) {
-                if (typeof name !== "string" || typeof defaultValue !== "number" || (maxLength !== undefined && typeof maxLength !== "number")) {
+                if (typeof name !== "string" || typeof defaultValue !== "string" || (maxLength !== undefined && typeof maxLength !== "number")) {
                     throw ("Invlid constructor");
                 }
                 if (findParameterIndex(name) !== -1) {
