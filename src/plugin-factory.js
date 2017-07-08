@@ -1111,24 +1111,23 @@ var PluginFactory = function (context, dir) {
                 plugin_object.node.onloaded.call(plugin_object.node);
             }
         };
-
-        Object.defineProperty(this, "name", {
-            get: function () {
-                return factoryName;
-            },
-            set: function (name) {
-                if (typeof name === "string") {
-                    factoryName = name;
-                }
-                return factoryName;
-            }
-        });
         Object.defineProperties(this, {
             'chainStart': {
                 'value': chainStart
             },
             'chainStop': {
                 'value': chainStop
+            },
+            'name': {
+                get: function () {
+                    return factoryName;
+                },
+                set: function (name) {
+                    if (typeof name === "string") {
+                        factoryName = name;
+                    }
+                    return factoryName;
+                }
             }
         });
     };
