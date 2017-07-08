@@ -10,6 +10,9 @@ engines:
       mass_threshold: 50
   eslint:
     enabled: true
+    no-native-reassign:
+      exceptions:
+      - "onmessage"
   fixme:
     enabled: true
 ratings:

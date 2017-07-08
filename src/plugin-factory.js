@@ -767,6 +767,8 @@ var PluginFactory = function (context, dir) {
                     'value': frameSize
                 });
 
+                var recursiveProcessing = owner.recursiveProcessing;
+                /*
                 function recursiveProcessing(base, list) {
                     var l = list.length,
                         i, entry;
@@ -778,7 +780,7 @@ var PluginFactory = function (context, dir) {
                         }
                     }
                 }
-
+                */
                 function onaudiocallback(data) {
                     //this === Extractor
                     var message = {
@@ -1111,6 +1113,19 @@ var PluginFactory = function (context, dir) {
                 plugin_object.node.onloaded.call(plugin_object.node);
             }
         };
+
+        function recursiveProcessing(base, list) {
+            var l = list.length,
+                i, entry;
+            for (i = 0; i < l; i++) {
+                entry = list[i];
+                base[entry.name].apply(base, entry.parameters);
+                if (entry.features && entry.features.length > 0) {
+                    recursiveProcessing(base.result[entry.name], entry.features);
+                }
+            }
+        }
+
         Object.defineProperties(this, {
             'chainStart': {
                 'value': chainStart
@@ -1119,14 +1134,19 @@ var PluginFactory = function (context, dir) {
                 'value': chainStop
             },
             'name': {
-                get: function () {
+                'get': function () {
                     return factoryName;
                 },
-                set: function (name) {
+                'set': function (name) {
                     if (typeof name === "string") {
                         factoryName = name;
                     }
                     return factoryName;
+                }
+            },
+            'recursiveProcessing': {
+                'get': function () {
+                    return recursiveProcessing;
                 }
             }
         });

@@ -3,6 +3,7 @@
 /*globals importScripts, onmessage, TimeData, postMessage*/
 /*eslint-env browser */
 importScripts('js-xtract/jsXtract.min.js');
+impoerScripts('jsap.js');
 
 var state = 0;
 var featureList;

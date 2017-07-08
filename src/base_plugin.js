@@ -991,7 +991,7 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
             Object.defineProperty(this, "frameSize", {
                 'value': frameSize
             });
-
+            /*
             function recursiveProcessing(base, list) {
                 var l = list.length,
                     i, entry;
@@ -1003,6 +1003,8 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
                     }
                 }
             }
+            */
+            var recursiveProcessing = this.factory.recursiveProcessing;
 
             function onaudiocallback(data) {
                 //this === Extractor
