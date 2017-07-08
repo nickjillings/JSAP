@@ -37,32 +37,25 @@ var LinkedStore = function (storeName) {
         var all_numbers = true,
             all_strings = true,
             i, l = arr.length;
-        for (i = 0; i < l; i++) {
-            switch (typeof arr[i]) {
-                case "string":
-                    all_numbers = false;
-                    break;
-                case "number":
-                    all_strings = false;
-                    break;
-                case "object":
-                    all_numbers = all_strings = false;
-                    break;
-            }
-        }
+        all_numbers = arr.every(function (a) {
+            return typeof a === "number";
+        });
+        all_strings = arr.every(function (a) {
+            return typeof a === "string";
+        });
         if (all_numbers || all_strings) {
             // An array of numbers or strings
-            for (i = 0; i < l; i++) {
-                root.setAttribute("index-" + i, arr[i]);
-            }
+            arr.forEach(function (a, i) {
+                root.setAttribute("index-" + i, a);
+            });
         } else {
             // An array of objects
-            for (i = 0; i < l; i++) {
+            arr.forEach(function (a, i) {
                 var node = document.createElement("value");
                 node.setAttribute("index", i);
-                objectToXML(arr[i], node, doc);
+                objectToXML(a, node, doc);
                 root.appendChild(node);
-            }
+            });
         }
     }
 
@@ -102,10 +95,7 @@ var LinkedStore = function (storeName) {
         },
         'deleteTerm': {
             'value': function (term) {
-                if (typeof term !== "string" && term.length === 0) {
-                    throw ("term must be a string");
-                }
-                root[term] = undefined;
+                this.addTerm(term, undefined);
             }
         },
         'getTerm': {
