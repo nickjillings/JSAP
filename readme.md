@@ -21,6 +21,10 @@ To include the JSAP library into a host, simply include the 'jsap.js' file in yo
 <script src="jsap.js"></script>
 ```
 
+## Plugin Repository
+A set of publically maintained plugins is available in the [jsap-plugins](https://github.com/nickjillings/jsap-plugins) repository.
+
+
 ## Documentation
 
 The documentation overviews the following items:
