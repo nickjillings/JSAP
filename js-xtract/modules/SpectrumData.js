@@ -125,7 +125,7 @@ var SpectrumData = function (N, sampleRate, parent) {
         "spectral_variance": {
             'value': function () {
                 if (this.result.spectral_variance === undefined) {
-                    this.result.spectral_variance = xtract_spectral_variance(this.data, this.spectral_mean());
+                    this.result.spectral_variance = xtract_spectral_variance(this.data, this.spectral_centroid());
                 }
                 return this.result.spectral_variance;
             }
@@ -149,7 +149,7 @@ var SpectrumData = function (N, sampleRate, parent) {
         "spectral_skewness": {
             'value': function () {
                 if (this.result.spectral_skewness === undefined) {
-                    this.result.spectral_skewness = xtract_spectral_skewness(this.data, this.spectral_mean(), this.spectral_standard_deviation());
+                    this.result.spectral_skewness = xtract_spectral_skewness(this.data, this.spectral_centroid(), this.spectral_standard_deviation());
                 }
                 return this.result.spectral_skewness;
             }
@@ -157,7 +157,7 @@ var SpectrumData = function (N, sampleRate, parent) {
         "spectral_kurtosis": {
             'value': function () {
                 if (this.result.spectral_kurtosis === undefined) {
-                    this.result.spectral_kurtosis = xtract_spectral_kurtosis(this.data, this.spectral_mean(), this.spectral_standard_deviation());
+                    this.result.spectral_kurtosis = xtract_spectral_kurtosis(this.data, this.spectral_centroid(), this.spectral_standard_deviation());
                 }
                 return this.result.spectral_kurtosis;
             }

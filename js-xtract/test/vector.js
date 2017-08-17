@@ -101,11 +101,11 @@ describe("Vector", function () {
     });
     describe("xtract_spectrum", function () {
         it("should return 0 if array is undefined", function (done) {
-            assert.equal(0, sandbox.xtract_spectrum(undefined));
+            assert.equal(0, sandbox.xtract_spectrum(undefined, 44100));
             done();
         });
         it("should return 0 if array is empty", function (done) {
-            assert.equal(0, sandbox.xtract_spectrum([]));
+            assert.equal(0, sandbox.xtract_spectrum([], 44100));
             done();
         });
         it("should return array if array is data", function (done) {
@@ -195,7 +195,7 @@ describe("Vector", function () {
             done();
         });
         it("should return array if array is data", function (done) {
-            var ret = sandbox.xtract_dct(sine.subarray(0,128));
+            var ret = sandbox.xtract_dct(sine.subarray(0, 128));
             assert.equal("object", typeof ret);
             assert.ok(ret.length);
             assert.ok(ret.length > 0);
@@ -212,7 +212,7 @@ describe("Vector", function () {
             done();
         });
         it("should return array if array is data", function (done) {
-            var ret = sandbox.xtract_dct_2(sine.subarray(0,128));
+            var ret = sandbox.xtract_dct_2(sine.subarray(0, 128));
             assert.equal("object", typeof ret);
             assert.ok(ret.length);
             assert.ok(ret.length > 0);
