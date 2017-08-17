@@ -138,9 +138,11 @@ var LinkedStore = function (storeName) {
 // Add getInputs to all AudioNodes to ease deployment
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 /*eslint-env browser */
-AudioNode.prototype.getInputs = function () {
-    return [this];
-};
+if (AudioNode) {
+    AudioNode.prototype.getInputs = function () {
+        return [this];
+    };
+}
 
 // This should simply define the BasePlugin from which custom plugins can be built from
 var BasePlugin = function (factory, owner) {
