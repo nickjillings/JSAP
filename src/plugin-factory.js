@@ -443,15 +443,13 @@ var PluginFactory = function (context, dir) {
             }, check);
         }
 
-        function checkFeatureNode(featureNode, list) {
-            if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length !== 0)) {
-                featureNode = {
-                    'name': featureList[f].name,
-                    'parameters': featureList[f].parameters,
-                    'features': []
-                };
-                list.push(featureNode);
-            }
+        function addFeatureNode(featureNode, list) {
+            var featureNode = {
+                'name': featureList[f].name,
+                'parameters': featureList[f].parameters,
+                'features': []
+            };
+            list.push(featureNode);
             return featureNode;
         }
 
@@ -475,7 +473,9 @@ var PluginFactory = function (context, dir) {
                     var f, list = [];
                     for (f = 0; f < featureList.length; f++) {
                         var featureNode = getFeatureNode(list, featureList[f]);
-                        featureNode = checkFeatureNode(featureNode, list)
+                        if (!featureNode || (featureList.parameters && featureList[f].parameters.length !== 0)) {
+                            featureNode = addFeatureNode(featureNode, list);
+                        }
                         if (featureList[f].features && featureList[f].features.length > 0) {
                             featureNode.features = recursiveFind(featureList[f].features);
                         }
@@ -575,7 +575,9 @@ var PluginFactory = function (context, dir) {
                 for (i = 0; i < featureObject.length; i++) {
                     // Check we have not already listed the feature
                     var featureNode = getFeatureNode(rootArray, featureObject[i]);
-                    featureNode = checkFeatureNode(featureNode, rootArray);
+                    if (!featureNode || (featureList.parameters && featureList[f].parameters.length !== 0)) {
+                        featureNode = addFeatureNode(featureNode, list);
+                    }
                     if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
                     }
