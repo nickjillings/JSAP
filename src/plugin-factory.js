@@ -587,7 +587,7 @@ var PluginFactory = function (context, dir) {
                     i;
                 for (i = 0; i < l; i++) {
                     // Find the feature
-                    var index = getFeatureNode(rootArray, featureList[i]);
+                    var index = getFeatureNode(rootArray, featureObject[i]);
                     if (index >= 0) {
                         if (featureObject[index].features && featureObject[index].features.length > 0) {
                             recursivelyDeleteFeatures(rootArray[index].features, featureObject[index].features);
