@@ -1597,7 +1597,7 @@ var PluginFactory = function (context, dir) {
                     for (f = 0; f < featureList.length; f++) {
                         var featureNode = getFeatureNode(list, featureList[f]);
                         if (!featureNode || (featureList.parameters && featureList[f].parameters.length !== 0)) {
-                            featureNode = addFeatureNode(featureNode, list);
+                            featureNode = addFeatureNode(featureList[f], list);
                         }
                         if (featureList[f].features && featureList[f].features.length > 0) {
                             featureNode.features = recursiveFind(featureList[f].features);
@@ -1699,7 +1699,7 @@ var PluginFactory = function (context, dir) {
                     // Check we have not already listed the feature
                     var featureNode = getFeatureNode(rootArray, featureObject[i]);
                     if (!featureNode || (featureObject[i].parameters && featureObject[i].parameters.length !== 0)) {
-                        featureNode = addFeatureNode(featureNode, rootArray);
+                        featureNode = addFeatureNode(featureObject[i], rootArray);
                     }
                     if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
