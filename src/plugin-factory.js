@@ -20,7 +20,7 @@ var PluginFactory = function (context, dir) {
             .test: function to call, returns true if resource already loaded, false if not
     */
     this.loadResource = function (resourceObject) {
-        (function () {
+        (function (resourceObject) {
             if (typeof resourceObject !== "object") {
                 throw ("Error");
             }
@@ -30,7 +30,7 @@ var PluginFactory = function (context, dir) {
             if (typeof resourceObject.test !== "function") {
                 throw ("resourceObject.test must be a function");
             }
-        })();
+        })(resourceObject);
         var response = resourceObject.test();
         if (response !== false && response !== true) {
             throw ("resourceObject.test must return true or false");
@@ -423,6 +423,12 @@ var PluginFactory = function (context, dir) {
 
     this.FeatureMap = function () {
         var Mappings = [];
+
+        function getFeatureNode(list, check) {
+            return list.find(function (e) {
+                return e.name === this.name;
+            }, check);
+        }
         var SourceMap = function (Sender, pluginInstace) {
             var Mappings = [];
             this.getSourceInstance = function () {
@@ -436,9 +442,7 @@ var PluginFactory = function (context, dir) {
                 function recursiveFind(featureList) {
                     var f, list = [];
                     for (f = 0; f < featureList.length; f++) {
-                        var featureNode = list.find(function (e) {
-                            return e.name === this.name;
-                        }, featureList[f]);
+                        var featureNode = getFeatureNode(list, featureList[f]);
                         if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length !== 0)) {
                             featureNode = {
                                 'name': featureList[f].name,
@@ -549,9 +553,7 @@ var PluginFactory = function (context, dir) {
                 var i;
                 for (i = 0; i < featureObject.length; i++) {
                     // Check we have not already listed the feature
-                    var featureNode = rootArray.find(function (e) {
-                        return e.name === this.name;
-                    }, featureObject[i]);
+                    var featureNode = getFeatureNode(rootArray, featureList[i]);
                     if (!featureNode) {
                         featureNode = {
                             'name': featureObject[i].name,
@@ -571,9 +573,7 @@ var PluginFactory = function (context, dir) {
                     i;
                 for (i = 0; i < l; i++) {
                     // Find the feature
-                    var index = rootArray.find(function (e) {
-                        return e.name === this.name;
-                    }, featureObject[i]);
+                    var index = getFeatureNode(rootArray, featureList[i]);
                     if (index >= 0) {
                         if (featureObject[index].features && featureObject[index].features.length > 0) {
                             recursivelyDeleteFeatures(rootArray[index].features, featureObject[index].features);
@@ -645,6 +645,17 @@ var PluginFactory = function (context, dir) {
             }, Sender);
         }
 
+        function findSourceMap(Mappings, source) {
+            var sourceMap = Mappings[findSourceIndex(source)];
+            if (!sourceMap) {
+                sourceMap = Mappings[findSourceIndex(this.getPluginSender(source))];
+                if (!sourceMap) {
+                    throw ("Could not locate source map");
+                }
+            }
+            return sourceMap;
+        }
+
         // GENERAL INTERFACE
         this.createSourceMap = function (Sender, pluginInstance) {
             var node = new SourceMap(Sender, pluginInstance);
@@ -672,13 +683,7 @@ var PluginFactory = function (context, dir) {
             }
             // Get the source map
 
-            var sourceMap = Mappings[findSourceIndex(source)];
-            if (!sourceMap) {
-                sourceMap = Mappings[findSourceIndex(this.getPluginSender(source))];
-                if (!sourceMap) {
-                    throw ("Could not locate source map");
-                }
-            }
+            var sourceMap = findSourceMap(Mappings, source);
             sourceMap.requestFeatures(requestor, featureObject);
         };
         this.deleteFeatures = function (requestor, source, featureObject) {
@@ -691,13 +696,7 @@ var PluginFactory = function (context, dir) {
                 });
             } else {
                 // Get the source map
-                var sourceMap = Mappings[findSourceIndex(source)];
-                if (!sourceMap) {
-                    sourceMap = Mappings[findSourceIndex(this.getPluginSender(source))];
-                    if (!sourceMap) {
-                        throw ("Could not locate source map");
-                    }
-                }
+                var sourceMap = findSourceMap(Mappings, source);
                 sourceMap.cancelFeatures(requestor, featureObject);
             }
         };
