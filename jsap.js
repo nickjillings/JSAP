@@ -1247,7 +1247,7 @@ var PluginFactory = function (context, dir) {
                 return true;
             }
             return false;
-        }
+        };
 
         this.disconnect = function () {
             if (this.next_node !== undefined) {
@@ -1565,7 +1565,7 @@ var PluginFactory = function (context, dir) {
             this.name = node.name;
             this.parameters = this.parameters;
             this.features = [];
-        }
+        };
 
         function getFeatureNode(list, check) {
             return list.find(function (e) {
@@ -1629,7 +1629,7 @@ var PluginFactory = function (context, dir) {
             }
 
             this.requestFeatures = function (requestorInstance, featureObject) {
-                var map = findFeatureObject(featureObject)
+                var map = findFeatureObject(featureObject);
                 if (!map) {
                     map = {
                         'outputIndex': featureObject.outputIndex,
