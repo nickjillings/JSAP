@@ -1154,10 +1154,10 @@ var PluginFactory = function (context, dir) {
         if (response !== false && response !== true) {
             throw ("resourceObject.test must return true or false");
         }
-        if (!resource.type) {
-            resource.type = "javascript";
+        if (!resourceObject.type) {
+            resourceObject.type = "javascript";
         }
-        resource.type = resource.type.toLowerCase();
+        resourceObject.type = resourceObject.type.toLowerCase();
         switch (resourceObject.type) {
             case "css":
                 return new Promise(function (resolve, reject) {
