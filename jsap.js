@@ -1407,13 +1407,13 @@ var PluginFactory = function (context, dir) {
             if (typeof plugin_proto !== "function") {
                 throw ("The Prototype must be a function!");
             }
-            if (typeof plugin_proto.name !== "string" || plugin_proto.name.length === 0) {
+            if (typeof plugin_proto.prototype.name !== "string" || plugin_proto.prototype.name.length === 0) {
                 throw ("Malformed plugin. Name not defined");
             }
-            if (typeof plugin_proto.version !== "string" || plugin_proto.version.length === 0) {
+            if (typeof plugin_proto.prototype.version !== "string" || plugin_proto.prototype.version.length === 0) {
                 throw ("Malformed plugin. Version not defined");
             }
-            if (typeof plugin_proto.uniqueID !== "string" || plugin_proto.uniqueID.length === 0) {
+            if (typeof plugin_proto.prototype.uniqueID !== "string" || plugin_proto.prototype.uniqueID.length === 0) {
                 throw ("Malformed plugin. uniqueID not defined");
             }
         })(plugin_proto);
