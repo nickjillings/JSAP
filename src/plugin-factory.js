@@ -126,8 +126,10 @@ var PluginFactory = function (context, dir) {
         }
 
         this.disconnect = function () {
-            plugin_node.disconnect(this.next_node.getInputs()[0]);
-            this.next_node = undefined;
+            if (this.next_node !== undefined) {
+                plugin_node.disconnect(this.next_node.getInputs()[0]);
+                this.next_node = undefined;
+            }
         };
 
         this.destory = function () {
