@@ -5237,7 +5237,7 @@ var TimeData = function (N, sampleRate, parent) {
     }
 
     _Fs = sampleRate;
-    _dct = this.createDctCoefficients(_length);
+    _dct = undefined;
     _wavelet = xtract_init_wavelet();
 
     this.zeroData = function () {
@@ -5447,6 +5447,9 @@ var TimeData = function (N, sampleRate, parent) {
         },
         "dct": {
             'value': function () {
+                if (_dct === undefined) {
+                    _dct = this.createDctCoefficients(_length);
+                }
                 if (this.result.dct === undefined) {
                     this.result.dct = xtract_dct_2(this.data, _dct);
                 }
@@ -5547,7 +5550,7 @@ var SpectrumData = function (N, sampleRate, parent) {
     var _length = N;
     var _Fs = sampleRate;
     var _f0;
-    var _mfcc, _bark, _dct = this.createDctCoefficients(_length);
+    var _mfcc, _bark, _dct;
 
     function computeFrequencies() {
         for (var i = 0; i < N; i++) {
@@ -5857,6 +5860,9 @@ var SpectrumData = function (N, sampleRate, parent) {
         },
         "dct": {
             'value': function () {
+                if (_dct === undefined) {
+                    _dct = this.createDctCoefficients(_length);
+                }
                 if (this.result.dct === undefined) {
                     this.result.dct = xtract_dct_2(_amps, _dct);
                 }
