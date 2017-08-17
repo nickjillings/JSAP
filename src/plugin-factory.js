@@ -110,21 +110,24 @@ var PluginFactory = function (context, dir) {
         this.next_node = undefined;
 
         this.reconnect = function (new_next) {
-            if (new_next !== this.next_node) {
-                if (this.next_node !== undefined && typeof this.next_node.getInputs === "function") {
-                    plugin_node.disconnect(this.next_node.getInputs()[0]);
-                }
+            this.connect(new_next);
+        };
+
+        this.connect = function (new_next) {
+            if (this.next_node !== undefined) {
+                this.disconnect();
+            }
+            if (new_next !== undefined && typeof new_next.getInputs === "function") {
                 this.next_node = new_next;
-                if (this.next_node !== undefined && typeof this.next_node.getInputs === "function") {
-                    plugin_node.connect(this.next_node.getInputs()[0]);
-                }
+                plugin_node.connect(this.next_node.getInputs()[0]);
                 return true;
             }
             return false;
-        };
+        }
 
         this.disconnect = function () {
-            this.reconnect(undefined);
+            plugin_node.disconnect(this.next_node.getInputs()[0]);
+            this.next_node = undefined;
         };
 
         this.destory = function () {
@@ -397,19 +400,27 @@ var PluginFactory = function (context, dir) {
         }
     };
 
+    function triggerAudioStart() {
+        pluginsList.forEach(function (n) {
+            n.node.start.call(n.node);
+        });
+    }
+
+    function triggerAudioStop() {
+        pluginsList.forEach(function (n) {
+            n.node.stop.call(n.node);
+        });
+    }
+
     this.audioStart = function () {
         if (!audioStarted) {
-            pluginsList.forEach(function (n) {
-                n.node.start.call(n.node);
-            });
+            triggerAudioStart();
             audioStarted = true;
         }
     };
     this.audioStop = function () {
         if (audioStarted) {
-            pluginsList.forEach(function (n) {
-                n.node.stop.call(n.node);
-            });
+            triggerAudioStop();
             audioStarted = false;
         }
     };
@@ -429,6 +440,19 @@ var PluginFactory = function (context, dir) {
                 return e.name === this.name;
             }, check);
         }
+
+        function checkFeatureNode(featureNode, list) {
+            if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length !== 0)) {
+                featureNode = {
+                    'name': featureList[f].name,
+                    'parameters': featureList[f].parameters,
+                    'features': []
+                };
+                list.push(featureNode);
+            }
+            return featureNode;
+        }
+
         var SourceMap = function (Sender, pluginInstace) {
             var Mappings = [];
             this.getSourceInstance = function () {
@@ -438,19 +462,18 @@ var PluginFactory = function (context, dir) {
                 return Sender;
             };
 
+            function findFeatureObject(featureObject) {
+                return Mappings.find(function (e) {
+                    return (e.outputIndex === this.outputIndex && e.frameSize === this.frameSize);
+                }, featureObject);
+            }
+
             function updateSender() {
                 function recursiveFind(featureList) {
                     var f, list = [];
                     for (f = 0; f < featureList.length; f++) {
                         var featureNode = getFeatureNode(list, featureList[f]);
-                        if (!featureNode || (featureList[f].parameters && featureList[f].parameters.length !== 0)) {
-                            featureNode = {
-                                'name': featureList[f].name,
-                                'parameters': featureList[f].parameters,
-                                'features': []
-                            };
-                            list.push(featureNode);
-                        }
+                        featureNode = checkFeatureNode(featureNode, list)
                         if (featureList[f].features && featureList[f].features.length > 0) {
                             featureNode.features = recursiveFind(featureList[f].features);
                         }
@@ -478,9 +501,7 @@ var PluginFactory = function (context, dir) {
             }
 
             this.requestFeatures = function (requestorInstance, featureObject) {
-                var map = Mappings.find(function (e) {
-                    return (e.outputIndex === this.outputIndex && e.frameSize === this.frameSize);
-                }, featureObject);
+                var map = findFeatureObject(featureObject)
                 if (!map) {
                     map = {
                         'outputIndex': featureObject.outputIndex,
@@ -525,9 +546,7 @@ var PluginFactory = function (context, dir) {
                         }
                     });
                 } else {
-                    var map = Mappings.find(function (e) {
-                        return (e.outputIndex === this.outputIndex && e.frameSize === this.frameSize);
-                    }, featureObject);
+                    var map = findFeatureObject(featureObject);
                     if (!map) {
                         return;
                     }
@@ -554,14 +573,7 @@ var PluginFactory = function (context, dir) {
                 for (i = 0; i < featureObject.length; i++) {
                     // Check we have not already listed the feature
                     var featureNode = getFeatureNode(rootArray, featureList[i]);
-                    if (!featureNode) {
-                        featureNode = {
-                            'name': featureObject[i].name,
-                            'parameters': featureObject[i].parameters,
-                            'features': []
-                        };
-                        rootArray.push(featureNode);
-                    }
+                    featureNode = checkFeatureNode(featureNode, rootArray);
                     if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
                     }
