@@ -1129,9 +1129,7 @@ var PluginFactory = function (context, dir) {
         plugin_prototypes = [],
         pluginsList = [],
         currentPluginId = 0,
-        audioStarted = false,
-        script,
-        self = this;
+        audioStarted = false;
 
     /*
         this.loadResource. Load a resource into the global namespace
@@ -1141,62 +1139,63 @@ var PluginFactory = function (context, dir) {
             .test: function to call, returns true if resource already loaded, false if not
     */
     this.loadResource = function (resourceObject) {
-        if (resourceObject) {
+        (function () {
+            if (typeof resourceObject !== "object") {
+                throw ("Error");
+            }
             if (typeof resourceObject.url !== "string") {
                 throw ("resourceObject.url must be a string");
             }
             if (typeof resourceObject.test !== "function") {
                 throw ("resourceObject.test must be a function");
             }
-            var response = resourceObject.test();
-            if (response !== false && response !== true) {
-                throw ("resourceObject.test must return true or false");
-            }
-            switch (resourceObject.type) {
-                case "CSS":
-                case "css":
-                    return new Promise(function (resolve, reject) {
-                        var css = document.createElement("link");
-                        css.setAttribute("rel", "stylesheet");
-                        css.setAttribute("type", "text/css");
-                        css.setAttribute("href", resourceObject.url);
-                        document.getElementsByTagName("head")[0].appendChild(css);
-                        resolve(resourceObject);
+        })();
+        var response = resourceObject.test();
+        if (response !== false && response !== true) {
+            throw ("resourceObject.test must return true or false");
+        }
+        if (!resource.type) {
+            resource.type = "javascript";
+        }
+        resource.type = resource.type.toLowerCase();
+        switch (resourceObject.type) {
+            case "css":
+                return new Promise(function (resolve, reject) {
+                    var css = document.createElement("link");
+                    css.setAttribute("rel", "stylesheet");
+                    css.setAttribute("type", "text/css");
+                    css.setAttribute("href", resourceObject.url);
+                    document.getElementsByTagName("head")[0].appendChild(css);
+                    resolve(resourceObject);
+                });
+            case "javascript":
+                if (!response) {
+                    return loadResource(resourceObject).then(function (resourceObject) {
+                        if (typeof resourceObject.returnObject === "string") {
+                            var returnObject;
+                            if (window.hasOwnProperty(resourceObject.returnObject)) {
+                                return window[resourceObject.returnObject];
+                            }
+                            return false;
+                        } else {
+                            return true;
+                        }
                     });
-                case "javascript":
-                case "JavaScript":
-                case "Javascript":
-                case undefined:
-                    if (!response) {
-                        return loadResource(resourceObject).then(function (resourceObject) {
-                            if (typeof resourceObject.returnObject === "string") {
-                                var returnObject;
-                                if (window.hasOwnProperty(resourceObject.returnObject)) {
-                                    return window[resourceObject.returnObject];
-                                }
-                                return false;
+                } else {
+                    return new Promise(function (resolve, reject) {
+                        if (typeof resourceObject.returnObject === "string") {
+                            if (window.hasOwnProperty(resourceObject.returnObject)) {
+                                resolve(window[resourceObject.returnObject]);
                             } else {
-                                return true;
+                                reject(false);
                             }
-                        });
-                    } else {
-                        return new Promise(function (resolve, reject) {
-                            if (typeof resourceObject.returnObject === "string") {
-                                if (window.hasOwnProperty(resourceObject.returnObject)) {
-                                    resolve(window[resourceObject.returnObject]);
-                                } else {
-                                    reject(false);
-                                }
-                            } else {
-                                resolve(true);
-                            }
-                        });
-                    }
-                    break;
-                default:
-                    console.error(resourceObject.type);
-                    break;
-            }
+                        } else {
+                            resolve(true);
+                        }
+                    });
+                }
+            default:
+                throw ("Invalid type " + String(resourceObject.type));
         }
     };
 
@@ -1206,8 +1205,8 @@ var PluginFactory = function (context, dir) {
                 throw ("resourceObject.returnObject must be the name of the prototype function");
             }
             return this.loadResource(resourceObject).then(function (plugin) {
-                return self.addPrototype(plugin);
-            });
+                return this.addPrototype(plugin);
+            }.bind(this));
         }
     };
 
@@ -1362,15 +1361,12 @@ var PluginFactory = function (context, dir) {
         if (proto.prototype.resources) {
             for (var i = 0; i < proto.prototype.resources.length; i++) {
                 var resource = proto.prototype.resources[i];
+                resource.type = resource.type.toLowerCase();
                 switch (resource.type) {
                     case "css":
-                    case "CSS":
                         loadStylesheet(resource.url);
                         break;
                     case "javascript":
-                    case "Javascript":
-                    case "JavaScript":
-                    case "JS":
                         var object = {
                             'promise': loadResourceChain(resource),
                             'state': 0,
@@ -1383,8 +1379,7 @@ var PluginFactory = function (context, dir) {
                         resourcePromises.push(object);
                         break;
                     default:
-                        console.error(resource.type);
-                        break;
+                        throw ("Could not load " + resource.url + ", invalid resource.type");
                 }
             }
         }
@@ -1405,24 +1400,26 @@ var PluginFactory = function (context, dir) {
     };
 
     this.addPrototype = function (plugin_proto) {
+        (function (plugin_proto) {
+            if (typeof plugin_proto !== "function") {
+                throw ("The Prototype must be a function!");
+            }
+            if (typeof plugin_proto.name !== "string" || plugin_proto.name.length === 0) {
+                throw ("Malformed plugin. Name not defined");
+            }
+            if (typeof plugin_proto.version !== "string" || plugin_proto.version.length === 0) {
+                throw ("Malformed plugin. Version not defined");
+            }
+            if (typeof plugin_proto.uniqueID !== "string" || plugin_proto.uniqueID.length === 0) {
+                throw ("Malformed plugin. uniqueID not defined");
+            }
+        })(plugin_proto);
         var testObj = {
             'proto': plugin_proto,
             'name': plugin_proto.prototype.name,
             'version': plugin_proto.prototype.version,
             'uniqueID': plugin_proto.prototype.uniqueID
         };
-        if (typeof plugin_proto !== "function") {
-            throw ("The Prototype must be a function!");
-        }
-        if (typeof testObj.name !== "string" || testObj.name.length === 0) {
-            throw ("Malformed plugin. Name not defined");
-        }
-        if (typeof testObj.version !== "string" || testObj.version.length === 0) {
-            throw ("Malformed plugin. Version not defined");
-        }
-        if (typeof testObj.uniqueID !== "string" || testObj.uniqueID.length === 0) {
-            throw ("Malformed plugin. uniqueID not defined");
-        }
         var obj = plugin_prototypes.find(function (e) {
             var param;
             var match = 0;
