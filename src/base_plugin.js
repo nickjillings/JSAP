@@ -1,7 +1,7 @@
 // Add getInputs to all AudioNodes to ease deployment
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 /*eslint-env browser */
-if (typeof AudioNode === "function" && importScripts === undefined) {
+if (typeof AudioNode === "function" && window.importScripts === undefined) {
     AudioNode.prototype.getInputs = function () {
         return [this];
     };
