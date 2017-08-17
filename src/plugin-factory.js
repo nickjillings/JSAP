@@ -696,8 +696,8 @@ var PluginFactory = function (context, dir) {
                 requestor = requestor.pluginInstance;
             }
             // Get the source map
-
-            var sourceMap = findSourceMap(Mappings, source);
+            var pluginSender = this.getPluginSender(source);
+            var sourceMap = findSourceMap(Mappings, source, pluginSender);
             sourceMap.requestFeatures(requestor, featureObject);
         };
         this.deleteFeatures = function (requestor, source, featureObject) {
@@ -710,7 +710,8 @@ var PluginFactory = function (context, dir) {
                 });
             } else {
                 // Get the source map
-                var sourceMap = findSourceMap(Mappings, source);
+                var pluginSender = this.getPluginSender(source);
+                var sourceMap = findSourceMap(Mappings, source, pluginSender);
                 sourceMap.cancelFeatures(requestor, featureObject);
             }
         };
