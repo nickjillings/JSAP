@@ -733,7 +733,7 @@ var ParameterManager = function (owner) {
                 var key;
                 for (key in object) {
                     if (object.hasOwnProperty(key)) {
-                        this.setParameterByName(key, object[key]);
+                        this.setParameterByName(key, object[key].value);
                     }
                 }
             }
