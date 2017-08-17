@@ -1198,6 +1198,7 @@ var PluginFactory = function (context, dir) {
                         }
                     });
                 }
+                break;
             default:
                 throw ("Invalid type " + String(resourceObject.type));
         }
