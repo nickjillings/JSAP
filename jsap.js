@@ -1558,6 +1558,12 @@ var PluginFactory = function (context, dir) {
     this.FeatureMap = function () {
         var Mappings = [];
 
+        var FeatureNode = function (node) {
+            this.name = node.name;
+            this.parameters = this.parameters;
+            this.features = [];
+        }
+
         function getFeatureNode(list, check) {
             return list.find(function (e) {
                 return e.name === this.name;
@@ -1565,13 +1571,9 @@ var PluginFactory = function (context, dir) {
         }
 
         function addFeatureNode(featureNode, list) {
-            var featureNode = {
-                'name': featureList[f].name,
-                'parameters': featureList[f].parameters,
-                'features': []
-            };
-            list.push(featureNode);
-            return featureNode;
+            var node = new FeatureNode(featureNode);
+            list.push(node);
+            return node;
         }
 
         var SourceMap = function (Sender, pluginInstace) {
