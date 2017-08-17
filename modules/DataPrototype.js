@@ -60,37 +60,36 @@ var DataProto = function (N, sampleRate) {
     };
 
     this.toJSON = function () {
+        function lchar(str) {
+            var lastchar = str[str.length - 1];
+            if (lastchar !== '{' && lastchar !== ',') {
+                str = str + ', ';
+            }
+            return str;
+        }
+
+        function getJSONString(p, n) {
+            var str = "";
+            if (typeof p === "number" && isFinite(p)) {
+                str = '"' + n + '": ' + p;
+            } else if (typeof p === "object") {
+                if (p.toJSON) {
+                    str = '"' + n + '": ' + p.toJSON(p);
+                } else if (p.length) {
+                    str = '"' + n + '": ' + xtract_array_to_JSON(p);
+                } else {
+                    str = '"' + n + '": ' + this.toJSON(p);
+                }
+            } else {
+                str = '"' + n + '": "' + p.toString() + '"';
+            }
+            return str;
+        }
         var json = '{';
         for (var property in _result) {
             if (_result.hasOwnProperty(property)) {
-                var lastchar = json[json.length - 1];
-                if (lastchar !== '{' && lastchar !== ',') {
-                    json = json + ', ';
-                }
-                if (typeof _result[property] === "number" && isFinite(_result[property])) {
-                    json = json + '"' + property + '": ' + _result[property];
-                } else if (typeof _result[property] === "object") {
-                    switch (_result[property].constructor) {
-                        case Array:
-                        case Float32Array:
-                        case Float64Array:
-                            //Array data type
-                            json = json + '"' + property + '": ' + xtract_array_to_JSON(_result[property]);
-                            break;
-                        case TimeData:
-                        case SpectrumData:
-                        case PeakSpectrumData:
-                        case HarmonicSpectrumData:
-                            // JSXtract Data type
-                            json = json + '"' + property + '": ' + _result[property].toJSON(_result[property]);
-                            break;
-                        default:
-                            json = json + '"' + property + '": ' + this.toJSON(_result[property]);
-                            break;
-                    }
-                } else {
-                    json = json + '"' + property + '": "' + _result[property].toString() + '"';
-                }
+                json = lchar(json);
+                json = json + getJSONString(_result[property], property);
             }
         }
         return json + '}';
@@ -105,34 +104,35 @@ var DataProto = function (N, sampleRate) {
                 if (typeof a[param] === "number") {
                     delta[param] = a[param] - b[param];
                 } else {
-                    switch (a[param].constructor) {
-                        case Array:
-                        case Float32Array:
-                        case Float64Array:
-                            if (a[param].length === b[param].length) {
-                                delta[param] = new Float64Array(a[param].length);
-                            } else {
-                                delta[param] = [];
-                            }
-                            var n = 0;
-                            while (n < a[param].length && n < b[param].length) {
-                                delta[param][n] = a[param][n] - b[param][n];
-                                n++;
-                            }
-                            break;
-                        case TimeData:
-                        case SpectrumData:
-                        case PeakSpectrumData:
-                        case HarmonicSpectrumData:
-                            delta[param] = recursiveDelta(a[param].result, b[param].result);
-                            break;
-                        default:
-                            break;
-                    }
+                    delta[param] = deltaObject(a, b, param);
                 }
             }
         }
         return delta;
+    }
+
+    function deltaObject(a, b, param) {
+        if (a.result && b.result) {
+            return recursiveDelta(a[param].result, b[param].result);
+        } else if (a.length && b.length) {
+            return deltaArray(a[param], b[param])
+        }
+        return undefined;
+    }
+
+    function deltaArray(a, b) {
+        var d;
+        if (a.length === b.length) {
+            d = new Float64Array(a.length);
+        } else {
+            d = [];
+        }
+        var n = 0;
+        while (n < a.length && n < b.length) {
+            d[n] = a[n] - b[n];
+            n++;
+        }
+        return d;
     }
 
     this.computeDelta = function (compare) {

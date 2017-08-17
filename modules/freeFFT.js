@@ -54,43 +54,42 @@ function inverseTransform(real, imag) {
  * Computes the discrete Fourier transform (DFT) of the given complex vector, storing the result back into the vector.
  * The vector's length must be a power of 2. Uses the Cooley-Tukey decimation-in-time radix-2 algorithm.
  */
+
 function transformRadix2(real, imag) {
     // Initialization
-    var i, j, k;
     if (real.length !== imag.length)
         throw "Mismatched lengths";
     var n = real.length;
     if (n === 1) // Trivial transform
         return;
-    var levels = -1;
-    for (i = 0; i < 32; i++) {
-        if (1 << i === n)
-            levels = i; // Equal to log2(n)
-    }
+    var levels = calculateNumberLevels(n);
     if (levels === -1)
         throw "Length is not a power of 2";
-    var cosTable = new Array(n / 2);
-    var sinTable = new Array(n / 2);
-    for (i = 0; i < n / 2; i++) {
-        cosTable[i] = Math.cos(2 * Math.PI * i / n);
-        sinTable[i] = Math.sin(2 * Math.PI * i / n);
-    }
+    var cosTable = new Float64Array(n / 2);
+    var sinTable = new Float64Array(n / 2);
+    calculateCosSineTables(cosTable, sinTable);
 
     // Bit-reversed addressing permutation
-    for (i = 0; i < n; i++) {
-        j = reverseBits(i, levels);
-        if (j > i) {
-            var temp = real[i];
-            real[i] = real[j];
-            real[j] = temp;
-            temp = imag[i];
-            imag[i] = imag[j];
-            imag[j] = temp;
-        }
-    }
+    bitReverseMap(real, imag);
 
     // Cooley-Tukey decimation-in-time radix-2 FFT
     for (var size = 2; size <= n; size *= 2) {
+        cooleyTukey(real, imag, sinTable, cosTable, size);
+    }
+
+    // Returns the integer whose value is the reverse of the lowest 'bits' bits of the integer 'x'.
+    function reverseBits(x, bits) {
+        var y = 0;
+        for (var i = 0; i < bits; i++) {
+            y = (y << 1) | (x & 1);
+            x >>>= 1;
+        }
+        return y;
+    }
+
+    function cooleyTukey(real, imag, sinTable, cosTable, size) {
+        var i, j, k;
+        var n = real.length;
         var halfsize = size / 2;
         var tablestep = n / size;
         for (i = 0; i < n; i += size) {
@@ -105,14 +104,38 @@ function transformRadix2(real, imag) {
         }
     }
 
-    // Returns the integer whose value is the reverse of the lowest 'bits' bits of the integer 'x'.
-    function reverseBits(x, bits) {
-        var y = 0;
-        for (var i = 0; i < bits; i++) {
-            y = (y << 1) | (x & 1);
-            x >>>= 1;
+    function calculateNumberLevels(N) {
+        var i;
+        for (i = 0; i < 32; i++) {
+            if (1 << i === N) {
+                return i;
+            }
         }
-        return y;
+        return -1;
+    }
+
+    function bitReverseMap(real, imag) {
+        var i, j, temp;
+        for (i = 0; i < n; i++) {
+            j = reverseBits(i, levels);
+            if (j > i) {
+                temp = real[i];
+                real[i] = real[j];
+                real[j] = temp;
+                temp = imag[i];
+                imag[i] = imag[j];
+                imag[j] = temp;
+            }
+        }
+    }
+
+    function calculateCosSineTables(cosTable, sinTable) {
+        var n = cosTable.length,
+            i;
+        for (i = 0; i < n; i++) {
+            cosTable[i] = Math.cos(Math.PI * i / n);
+            sinTable[i] = Math.sin(Math.PI * i / n);
+        }
     }
 }
 
@@ -133,37 +156,36 @@ function transformBluestein(real, imag) {
         m *= 2;
 
     // Trignometric tables
-    var cosTable = new Array(n);
-    var sinTable = new Array(n);
-    for (i = 0; i < n; i++) {
-        j = i * i % (n * 2); // This is more accurate than j = i * i
-        cosTable[i] = Math.cos(Math.PI * j / n);
-        sinTable[i] = Math.sin(Math.PI * j / n);
-    }
+    var cosTable = new Float64Array(n);
+    var sinTable = new Float64Array(n);
+    (function (cosTable, sinTable) {
+        for (i = 0; i < n; i++) {
+            j = i * i % (n * 2); // This is more accurate than j = i * i
+            cosTable[i] = Math.cos(Math.PI * j / n);
+            sinTable[i] = Math.sin(Math.PI * j / n);
+        }
+    })(cosTable, sinTable);
 
     // Temporary vectors and preprocessing
-    var areal = new Array(m);
-    var aimag = new Array(m);
+    var areal = new Float64Array(m);
+    var aimag = new Float64Array(m);
+
     for (i = 0; i < n; i++) {
         areal[i] = real[i] * cosTable[i] + imag[i] * sinTable[i];
         aimag[i] = -real[i] * sinTable[i] + imag[i] * cosTable[i];
     }
-    for (i = n; i < m; i++)
-        areal[i] = aimag[i] = 0;
-    var breal = new Array(m);
-    var bimag = new Array(m);
+    var breal = new Float64Array(m);
+    var bimag = new Float64Array(m);
     breal[0] = cosTable[0];
     bimag[0] = sinTable[0];
     for (i = 1; i < n; i++) {
         breal[i] = breal[m - i] = cosTable[i];
         bimag[i] = bimag[m - i] = sinTable[i];
     }
-    for (i = n; i <= m - n; i++)
-        breal[i] = bimag[i] = 0;
 
     // Convolution
-    var creal = new Array(m);
-    var cimag = new Array(m);
+    var creal = new Float64Array(m);
+    var cimag = new Float64Array(m);
     convolveComplex(areal, aimag, breal, bimag, creal, cimag);
 
     // Postprocessing
@@ -191,8 +213,10 @@ function convolveReal(x, y, out) {
  * Computes the circular convolution of the given complex vectors. Each vector's length must be the same.
  */
 function convolveComplex(xreal, ximag, yreal, yimag, outreal, outimag) {
-    if (xreal.length !== ximag.length || xreal.length !== yreal.length || yreal.length !== yimag.length || xreal.length !== outreal.length || outreal.length !== outimag.length)
-        throw "Mismatched lengths";
+    (function () {
+        if (xreal.length !== ximag.length || xreal.length !== yreal.length || yreal.length !== yimag.length || xreal.length !== outreal.length || outreal.length !== outimag.length)
+            throw "Mismatched lengths";
+    })();
     var i;
     var n = xreal.length;
     xreal = xreal.slice();
