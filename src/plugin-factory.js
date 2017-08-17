@@ -575,8 +575,8 @@ var PluginFactory = function (context, dir) {
                 for (i = 0; i < featureObject.length; i++) {
                     // Check we have not already listed the feature
                     var featureNode = getFeatureNode(rootArray, featureObject[i]);
-                    if (!featureNode || (featureList.parameters && featureList[f].parameters.length !== 0)) {
-                        featureNode = addFeatureNode(featureNode, list);
+                    if (!featureNode || (featureObject[i].parameters && featureObject[i].parameters.length !== 0)) {
+                        featureNode = addFeatureNode(featureNode, rootArray);
                     }
                     if (featureObject[i].features !== undefined && featureObject[i].features.length > 0) {
                         recursivelyAddFeatures(featureNode.features, featureObject[i].features);
