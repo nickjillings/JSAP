@@ -237,7 +237,7 @@ var ParameterManager = function (owner) {
                     if (typeof ap !== "object" || ap.value === undefined) {
                         throw ("Must be an AudioParam object from an AudioNode");
                     }
-                    var v = this.translate(this.value);
+                    var v = this.update(this.value);
                     audioParam = ap;
                     audioParam.value = v;
                 }
