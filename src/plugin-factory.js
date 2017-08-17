@@ -659,10 +659,10 @@ var PluginFactory = function (context, dir) {
             }, Sender);
         }
 
-        function findSourceMap(Mappings, source) {
+        function findSourceMap(Mappings, source, pluginSender) {
             var sourceMap = Mappings[findSourceIndex(source)];
             if (!sourceMap) {
-                sourceMap = Mappings[findSourceIndex(this.getPluginSender(source))];
+                sourceMap = Mappings[findSourceIndex(pluginSender)];
                 if (!sourceMap) {
                     throw ("Could not locate source map");
                 }
