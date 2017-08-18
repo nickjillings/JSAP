@@ -176,14 +176,14 @@ var PluginFactory = function (context, dir) {
             'node': {
                 'value': plugin_node
             },
-            'getInputs': {
+            'input': {
                 'value': function () {
-                    return plugin_node.getInputs();
+                    return _in;
                 }
             },
-            'getOutputs': {
+            'output': {
                 'value': function () {
-                    return plugin_node.getOutputs();
+                    return _out;
                 }
             }
         });
@@ -1050,8 +1050,8 @@ var PluginFactory = function (context, dir) {
 
         function joinChain() {
             if (plugin_list.length > 0) {
-                pluginChainStart.connect(plugin_list[0].node.getInputs()[0]);
-                plugin_list[plugin_list.length - 1].node.getOutputs()[0].connect(pluginChainStop);
+                pluginChainStart.connect(plugin_list[0].input);
+                plugin_list[plugin_list.length - 1].output.connect(pluginChainStop);
             } else {
                 pluginChainStart.connect(pluginChainStop);
             }
