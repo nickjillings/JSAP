@@ -110,8 +110,8 @@ var PluginFactory = function (context, dir) {
     var PluginInstance = function (id, plugin_node) {
         this.next_node = undefined;
         var _bypassed = false;
-        var _in = audio_context.createGainNode(),
-            _out = audio_context.createGainNode();
+        var _in = audio_context.createGain(),
+            _out = audio_context.createGain();
 
         _in.connect(plugin_node.getInputs()[0]);
         plugin_node.getOutputs()[0].connect(_out);
