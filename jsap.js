@@ -1242,13 +1242,13 @@ var PluginFactory = function (context, dir) {
         function bypassEnable() {
             _in.disconnect();
             _in.connect(_out);
-            _byassed = true;
+            _bypassed = true;
         }
 
         function bypassDisable() {
             _in.disconnect();
             _in.connect(plugin_node.getInputs()[0]);
-            _byassed = false;
+            _bypassed = false;
         }
 
         this.bypass = function (state) {
@@ -1258,7 +1258,7 @@ var PluginFactory = function (context, dir) {
             } else {
                 bypassDisable();
             }
-            _bypass = state;
+            return _bypassed;
         }
 
         this.isBypassed = function () {
