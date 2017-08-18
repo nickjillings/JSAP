@@ -185,6 +185,11 @@ var PluginFactory = function (context, dir) {
                 'get': function () {
                     return _out;
                 }
+            },
+            'bypassed': {
+                'get': function () {
+                    return _bypassed;
+                }
             }
         });
     };
