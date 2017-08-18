@@ -177,12 +177,12 @@ var PluginFactory = function (context, dir) {
                 'value': plugin_node
             },
             'input': {
-                'value': function () {
+                'get': function () {
                     return _in;
                 }
             },
             'output': {
-                'value': function () {
+                'get': function () {
                     return _out;
                 }
             }
