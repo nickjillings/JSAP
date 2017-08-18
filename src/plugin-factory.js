@@ -1046,8 +1046,8 @@ var PluginFactory = function (context, dir) {
 
         function cutChain() {
             if (plugin_list.length > 0) {
-                pluginChainStart.disconnect(plugin_list[0].node.getInputs()[0]);
-                plugin_list[plugin_list.length - 1].node.getOutputs()[0].disconnect(pluginChainStop);
+                pluginChainStart.disconnect(plugin_list[0].input);
+                plugin_list[plugin_list.length - 1].output.disconnect(pluginChainStop);
             } else {
                 pluginChainStart.disconnect(pluginChainStop);
             }
