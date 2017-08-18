@@ -109,6 +109,38 @@ var PluginFactory = function (context, dir) {
 
     var PluginInstance = function (id, plugin_node) {
         this.next_node = undefined;
+        var _bypassed = false;
+        var _in = audio_context.createGainNode(),
+            _out = audio_context.createGainNode();
+
+        _in.connect(plugin_node.getInputs()[0]);
+        plugin_node.getOutputs()[0].connect(_out);
+
+        function bypassEnable() {
+            _in.disconnect();
+            _in.connect(_out);
+            _byassed = true;
+        }
+
+        function bypassDisable() {
+            _in.disconnect();
+            _in.connect(plugin_node.getInputs()[0]);
+            _byassed = false;
+        }
+
+        this.bypass = function (state) {
+            state = (state === true);
+            if (state) {
+                bypassEnable();
+            } else {
+                bypassDisable();
+            }
+            _bypass = state;
+        }
+
+        this.isBypassed = function () {
+            return _bypass;
+        }
 
         this.reconnect = function (new_next) {
             this.connect(new_next);
@@ -120,7 +152,7 @@ var PluginFactory = function (context, dir) {
             }
             if (new_next !== undefined && typeof new_next.getInputs === "function") {
                 this.next_node = new_next;
-                plugin_node.connect(this.next_node.getInputs()[0]);
+                _out.connect(this.next_node.getInputs()[0]);
                 return true;
             }
             return false;
@@ -128,7 +160,7 @@ var PluginFactory = function (context, dir) {
 
         this.disconnect = function () {
             if (this.next_node !== undefined) {
-                plugin_node.disconnect(this.next_node.getInputs()[0]);
+                _out.disconnect(this.next_node.getInputs()[0]);
                 this.next_node = undefined;
             }
         };
@@ -1024,6 +1056,14 @@ var PluginFactory = function (context, dir) {
                 pluginChainStart.connect(pluginChainStop);
             }
             chainStartFeature.rejoinExtractors();
+        }
+
+        this.bypassPlugin = function (plugin_instance, state) {
+            // Check is a member of this chain
+            if (plugin_list.includes(plugin_instance) === false) {
+                return;
+            }
+            plugin_instance.bypass(state);
         }
 
         this.getPrototypes = function () {
