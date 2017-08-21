@@ -14,7 +14,7 @@ var PluginFactory = function (context, dir) {
 
     /*
         this.loadResource. Load a resource into the global namespace
-        
+
         @param resourceObject: a JS object holding the following parameters:
             .url: URL of the resource
             .test: function to call, returns true if resource already loaded, false if not
@@ -165,7 +165,7 @@ var PluginFactory = function (context, dir) {
             }
         };
 
-        this.destory = function () {
+        this.destroy = function () {
             plugin_node.destroy();
         };
 
