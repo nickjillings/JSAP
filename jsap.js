@@ -1259,11 +1259,11 @@ var PluginFactory = function (context, dir) {
                 bypassDisable();
             }
             return _bypassed;
-        }
+        };
 
         this.isBypassed = function () {
-            return _bypass;
-        }
+            return _bypassed;
+        };
 
         this.reconnect = function (new_next) {
             this.connect(new_next);
@@ -2192,7 +2192,7 @@ var PluginFactory = function (context, dir) {
                 return;
             }
             plugin_instance.bypass(state);
-        }
+        };
 
         this.getPrototypes = function () {
             return this.parent.getPrototypes();
