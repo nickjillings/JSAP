@@ -607,10 +607,10 @@ var ParameterManager = function (owner) {
         },
         'parameters': {
             'get': function () {
-                return parameterList;
+                return buildParameterObject();
             },
             'set': function () {
-                throw ("Cannot set read only array");
+                throw ("Cannot set, use .setParameterBy...()");
             }
         }
     });
