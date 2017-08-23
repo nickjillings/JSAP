@@ -1137,7 +1137,7 @@ var PluginFactory = function (context, dir) {
 
     /*
         this.loadResource. Load a resource into the global namespace
-        
+
         @param resourceObject: a JS object holding the following parameters:
             .url: URL of the resource
             .test: function to call, returns true if resource already loaded, false if not
@@ -1288,7 +1288,7 @@ var PluginFactory = function (context, dir) {
             }
         };
 
-        this.destory = function () {
+        this.destroy = function () {
             plugin_node.destroy();
         };
 
@@ -1558,8 +1558,11 @@ var PluginFactory = function (context, dir) {
     };
 
     this.deletePlugin = function (id) {
-        if (id >= 0 && id < pluginsList.length) {
-            pluginsList.splice(id, 1);
+        var index = pluginsList.findIndex(function (p) {
+            return p.id === id;
+        });
+        if (index >= 0) {
+            pluginsList.splice(index, 1);
         }
     };
 
