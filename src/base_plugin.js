@@ -569,6 +569,7 @@ var ParameterManager = function (owner) {
                 parameterList.forEach(function (a) {
                     l.push(a.name);
                 });
+                return l;
             }
         },
         'setParameterByName': {
