@@ -737,7 +737,14 @@ var ParameterManager = function (owner) {
                 var key;
                 for (key in object) {
                     if (object.hasOwnProperty(key)) {
-                        this.setParameterByName(key, object[key].value);
+                        if (typeof object[key] == "object") {
+
+                            this.setParameterByName(key, object[key].value);
+                        } else if (typeof object[key] == "number") {
+                            this.setParameterByName(key, object[key]);
+                        } else {
+                            throw ("Cannot set " + key + ": Not a valid object");
+                        }
                     }
                 }
             }
