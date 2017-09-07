@@ -700,6 +700,14 @@ var ParameterManager = function (owner) {
                 return buildParameterObject();
             }
         },
+        'getParameterNames': {
+            'value': function () {
+                var l = [];
+                parameterList.forEach(function (a) {
+                    l.push(a.name);
+                });
+            }
+        },
         'setParameterByName': {
             'value': function (n, v) {
                 var parameter = findParameter(n);
