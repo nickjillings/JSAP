@@ -94,13 +94,18 @@ var PluginFactory = function (context, dir) {
 
     function loadResource(resourceObject) {
         return new Promise(function (resolve, reject) {
-            var script = document.createElement("script");
-            script.src = resourceObject.url;
-            document.getElementsByTagName("head")[0].appendChild(script);
-            script.onload = function () {
+            console.log("TEST");
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", resourceObject.url);
+            xhr.onload = function () {
+                var script = document.createElement("script");
+                script.textContent = xhr.responseText;
+                document.getElementsByTagName("head")[0].appendChild(script);
                 resolve(resourceObject);
-            };
+            }
+            xhr.send();
         });
+        console.log("TEST");
     }
 
     if (dir === undefined) {
@@ -468,14 +473,7 @@ var PluginFactory = function (context, dir) {
         }
     };
 
-    Object.defineProperty(this, "context", {
-        'get': function () {
-            return audio_context;
-        },
-        'set': function () {}
-    });
-
-    this.FeatureMap = function () {
+    var FeatureMap = function () {
         var Mappings = [];
 
         var FeatureNode = function (node) {
@@ -783,7 +781,7 @@ var PluginFactory = function (context, dir) {
         };
     };
 
-    this.FeatureMap = new this.FeatureMap();
+    this.FeatureMap = new FeatureMap();
     Object.defineProperty(this.FeatureMap, "factory", {
         'value': this
     });
@@ -1215,4 +1213,9 @@ var PluginFactory = function (context, dir) {
             }
         });
     };
+    Object.defineProperties(this, {
+        "context": {
+            "value": audio_context
+        }
+    });
 };
