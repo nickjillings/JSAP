@@ -94,14 +94,15 @@ var PluginFactory = function (context, dir) {
 
     function loadResource(resourceObject) {
         return new Promise(function (resolve, reject) {
-            console.log("TEST");
             var xhr = new XMLHttpRequest();
             xhr.open("GET", resourceObject.url);
-            xhr.onload = function () {
-                var script = document.createElement("script");
-                script.textContent = xhr.responseText;
-                document.getElementsByTagName("head")[0].appendChild(script);
-                resolve(resourceObject);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    var script = document.createElement("script");
+                    script.textContent = xhr.responseText;
+                    document.getElementsByTagName("head")[0].appendChild(script);
+                    resolve(resourceObject);
+                }
             };
             xhr.send();
         });

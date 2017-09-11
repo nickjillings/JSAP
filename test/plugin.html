@@ -21,6 +21,17 @@
         var a = context.createGain();
         var b = context.createGain();
 
+        var p = {
+            "url": "http://dmtlab.bcu.ac.uk/nickjillings/jsap-plugins/plugins/gain.js",
+            "type": "javascript",
+            "returnObject": "GainPlugin",
+            "test": function() {
+                return typeof GainPlugin === "function";
+            }
+        }
+
+        factory.loadPluginScript(p);
+
     </script>
 </head>
 

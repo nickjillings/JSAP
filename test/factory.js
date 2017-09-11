@@ -21,124 +21,120 @@ server.listen(port, (err) => {
 });
 
 const Browser = require('zombie');
+Browser.localhost('example.com', 3000);
+const dummy = require("dummy-audio-context");
+const fs = require("fs");
 //const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const assert = require('assert');
-const vm = require("vm");
-const fs = require("fs");
-const sandbox = {
-    globalVar: 1
-};
-Browser.localhost('example.com', 3000);
-vm.createContext(sandbox);
-module.exports = function (path, context) {
-    var data = fs.readFileSync(path);
-    vm.runInNewContext(data, context, path);
-};
 
-module.exports('./jsap.js', sandbox);
-module.exports('./test/audio-context.js', sandbox);
-
-var context = new sandbox.AudioContext(),
-    factory = new sandbox.PluginFactory(context),
-    sf;
+var context = new dummy.AudioContext();
 
 describe("PluginFactory", function () {
     describe("Definitions", function () {
+        const browser = new Browser();
+        browser.debug = true;
+        before(function (d) {
+            browser.visit("/test/index.html", d);
+        });
         it("should define loadResource", function (done) {
-            assert.ok(typeof factory.loadResource === "function");
+            assert.ok(typeof browser.window.window.factory.loadResource === "function");
             done();
         });
         it("should define loadPluginScript", function (done) {
-            assert.ok(typeof factory.loadPluginScript === "function");
+            assert.ok(typeof browser.window.window.factory.loadPluginScript === "function");
             done();
         });
         it("should define addPrototype", function (done) {
-            assert.ok(typeof factory.addPrototype === "function");
+            assert.ok(typeof browser.window.window.factory.addPrototype === "function");
             done();
         });
         it("should define getPrototypes", function (done) {
-            assert.ok(typeof factory.getPrototypes === "function");
+            assert.ok(typeof browser.window.window.factory.getPrototypes === "function");
             done();
         });
         it("should define getAllPlugins", function (done) {
-            assert.ok(typeof factory.getAllPlugins === "function");
+            assert.ok(typeof browser.window.window.factory.getAllPlugins === "function");
             done();
         });
         it("should define getAllPluginsObject", function (done) {
-            assert.ok(typeof factory.getAllPluginsObject === "function");
+            assert.ok(typeof browser.window.window.factory.getAllPluginsObject === "function");
             done();
         });
         it("should define createSubFactory", function (done) {
-            assert.ok(typeof factory.createSubFactory === "function");
+            assert.ok(typeof browser.window.window.factory.createSubFactory === "function");
             done();
         });
         it("should define destroySubFactory", function (done) {
-            assert.ok(typeof factory.destroySubFactory === "function");
+            assert.ok(typeof browser.window.window.factory.destroySubFactory === "function");
             done();
         });
         it("should define registerPluginInstance", function (done) {
-            assert.ok(typeof factory.registerPluginInstance === "function");
+            assert.ok(typeof browser.window.window.factory.registerPluginInstance === "function");
             done();
         });
         it("should define deletePlugin", function (done) {
-            assert.ok(typeof factory.deletePlugin === "function");
+            assert.ok(typeof browser.window.window.factory.deletePlugin === "function");
             done();
         });
         it("should define audioStart", function (done) {
-            assert.ok(typeof factory.audioStart === "function");
+            assert.ok(typeof browser.window.window.factory.audioStart === "function");
             done();
         });
         it("should define audioStop", function (done) {
-            assert.ok(typeof factory.audioStop === "function");
+            assert.ok(typeof browser.window.window.factory.audioStop === "function");
             done();
         });
         it("should define the audio context", function (done) {
-            assert.ok(factory.context == context);
+            assert.ok(browser.window.window.factory.context.constructor.name == "AudioContext");
             done();
         });
         it("should define FeatureMap", function (done) {
-            assert.ok(typeof factory.FeatureMap === "object");
+            assert.ok(typeof browser.window.window.factory.FeatureMap === "object");
             done();
         });
         it("should define createStore", function (done) {
-            assert.ok(typeof factory.createStore === "function");
+            assert.ok(typeof browser.window.window.factory.createStore === "function");
             done();
         });
         it("should define getStores", function (done) {
-            assert.ok(typeof factory.getStores === "function");
+            assert.ok(typeof browser.window.window.factory.getStores === "function");
             done();
         });
         it("should define findStore", function (done) {
-            assert.ok(typeof factory.findStore === "function");
+            assert.ok(typeof browser.window.window.factory.findStore === "function");
             done();
         });
         it("should define the SessionData store", function (done) {
-            assert.ok(factory.SessionData.constructor === sandbox.LinkedStore);
+            assert.ok(browser.window.window.factory.SessionData.constructor === browser.window.window.LinkedStore);
             done();
         });
         it("should define the UserData store", function (done) {
-            assert.ok(factory.UserData.constructor === sandbox.LinkedStore);
+            assert.ok(browser.window.window.factory.UserData.constructor === browser.window.window.LinkedStore);
             done();
         });
     });
     describe("SubFactory", function () {
-        var a = context.createGain(),
-            b = context.createGain();
+        const browser = new Browser();
+        browser.debug = true;
+        var sf;
+        before(function (d) {
+            browser.visit("/test/index.html", d);
+        });
         it("should return a SubFactory on createSubFactory", function (done) {
-            sf = factory.createSubFactory(a, b);
+            sf = browser.window.window.factory.createSubFactory(browser.window.window.a, browser.window.window.b);
             assert.equal(sf.constructor.name, "PluginSubFactory");
             done();
         });
         it("should define the Factory in .parent", function (done) {
-            assert.equal(sf.parent, factory);
+            assert.equal(sf.parent, browser.window.window.factory);
             done();
         });
         it("should define the TrackData store", function (done) {
-            assert.ok(sf.TrackData.constructor === sandbox.LinkedStore);
+            assert.ok(sf.TrackData.constructor === browser.window.window.LinkedStore);
             done();
         });
         it("should define the PluginData store", function (done) {
-            assert.ok(sf.PluginData.constructor === sandbox.LinkedStore);
+            assert.ok(sf.PluginData.constructor === browser.window.window.LinkedStore);
             done();
         });
         it("should define .featureSender", function (done) {
@@ -190,46 +186,29 @@ describe("PluginFactory", function () {
             done();
         });
         it("should define .chainStart", function (done) {
-            assert.ok(sf.chainStart === a);
+            assert.ok(sf.chainStart === browser.window.window.a);
             done();
         });
         it("should define .chainStop", function (done) {
-            assert.ok(sf.chainStop === b);
+            assert.ok(sf.chainStop === browser.window.window.b);
             done();
         });
     });
     describe("Plugin Prototype", function () {
-        const browser = new Browser({
-            debug: true
-        });
+        const browser = new Browser();
+        browser.debug = true;
+        var sf;
         var prototype;
-        before(function (done) {
-            browser.visit('/test/index.html', function (err, view, status) {});
-            done();
+        before(function (d) {
+            browser.on("idle", d);
+            browser.visit("/test/plugin.html", function () {});
         });
         it("should load a given plugin", function (done) {
-            var p = {
-                "url": "http://dmtlab.bcu.ac.uk/nickjillings/jsap-plugins/plugins/gain.js",
-                "type": "javascript",
-                "returnObject": "GainPlugin",
-                "test": function () {
-                    return typeof GainPlugin === "function";
-                }
-            }
-            sandbox.document = browser.document;
-            sandbox.console = browser.console;
-            sandbox.window = browser.window;
-            sandbox.XMLHttpRequest = browser.window.XMLHttpRequest;
-            browser.on("xhr", function (e, u) {
-                console.log(e);
-            });
-            factory.loadPluginScript(p).then(function () {
-                //console.log("TEST")
-                done();
-            });
+            assert.ok(browser.window.window.factory.getPrototypes().length > 0);
+            done();
         });
         it("should have a prototype called \"Gain\"", function (done) {
-            var protoList = factory.getPrototypes()
+            var protoList = browser.window.window.factory.getPrototypes();
             assert.ok(protoList.length > 0);
             prototype = protoList.find(function (a) {
                 return a.name == "Gain";
