@@ -1,6 +1,6 @@
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
-/*globals Promise, document, console, LinkedStore, Worker, window */
+/*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
 /*eslint-env browser */
 
 var PluginFactory = function (context, dir) {
@@ -102,10 +102,9 @@ var PluginFactory = function (context, dir) {
                 script.textContent = xhr.responseText;
                 document.getElementsByTagName("head")[0].appendChild(script);
                 resolve(resourceObject);
-            }
+            };
             xhr.send();
         });
-        console.log("TEST");
     }
 
     if (dir === undefined) {
