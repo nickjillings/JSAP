@@ -6,7 +6,6 @@ const http = require('http')
 const port = 3000
 
 function requestHandler(request, response) {
-    console.log(request.url)
     response.end(fs.readFileSync("." + request.url));
 }
 
@@ -224,6 +223,22 @@ describe("PluginFactory", function () {
         it("should have .createPluginInstance function", function (done) {
             assert.ok(typeof prototype.createPluginInstance == "function");
             done();
-        })
-    })
+        });
+        it("should have the plugin name", function (done) {
+            assert.ok(typeof prototype.name === "string");
+            done();
+        });
+        it("should have the plugin proto", function (done) {
+            assert.ok(typeof prototype.proto === "function");
+            done();
+        });
+        it("should have the plugin version", function (done) {
+            assert.ok(typeof prototype.version === "string");
+            done();
+        });
+        it("should have the plugin uniqueID", function (done) {
+            assert.ok(typeof prototype.uniqueID === "string");
+            done();
+        });
+    });
 });
