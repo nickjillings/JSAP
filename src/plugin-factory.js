@@ -154,9 +154,9 @@ var PluginFactory = function (context, dir) {
             if (this.next_node !== undefined) {
                 this.disconnect();
             }
-            if (new_next !== undefined && typeof new_next.getInputs === "function") {
+            if (new_next !== undefined && typeof new_next.node.getInputs === "function") {
                 this.next_node = new_next;
-                _out.connect(this.next_node.getInputs()[0]);
+                _out.connect(this.next_node.node.getInputs()[0]);
                 return true;
             }
             return false;
@@ -164,7 +164,7 @@ var PluginFactory = function (context, dir) {
 
         this.disconnect = function () {
             if (this.next_node !== undefined) {
-                _out.disconnect(this.next_node.getInputs()[0]);
+                _out.disconnect(this.next_node.node.getInputs()[0]);
                 this.next_node = undefined;
             }
         };
