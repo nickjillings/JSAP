@@ -1,0 +1,14 @@
+{
+"check-coverage": true,
+"include": [
+"*.js"
+],
+"sourceMap": true,
+"instrument": true,
+"require": [
+"babel-register"
+],
+"register": "babel-register",
+"all": true,
+"check-coverage": true
+}
