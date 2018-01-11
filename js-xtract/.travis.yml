@@ -2,7 +2,8 @@ language: node_js
 node_js:
   - 6
 before_script:
-  - npm install jshint
-  - npm install mocha
-  
+  - npm install -g codecov
+  - sudo apt-get install istanbul
+script:
+  - npm test
   
