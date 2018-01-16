@@ -1,7 +1,5 @@
 # JSAP - JavaScript Audio Plugin
 
-[![Code Climate](https://codeclimate.com/github/nickjillings/JSAP/badges/gpa.svg)](https://codeclimate.com/github/nickjillings/JSAP)
-
 Branch | Status 
  --- | --- 
 Master | [![Build Status](https://travis-ci.org/nickjillings/JSAP.svg?branch=master)](https://travis-ci.org/nickjillings/JSAP)
