@@ -1151,6 +1151,10 @@ var PluginFactory = function (context, dir) {
         currentPluginId = 0,
         audioStarted = false;
 
+    if (dir === undefined) {
+        dir = "jsap/";
+    }
+
     /*
         this.loadResource. Load a resource into the global namespace
 
@@ -1245,10 +1249,6 @@ var PluginFactory = function (context, dir) {
             };
             xhr.send();
         });
-    }
-
-    if (dir === undefined) {
-        dir = "jsap/";
     }
 
     var PluginInstance = function (id, plugin_node) {
