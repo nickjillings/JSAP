@@ -424,7 +424,7 @@ var ParameterManager = function (owner) {
             if (this.boundAudioParam) {
                 this.boundAudioParam.value = this.update(v);
             }
-            addAction(v);
+            addAction.call(this, v);
             this.trigger();
             _value = v;
             return v;
@@ -459,7 +459,7 @@ var ParameterManager = function (owner) {
                     if (v > maxState) {
                         throw ("Set value is greater than " + maxState);
                     }
-                    return setV(v);
+                    return setV.call(this, v);
                 }
             },
             "increment": {
@@ -468,7 +468,7 @@ var ParameterManager = function (owner) {
                     if (v > maxState) {
                         v = minState;
                     }
-                    return setV(v);
+                    return setV.call(this, v);
                 }
             },
             "deccrement": {
@@ -477,7 +477,7 @@ var ParameterManager = function (owner) {
                     if (v < minState) {
                         v = maxState;
                     }
-                    return setV(v);
+                    return setV.call(this, v);
                 }
             }
         });
