@@ -425,8 +425,8 @@ var ParameterManager = function (owner) {
                 this.boundAudioParam.value = this.update(v);
             }
             addAction.call(this, v);
-            this.trigger();
             _value = v;
+            this.trigger();
             return v;
         }
 
