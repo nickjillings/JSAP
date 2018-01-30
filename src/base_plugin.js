@@ -464,16 +464,16 @@ var ParameterManager = function (owner) {
             },
             "increment": {
                 "value": function () {
-                    var v = _value++;
+                    var v = _value + 1;
                     if (v > maxState) {
                         v = minState;
                     }
                     return setV.call(this, v);
                 }
             },
-            "deccrement": {
+            "decrement": {
                 "value": function () {
-                    var v = _value--;
+                    var v = _value - 1;
                     if (v < minState) {
                         v = maxState;
                     }
