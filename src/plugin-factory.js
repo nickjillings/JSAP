@@ -94,12 +94,15 @@ var PluginFactory = function (context) {
 
     function loadResource(resourceObject) {
         return new Promise(function (resolve, reject) {
-            console.log("TEST");
             var xhr = new XMLHttpRequest();
             var url = resourceObject.url;
             if (url.startsWith("http") === false) {
                 url = dir + resourceObject.url;
             }
+            if (resourceObject.test() === true) {
+                resolve(resourceObject);
+            }
+            console.log(url);
             xhr.open("GET", url);
             xhr.onload = function () {
                 var script = document.createElement("script");
