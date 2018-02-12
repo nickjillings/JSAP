@@ -1178,7 +1178,6 @@ var PluginFactory = function (context) {
             resourceObject.type = "javascript";
         }
         resourceObject.type = resourceObject.type.toLowerCase();
-        resourceObject.url = dir + resourceObject.url;
         switch (resourceObject.type) {
             case "css":
                 return new Promise(function (resolve, reject) {
@@ -1236,7 +1235,11 @@ var PluginFactory = function (context) {
         return new Promise(function (resolve, reject) {
             console.log("TEST");
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", resourceObject.url);
+            var url = resourceObject.url;
+            if (url.startsWith("http") === false) {
+                url = dir + resourceObject.url;
+            }
+            xhr.open("GET", url);
             xhr.onload = function () {
                 var script = document.createElement("script");
                 script.textContent = xhr.responseText;
