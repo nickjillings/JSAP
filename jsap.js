@@ -1254,7 +1254,7 @@ var PluginFactory = function (context) {
         var BFactory = new PluginFactory(newcontext);
         // Now copy in all of the plugin prototypes
         plugin_prototypes.forEach(function (proto) {
-            BFactory.addPrototype(proto);
+            BFactory.addPrototype(proto.proto);
         });
         return BFactory;
     }
