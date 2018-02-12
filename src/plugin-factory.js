@@ -111,6 +111,15 @@ var PluginFactory = function (context) {
         });
     }
 
+    function copyFactory(newcontext) {
+        var BFactory = new PluginFactory(newcontext);
+        // Now copy in all of the plugin prototypes
+        plugin_prototypes.forEach(function (proto) {
+            BFactory.addPrototype(proto);
+        });
+        return BFactory;
+    }
+
     var dir = "";
 
     var PluginInstance = function (id, plugin_node) {
@@ -1228,6 +1237,11 @@ var PluginFactory = function (context) {
                     return dir;
                 }
                 throw ("Cannot set root URL without a string");
+            }
+        },
+        "createFactoryCopy": {
+            "value": function (context) {
+                return copyFactory(context);
             }
         }
     });
