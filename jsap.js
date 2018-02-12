@@ -1142,7 +1142,7 @@ PluginUserInterface.prototype.clearGUI = function () {
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
 /*eslint-env browser */
 
-var PluginFactory = function (context, dir) {
+var PluginFactory = function (context) {
 
     var audio_context = context,
         subFactories = [],
@@ -1182,6 +1182,7 @@ var PluginFactory = function (context, dir) {
             resourceObject.type = "javascript";
         }
         resourceObject.type = resourceObject.type.toLowerCase();
+        resourceObject.url = dir + resourceObject.url;
         switch (resourceObject.type) {
             case "css":
                 return new Promise(function (resolve, reject) {
@@ -1250,6 +1251,8 @@ var PluginFactory = function (context, dir) {
             xhr.send();
         });
     }
+
+    var dir = "";
 
     var PluginInstance = function (id, plugin_node) {
         this.next_node = undefined;
@@ -2355,6 +2358,18 @@ var PluginFactory = function (context, dir) {
     Object.defineProperties(this, {
         "context": {
             "value": audio_context
+        },
+        "pluginRootURL": {
+            "get": function () {
+                return dir;
+            },
+            "set": function (t) {
+                if (typeof t === "string") {
+                    dir = t;
+                    return dir;
+                }
+                throw ("Cannot set root URL without a string");
+            }
         }
     });
 };
