@@ -1144,6 +1144,7 @@ PluginUserInterface.prototype.clearGUI = function () {
 
 var PluginFactory = function (context, rootURL) {
 
+
     var audio_context = context,
         subFactories = [],
         plugin_prototypes = [],
@@ -1236,9 +1237,16 @@ var PluginFactory = function (context, rootURL) {
             resourceObject.url = rootURL + resourceObject.url;
         }
         return new Promise(function (resolve, reject) {
-            console.log("TEST");
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", resourceObject.url);
+            var url = resourceObject.url;
+            if (url.startsWith("http") === false) {
+                url = dir + resourceObject.url;
+            }
+            if (resourceObject.test() === true) {
+                resolve(resourceObject);
+            }
+            console.log(url);
+            xhr.open("GET", url);
             xhr.onload = function () {
                 var script = document.createElement("script");
                 script.textContent = xhr.responseText;
@@ -1247,6 +1255,15 @@ var PluginFactory = function (context, rootURL) {
             };
             xhr.send();
         });
+    }
+    
+    function copyFactory(newcontext) {
+        var BFactory = new PluginFactory(newcontext);
+        // Now copy in all of the plugin prototypes
+        plugin_prototypes.forEach(function (proto) {
+            BFactory.addPrototype(proto.proto);
+        });
+        return BFactory;
     }
 
     var PluginInstance = function (id, plugin_node) {
@@ -2353,6 +2370,23 @@ var PluginFactory = function (context, rootURL) {
     Object.defineProperties(this, {
         "context": {
             "value": audio_context
+        },
+        "pluginRootURL": {
+            "get": function () {
+                return dir;
+            },
+            "set": function (t) {
+                if (typeof t === "string") {
+                    dir = t;
+                    return dir;
+                }
+                throw ("Cannot set root URL without a string");
+            }
+        },
+        "createFactoryCopy": {
+            "value": function (context) {
+                return copyFactory(context);
+            }
         }
     });
 };
