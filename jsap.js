@@ -1142,7 +1142,7 @@ PluginUserInterface.prototype.clearGUI = function () {
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
 /*eslint-env browser */
 
-var PluginFactory = function (context, dir) {
+var PluginFactory = function (context, rootURL) {
 
     var audio_context = context,
         subFactories = [],
@@ -1232,6 +1232,9 @@ var PluginFactory = function (context, dir) {
     };
 
     function loadResource(resourceObject) {
+        if (resourceObject.url.startsWith("http") == false && rootURL != undefined && rootURL.startsWith("http")) {
+            resourceObject.url = rootURL + resourceObject.url;
+        }
         return new Promise(function (resolve, reject) {
             console.log("TEST");
             var xhr = new XMLHttpRequest();
@@ -1244,10 +1247,6 @@ var PluginFactory = function (context, dir) {
             };
             xhr.send();
         });
-    }
-
-    if (dir === undefined) {
-        dir = "jsap/";
     }
 
     var PluginInstance = function (id, plugin_node) {
