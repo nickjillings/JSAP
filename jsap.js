@@ -1142,7 +1142,8 @@ PluginUserInterface.prototype.clearGUI = function () {
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
 /*eslint-env browser */
 
-var PluginFactory = function (context) {
+var PluginFactory = function (context, rootURL) {
+
 
     var audio_context = context,
         subFactories = [],
@@ -1182,7 +1183,6 @@ var PluginFactory = function (context) {
             resourceObject.type = "javascript";
         }
         resourceObject.type = resourceObject.type.toLowerCase();
-        resourceObject.url = dir + resourceObject.url;
         switch (resourceObject.type) {
             case "css":
                 return new Promise(function (resolve, reject) {
@@ -1237,6 +1237,9 @@ var PluginFactory = function (context) {
     };
 
     function loadResource(resourceObject) {
+        if (resourceObject.url.startsWith("http") == false && rootURL != undefined && rootURL.startsWith("http")) {
+            resourceObject.url = rootURL + resourceObject.url;
+        }
         return new Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", resourceObject.url);
@@ -1247,12 +1250,20 @@ var PluginFactory = function (context) {
                     document.getElementsByTagName("head")[0].appendChild(script);
                     resolve(resourceObject);
                 }
+
             };
             xhr.send();
         });
     }
-
-    var dir = "";
+    
+    function copyFactory(newcontext) {
+        var BFactory = new PluginFactory(newcontext);
+        // Now copy in all of the plugin prototypes
+        plugin_prototypes.forEach(function (proto) {
+            BFactory.addPrototype(proto.proto);
+        });
+        return BFactory;
+    }
 
     var PluginInstance = function (id, plugin_node) {
         this.next_node = undefined;
@@ -2369,6 +2380,11 @@ var PluginFactory = function (context) {
                     return dir;
                 }
                 throw ("Cannot set root URL without a string");
+            }
+        },
+        "createFactoryCopy": {
+            "value": function (context) {
+                return copyFactory(context);
             }
         }
     });
