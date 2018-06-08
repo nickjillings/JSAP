@@ -1239,9 +1239,6 @@ var PluginFactory = function (context, rootURL) {
         return new Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             var url = resourceObject.url;
-            if (url.startsWith("http") === false) {
-                url = dir + resourceObject.url;
-            }
             if (resourceObject.test() === true) {
                 resolve(resourceObject);
             }
