@@ -13,10 +13,6 @@ var PluginFactory = function (context, rootURL) {
         currentPluginId = 0,
         audioStarted = false;
 
-    if (dir === undefined) {
-        dir = "jsap/";
-    }
-
     /*
         this.loadResource. Load a resource into the global namespace
 
@@ -98,7 +94,7 @@ var PluginFactory = function (context, rootURL) {
     };
 
     function loadResource(resourceObject) {
-        if (resourceObject.url.startsWith("http") == false && rootURL != undefined && rootURL.startsWith("http")) {
+        if (resourceObject.url.startsWith("http") === false && rootURL !== undefined && rootURL.startsWith("http")) {
             resourceObject.url = rootURL + resourceObject.url;
         }
         return new Promise(function (resolve, reject) {
@@ -1233,12 +1229,12 @@ var PluginFactory = function (context, rootURL) {
         },
         "pluginRootURL": {
             "get": function () {
-                return dir;
+                return rootURL;
             },
             "set": function (t) {
                 if (typeof t === "string") {
-                    dir = t;
-                    return dir;
+                    rootURL = t;
+                    return rootURL;
                 }
                 throw ("Cannot set root URL without a string");
             }
