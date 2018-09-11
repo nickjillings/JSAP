@@ -2419,7 +2419,11 @@ var PluginFactory = function (context, rootURL) {
 /*globals window, console, Float32Array, Float64Array, Int32Array */
 /*globals inverseTransform, transform */
 
-var jsXtract = (function () {
+var jsXtract = (function (urlroot) {
+    
+    if (urlroot === undefined) {
+        urlroot = "https://cdn.rawgit.com/nickjillings/js-xtract/ASM/";
+    }
 
     function searchMapProperties(map, properties) {
         var match = map.find(function (e) {
@@ -2517,7 +2521,6 @@ var jsXtract = (function () {
     var Module;
     if (window !== undefined && WebAssembly !== undefined) {
         function postRun() {
-            Module = window.Module;
             Module.xtract_array_sum = {};
             Module.xtract_array_sum.fp32 = Module.cwrap("xtract_array_sum_fp32", "number", ["array", "number"]);
             Module.xtract_array_sum.fp64 = Module.cwrap("xtract_array_sum_fp64", "number", ["array", "number"]);
@@ -2570,16 +2573,16 @@ var jsXtract = (function () {
             window.Module['wasmBinary'] = bytes;
             window.Module['postRun'] = [postRun];
             var sc = document.createElement("script");
-            sc.setAttribute("src", "jsXtract-wasm.js");
+            sc.setAttribute("src", urlroot+"jsXtract-wasm.js");
             document.querySelector("head").appendChild(sc);
         }
         if (window.fetch !== undefined) {
-            fetch("jsXtract-wasm.wasm").then(function(response) {
+            fetch(urlroot+"jsXtract-wasm.wasm").then(function(response) {
                 return response.arrayBuffer();
             }).then(load);
 	   } else {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "jsXtract-wasm.wasm");
+            xhr.open("GET", urlroot+"jsXtract-wasm.wasm");
             xhr.responseType = "ArrayBuffer";
             xhr.onload = function(xhr) {
                 var reader = new Reader();
@@ -3274,7 +3277,7 @@ var jsXtract = (function () {
         }
     })
     return pub_obj;
-})();
+})(urlroot);
 
 function xtract_is_denormal(num) {
     if (Math.abs(num) <= 2.2250738585072014e-308) {
