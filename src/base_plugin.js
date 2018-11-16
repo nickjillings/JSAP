@@ -1030,7 +1030,7 @@ var PluginInterfaceMessageHub = function(owner) {
         });
         return O;
     }
-    function getParameterMessage(message) {
+    function getParameterMessage() {
         var payload = buildPluginParameterJSON(owner);
         channel.postMessage(JSON.stringify(payload));
     }
@@ -1063,7 +1063,7 @@ var PluginInterfaceMessageHub = function(owner) {
     Object.defineProperties(this, {
         "updateInterfaces": {
             "value": function() {
-                getParameterMessage(e.data);
+                getParameterMessage();
             }
         },
         "getMessageChannelID": {
