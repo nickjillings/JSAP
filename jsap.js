@@ -1169,7 +1169,10 @@ var PluginInterfaceMessageHub = function(owner) {
     }
     function getParameterMessage() {
         var payload = buildPluginParameterJSON(owner);
-        channel.postMessage(JSON.stringify(payload));
+        channel.postMessage({
+            message: "update parameters",
+            parameters: JSON.stringify(payload)
+        });
     }
     function setParameterMessage(message) {
         message.parameters.forEach(function(p) {
@@ -1192,6 +1195,8 @@ var PluginInterfaceMessageHub = function(owner) {
             case "get parameters":
                 getParameterMessage(e.data);
                 break;
+            case "update parameters":
+                return;
             default:
                 throw("Unknown message type \""+e.data.message+"\"");
         }
@@ -1684,6 +1689,7 @@ var PluginFactory = function (context, rootURL) {
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
             this.PluginGUI.deleteAllPluginInterfaces(p[0].node);
+            p[0].node.externalInterface.closeChannel();
         }
     };
 

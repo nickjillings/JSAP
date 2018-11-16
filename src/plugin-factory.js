@@ -456,6 +456,7 @@ var PluginFactory = function (context, rootURL) {
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
             this.PluginGUI.deleteAllPluginInterfaces(p[0].node);
+            p[0].node.externalInterface.closeChannel();
         }
     };
 
