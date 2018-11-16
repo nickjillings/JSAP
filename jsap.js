@@ -2417,7 +2417,11 @@ var PluginFactory = function (context, rootURL) {
 /*globals window, console, Float32Array, Float64Array, Int32Array */
 /*globals inverseTransform, transform */
 
-var jsXtract = (function () {
+var jsXtract = (function (urlroot) {
+    
+    if (urlroot === undefined) {
+        urlroot = "https://cdn.rawgit.com/nickjillings/js-xtract/ASM/";
+    }
 
     function searchMapProperties(map, properties) {
         var match = map.find(function (e) {
@@ -2489,8 +2493,8 @@ var jsXtract = (function () {
             return match.data;
         }
     };
-    
-    
+
+
     var chroma_map = {
         parent: this,
         store: [],
@@ -2512,8 +2516,250 @@ var jsXtract = (function () {
             return match.data;
         }
     };
+    var Module;
+    if (window !== undefined && WebAssembly !== undefined) {
+        function postRun() {
+            Module.xtract_array_sum = {};
+            Module.xtract_array_sum.fp32 = Module.cwrap("xtract_array_sum_fp32", "number", ["array", "number"]);
+            Module.xtract_array_sum.fp64 = Module.cwrap("xtract_array_sum_fp64", "number", ["array", "number"]);
+            Module.xtract_array_sum.fp32_pinned = Module.cwrap("xtract_array_sum_fp32", "number", ["number", "number"]);
+            Module.xtract_array_sum.fp64_pinned = Module.cwrap("xtract_array_sum_fp64", "number", ["number", "number"]);
+            Module.xtract_array_max = {};
+            Module.xtract_array_max.fp32 = Module.cwrap("xtract_array_max_fp32", "number", ["array", "number"]);
+            Module.xtract_array_max.fp64 = Module.cwrap("xtract_array_max_fp64", "number", ["array", "number"]);
+            Module.xtract_array_max.fp32_pinned = Module.cwrap("xtract_array_max_fp32", "number", ["number", "number"]);
+            Module.xtract_array_max.fp64_pinned = Module.cwrap("xtract_array_max_fp64", "number", ["number", "number"]);
+            Module.xtract_array_min = {};
+            Module.xtract_array_min.fp32 = Module.cwrap("xtract_array_min_fp32", "number", ["array", "number"]);
+            Module.xtract_array_min.fp64 = Module.cwrap("xtract_array_min_fp64", "number", ["array", "number"]);
+            Module.xtract_array_min.fp32_pinned = Module.cwrap("xtract_array_min_fp32", "number", ["number", "number"]);
+            Module.xtract_array_min.fp64_pinned = Module.cwrap("xtract_array_min_fp64", "number", ["number", "number"]);
+            Module.xtract_array_scale = {};
+            Module.xtract_array_scale.fp32 = Module.cwrap("xtract_array_scale_fp32", "number", ["number", "number"]);
+            Module.xtract_array_scale.fp64 = Module.cwrap("xtract_array_scale_fp64", "number", ["number", "number"]);
+            Module.xtract_variance = {};
+            Module.xtract_variance.fp32 = Module.cwrap("xtract_variance_fp32", "number", ["array", "number"]);
+            Module.xtract_variance.fp64 = Module.cwrap("xtract_variance_fp64", "number", ["array", "number"]);
+            Module.xtract_variance.fp32_pinned = Module.cwrap("xtract_variance_fp32", "number", ["number", "number"]);
+            Module.xtract_variance.fp64_pinned = Module.cwrap("xtract_variance_fp64", "number", ["number", "number"]);
+            Module.xtract_average_deviation = {};
+            Module.xtract_average_deviation.fp32 = Module.cwrap("xtract_average_deviation_fp32", "number", ["array", "number"]);
+            Module.xtract_average_deviation.fp64 = Module.cwrap("xtract_average_deviation_fp64", "number", ["array", "number"]);
+            Module.xtract_average_deviation.fp32_pinned = Module.cwrap("xtract_average_deviation_fp32", "number", ["number", "number"]);
+            Module.xtract_average_deviation.fp64_pinned = Module.cwrap("xtract_average_deviation_fp64", "number", ["number", "number"]);
+            Module.xtract_spectral_centroid = {};
+            Module.xtract_spectral_centroid.fp32 = Module.cwrap("xtract_spectral_centroid_fp32", "number", ["array", "number"]);
+            Module.xtract_spectral_centroid.fp64 = Module.cwrap("xtract_spectral_centroid_fp64", "number", ["array", "number"]);
+            Module.xtract_spectral_centroid.fp32_pinned = Module.cwrap("xtract_spectral_centroid_fp32", "number", ["number", "number"]);
+            Module.xtract_spectral_centroid.fp64_pinned = Module.cwrap("xtract_spectral_centroid_fp64", "number", ["number", "number"]);
+            Module.xtract_spectral_variance = {};
+            Module.xtract_spectral_variance.fp32 = Module.cwrap("xtract_spectral_variance_fp32", "number", ["array", "number", "number"]);
+            Module.xtract_spectral_variance.fp64 = Module.cwrap("xtract_spectral_variance_fp64", "number", ["array", "number", "number"]);
+            Module.xtract_spectral_variance.fp32_pinned = Module.cwrap("xtract_spectral_variance_fp32", "number", ["number", "number", "number"]);
+            Module.xtract_spectral_variance.fp64_pinned = Module.cwrap("xtract_spectral_variance_fp64", "number", ["number", "number", "number"]);
+            Module.xtract_rms_amplitude = {};
+            Module.xtract_rms_amplitude.fp32 = Module.cwrap("xtract_rms_amplitude_fp32", "number", ["array", "number"]);
+            Module.xtract_rms_amplitude.fp64 = Module.cwrap("xtract_rms_amplitude_fp64", "number", ["array", "number"]);
+            Module.xtract_rms_amplitude.fp32_pinned = Module.cwrap("xtract_rms_amplitude_fp32", "number", ["number", "number"]);
+            Module.xtract_rms_amplitude.fp64_pinned = Module.cwrap("xtract_rms_amplitude_fp64", "number", ["number", "number"]);
+            Module.xtract_autocorrelation = {};
+            Module.xtract_autocorrelation.fp32 = Module.cwrap("xtract_autocorrelation_fp32", "number", ["number", "number", "number"]);
+            Module.xtract_autocorrelation.fp64 = Module.cwrap("xtract_autocorrelation_fp64", "number", ["number", "number", "number"]);
+        }
+        function load(bytes) {
+            window.Module = {};
+            window.Module['wasmBinary'] = bytes;
+            window.Module['postRun'] = [postRun];
+            var sc = document.createElement("script");
+            sc.setAttribute("src", urlroot+"jsXtract-wasm.js");
+            document.querySelector("head").appendChild(sc);
+        }
+        if (window.fetch !== undefined) {
+            fetch(urlroot+"jsXtract-wasm.wasm").then(function(response) {
+                return response.arrayBuffer();
+            }).then(load);
+	   } else {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", urlroot+"jsXtract-wasm.wasm");
+            xhr.responseType = "ArrayBuffer";
+            xhr.onload = function(xhr) {
+                var reader = new Reader();
+                reader.onload = load;
+                reader.readAsArrayBuffer(xhr.response);
+            }
+	   }
+    }
+
+    var memory = (function() {
+        function malloc(size) {
+            if (typeof size !== "number" || size <= 0 || size != Math.floor(size)) {
+                throw("malloc size must be positive integer");
+            }
+            if (Module) {
+                return Module._malloc(size);
+            }
+            return 0;
+        }
+
+        function createFP32Array(ptr, number) {
+            var elem = ptr >> 2,
+                array;
+            if (Module && elem > 0) {
+                array = Module.HEAPF32.subarray(elem,elem+number);
+                allocations.push(new MemoryObject(array, ptr, number, Module.HEAPF32));
+            } else {
+                array = new Float32Array(number);
+            }
+            return array;
+        }
+
+        function createFP64Array(ptr, number) {
+            var elem = ptr >> 4,
+                array;
+            if (Module && elem > 0) {
+                array = Module.HEAPF64.subarray(elem,elem+number);
+                allocations.push(new MemoryObject(array, ptr, number, Module.HEAPF64));
+            } else {
+                array = new Float64Array(number);
+            }
+            return array;
+        }
+
+        function isMemoryPinned(array) {
+            var heap;
+            if (Module === undefined) {
+                return false;
+            }
+            if (array.constructor == Float32Array) {
+                heap = Module.HEAPF32;
+            } else if (array.constructor == Float64Array) {
+                heap = Module.HEAPF64;
+            } else {
+                return false;
+            }
+            return heap.buffer == array.buffer;
+        }
+
+        function findPinnedObjectIndex(array) {
+            var heap;
+            if (array.constructor == Float32Array) {
+                heap = Module.HEAPF32;
+            } else if (array.constructor == Float64Array) {
+                heap = Module.HEAPF64;
+            } else {
+                return false;
+            }
+            index = allocations.findIndex(function(entry) {
+                return entry.array === array;
+            });
+            return index;
+        }
+
+        function getPinnedObject(array) {
+            var i = findPinnedObjectIndex(array);
+            if (i >= 0) {
+                return allocations[i];
+            }
+            return false;
+        }
+
+        function free(array) {
+            var heap, index, memblock;
+            if (isMemoryPinned(array) === false) {
+                return;
+            }
+            if (Module === undefined) {
+                return;
+            }
+            index = findPinnedObjectIndex(array);
+            if (index === -1) {
+                throw("MEMLEAK: Cannot locate memblock to free, but it is pinned.")
+            }
+            memblock = allocations[index];
+            Module._free(memblock.ptr);
+            allocations.splice(index, 1);
+        }
+
+        var allocations = [];
+        var MemoryObject = function(array, ptr, number, heap) {
+            Object.defineProperties(this, {
+                "array": {
+                    "value": array
+                },
+                "length": {
+                    "value": number
+                },
+                "stack": {
+                    "value": heap
+                },
+                "ptr": {
+                    "value": ptr
+                }
+            });
+        }
+
+        var memoryController = {};
+        Object.defineProperties(memoryController, {
+            "allocateFP32Array": {
+                "value": function(numElements) {
+                    var ptr;
+                    if (typeof numElements != "number" || numElements <= 0 || numElements != Math.floor(numElements)) {
+                        throw("Elemnt count must be positive integer");
+                    }
+
+                    ptr = malloc(numElements*4);
+                    return createFP32Array(ptr, numElements);
+                }
+            },
+            "allocateFP64Array": {
+                "value": function(numElements) {
+                    var ptr;
+                    if (typeof numElements != "number" || numElements <= 0 || numElements != Math.floor(numElements)) {
+                        throw("Elemnt count must be positive integer");
+                    }
+
+                    ptr = malloc(numElements*8);
+                    return createFP64Array(ptr, numElements);
+                }
+            },
+            "isPinned": {
+                "value": function (array) {
+                    return isMemoryPinned(array);
+                }
+            },
+            "getPinnedAddress": {
+                "value": function(array) {
+                    var p;
+                    if (isMemoryPinned(array) == false) {
+                        return false;
+                    }
+                    p = getPinnedObject(array);
+                    if (typeof p == "object") {
+                        return p.ptr;
+                    }
+                    return false;
+                }
+            },
+            "free": {
+                "value": function (array) {
+                    free(array);
+                }
+            },
+            "copy": {
+                "value": function (src, dst) {
+                    var i;
+                    for (i=0; i<src.length; i++)
+                        dst[i] = src[i];
+                    for (i=src.length; i<dst.length; i++)
+                        dst[i] = 0.0;
+                }
+            }
+        });
+        return memoryController;
+    })();
 
     var pub_obj = {};
+    var functions ={};
     Object.defineProperties(pub_obj, {
         "createDctCoefficients": {
             "value": function (N) {
@@ -2536,13 +2782,500 @@ var jsXtract = (function () {
         "createChromaCoefficients": {
             "value": function (N, sampleRate, nbins, A440, f_ctr, octwidth) {
                 return chroma_map.createCoefficients(N, sampleRate, nbins, A440, f_ctr, octwidth);
-            }            
+            }
+        },
+        "wasm": {
+            "get": function() {
+                return Module;
+            }
+        },
+        "functions": {
+            get: function() {
+                return functions;
+            }
+        },
+        "memory": {
+            "get": function() {
+                return memory;
+            }
         }
     });
+
+    function xtract_array_sum(data) {
+        if (!xtract_assert_array(data))
+            return 0;
+        if (data.reduce) {
+            return data.reduce(function (a, b) {
+                return a + b;
+            }, 0);
+        }
+        var sum = 0,
+            l = data.length;
+        for (var n = 0; n < l; n++) {
+            sum += data[n];
+        }
+        return sum;
+    }
+
+    function xtract_array_max(data) {
+        if (!xtract_assert_array(data))
+            return -Infinity;
+        if (data.reduce) {
+            return data.reduce(function (a, b) {
+                if (b > a) {
+                    return b;
+                }
+                return a;
+            }, data[0]);
+        }
+        var max = data[0],
+            l = data.length;
+        for (var n = 1; n < l; n++) {
+            if (data[n] > max) {
+                max = data[n];
+            }
+        }
+        return max;
+    }
+
+    function xtract_array_min(data) {
+        if (!xtract_assert_array(data))
+            return Infinity;
+        if (data.reduce) {
+            return data.reduce(function (a, b) {
+                if (b < a) {
+                    return b;
+                }
+                return a;
+            }, data[0]);
+        }
+        var min = Infinity,
+            l = data.length;
+        for (var n = 0; n < l; n++) {
+            if (data[n] < min) {
+                min = data[n];
+            }
+        }
+        return min;
+    }
+
+    function xtract_array_scale(data, factor) {
+        if (!xtract_assert_array(data))
+            return 0;
+        if (typeof factor !== "number") {
+            return 0;
+        }
+        var i = 0,
+            l = data.length,
+            a = xtract_array_copy(data);
+        for (i = 0; i < l; i++) {
+            a[i] *= factor;
+        }
+        return a;
+    }
+
+    function xtract_variance(array, mean) {
+        if (!xtract_assert_array(array))
+            return 0;
+        if (typeof mean !== "number") {
+            mean = xtract_mean(array);
+        }
+        var result = 0.0;
+        if (array.reduce) {
+            result = array.reduce(function (a, b) {
+                a += Math.pow(b - mean, 2);
+                return a;
+            }, 0);
+        } else {
+            for (var n = 0; n < array.length; n++) {
+                result += Math.pow(array[n] - mean, 2);
+            }
+        }
+        result /= (array.length - 1);
+        return result;
+    }
+
+    function xtract_average_deviation(array, mean) {
+        if (!xtract_assert_array(array))
+            return 0;
+        if (typeof mean !== "number") {
+            mean = xtract_mean(array);
+        }
+        var result = 0.0;
+        if (array.reduce) {
+            result = array.reduce(function (a, b) {
+                return a + Math.abs(b - mean);
+            }, 0);
+        } else {
+            for (var n = 0; n < array.length; n++) {
+                result += Math.abs(array[n] - mean);
+            }
+        }
+        return result / array.length;
+    }
+    
+    function xtract_spectral_centroid(spectrum) {
+        if (!xtract_assert_array(spectrum))
+            return 0;
+        var N = spectrum.length;
+        var n = N >> 1;
+        var amps = spectrum.subarray(0, n);
+        var freqs = spectrum.subarray(n);
+        var A_d = xtract_array_sum(amps);
+        if (A_d === 0.0) {
+            return 0.0;
+        }
+        var sum = 0.0;
+        while (n--) {
+            sum += freqs[n] * (amps[n] / A_d);
+        }
+        return sum;
+    }
+    
+    function xtract_spectral_variance(spectrum, spectral_centroid) {
+        if (!xtract_assert_array(spectrum))
+            return 0;
+        if (typeof spectral_centroid !== "number") {
+            spectral_centroid = xtract_spectral_centroid(spectrum);
+        }
+        var A = 0,
+            result = 0;
+        var N = spectrum.length;
+        var n = N >> 1;
+        var amps = spectrum.subarray(0, n);
+        var freqs = spectrum.subarray(n, N);
+        var A_d = xtract_array_sum(amps);
+        while (n--) {
+            result += Math.pow(freqs[n] - spectral_centroid, 2) * (amps[n] / A_d);
+        }
+        return result;
+    }
+
+    function xtract_autocorrelation(array) {
+        if (!xtract_assert_array(array))
+            return 0;
+        var n = array.length;
+        var result = new Float64Array(n);
+        while (n--) {
+            var corr = 0;
+            for (var i = 0; i < array.length - n; i++) {
+                corr += array[i] * array[i + n];
+            }
+            result[n] = corr / array.length;
+        }
+        return result;
+    }
+    
+    function xtract_rms_amplitude(timeArray) {
+        if (!xtract_assert_array(timeArray))
+            return 0;
+        var result = 0;
+        if (timeArray.reduce) {
+            result = timeArray.reduce(function (a, b) {
+                return a + b * b;
+            }, 0);
+        } else {
+            for (var n = 0; n < timeArray.length; n++) {
+                result += timeArray[n] * timeArray[n];
+            }
+        }
+        return Math.sqrt(result / timeArray.length);
+    }
+
+    Object.defineProperties(functions, {
+        "array_sum": {
+            "value": function(data) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_array_sum(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_sum.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_array_sum.fp32(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_sum.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_array_sum.fp64(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else {
+                    return xtract_array_sum(data);
+                }
+            }
+        },
+        "array_max": {
+            "value": function (data) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_array_max(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_max.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_array_max.fp32(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_max.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_array_max.fp64(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else {
+                    return xtract_array_max(data);
+                }
+            }
+        },
+        "array_min": {
+            "value": function (data) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_array_min(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_min.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_array_min.fp32(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_min.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_array_min.fp64(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else {
+                    return xtract_array_min(data);
+                }
+            }
+        },
+        "array_scale": {
+            "value": function (data, factor) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_array_scale(data, factor);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_scale.fp32(ptr, factor, N);
+                    } else {
+                        var mem = memory.allocateFP32Array(data.length);
+                        memory.copy(data,mem);
+                        ptr = memory.getPinnedAddress(mem);
+                        var result = Module.xtract_array_scale.fp32(ptr, factor, N);
+                        memory.copy(mem,data);
+                        memory.free(mem);
+                        return result;
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_array_scale.fp32(ptr, factor, N);
+                    } else {
+                        var mem = memory.allocateFP64Array(data.length);
+                        memory.copy(data,mem);
+                        ptr = memory.getPinnedAddress(mem);
+                        var result = Module.xtract_array_scale.fp64(ptr, factor, N);
+                        memory.copy(mem,data);
+                        memory.free(mem);
+                        return result;
+                    }
+                }
+                else {
+                    return xtract_array_scale(data, factor);
+                }
+            }
+        },
+        "variance": {
+            "value": function(data, mean) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_variance(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_variance.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_variance.fp32(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_variance.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_variance.fp64(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else {
+                    return xtract_variance(data);
+                }
+            }
+        },
+        "average_deviation": {
+            "value": function(data, mean) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_average_deviation(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_average_deviation.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_average_deviation.fp32(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_average_deviation.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_average_deviation.fp64(new Uint8Array(data.buffer), N);
+                    }
+                }
+                else {
+                    return xtract_average_deviation(data);
+                }
+            }
+        },
+        "spectral_centroid": {
+            "value": function (data) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_spectral_centroid(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_spectral_centroid.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_spectral_centroid.fp32(new Uint8Array(data.buffer), N);
+                    }
+                } else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_spectral_centroid.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_spectral_centroid.fp64(new Uint8Array(data.buffer), N);
+                    }
+                } else {
+                    return xtract_spectral_centroid(data);
+                }
+            }
+        },
+        "spectral_variance": {
+            "value": function (data, spectral_centroid) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_spectral_variance(data, spectral_centroid);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_spectral_variance.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_spectral_variance.fp32(new Uint8Array(data.buffer), spectral_centroid, N);
+                    }
+                } else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_spectral_variance.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_spectral_variance.fp64(new Uint8Array(data.buffer), spectral_centroid, N);
+                    }
+                } else {
+                    return xtract_spectral_variance(data, spectral_centroid);
+                }
+            }
+        },
+        "rms_amplitude": {
+            "value": function (data) {
+                var N = data.length, ptr;
+                if (!Module) {
+                    return xtract_rms_amplitude(data);
+                }
+                if (data.constructor == Float32Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_rms_amplitude.fp32_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_rms_amplitude.fp32(new Uint8Array(data.buffer), N);
+                    }
+                } else if (data.constructor == Float64Array) {
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        return Module.xtract_rms_amplitude.fp64_pinned(ptr, N);
+                    } else {
+                        return Module.xtract_rms_amplitude.fp64(new Uint8Array(data.buffer), N);
+                    }
+                } else {
+                    return xtract_rms_amplitude(data);
+                }
+            }
+        },
+        "autocorrelation": {
+            "value": function(data) {
+                var N = data.length, ptr, copymem;
+                if (!Module) {
+                    return xtract_autocorrelation(data);
+                }
+                if (data.constructor == Float32Array) {
+                    copymem = memory.allocateFP32Array(data.length);
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        Module.xtract_autocorrelation.fp32(ptr, memory.getPinnedAddress(copymem), N);
+                        return copymem;
+                    } else {
+                        var mem = memory.allocateFP32Array(data.length);
+                        memory.copy(data, mem);
+                        ptr = memory.getPinnedAddress(mem);
+                        Module.xtract_autocorrelation.fp32(ptr, memory.getPinnedAddress(copymem), N);
+                        memory.free(mem);
+                        return copymem;
+                    }
+                }
+                else if (data.constructor == Float64Array) {
+                    copymem = memory.allocateFP64Array(data.length);
+                    if (memory.isPinned(data)) {
+                        ptr = memory.getPinnedAddress(data);
+                        Module.xtract_autocorrelation.fp64(ptr, memory.getPinnedAddress(copymem), N);
+                        return copymem;
+                    } else {
+                        var mem = memory.allocateFP64Array(data.length);
+                        memory.copy(data, mem);
+                        ptr = memory.getPinnedAddress(mem);
+                        Module.xtract_autocorrelation.fp64(ptr, memory.getPinnedAddress(copymem), N);
+                        memory.free(mem);
+                        return copymem;
+                    }
+                }
+                else {
+                    return xtract_autocorrelation(data);
+                }
+            }
+        }
+    })
     return pub_obj;
-})();
-
-
+})(urlroot);
 
 function xtract_is_denormal(num) {
     if (Math.abs(num) <= 2.2250738585072014e-308) {
@@ -2562,17 +3295,7 @@ function xtract_assert_positive_integer(number) {
 function xtract_array_sum(data) {
     if (!xtract_assert_array(data))
         return 0;
-    if (data.reduce) {
-        return data.reduce(function (a, b) {
-            return a + b;
-        }, 0);
-    }
-    var sum = 0,
-        l = data.length;
-    for (var n = 0; n < l; n++) {
-        sum += data[n];
-    }
-    return sum;
+    return jsXtract.functions.array_sum(data);
 }
 
 function xtract_array_copy(src) {
@@ -2585,58 +3308,20 @@ function xtract_array_copy(src) {
 
 function xtract_array_min(data) {
     if (!xtract_assert_array(data))
-        return Infinity;
-    if (data.reduce) {
-        return data.reduce(function (a, b) {
-            if (b < a) {
-                return b;
-            }
-            return a;
-        }, data[0]);
-    }
-    var min = Infinity,
-        l = data.length;
-    for (var n = 0; n < l; n++) {
-        if (data[n] < min) {
-            min = data[n];
-        }
-    }
-    return min;
+        return 0;
+    return jsXtract.functions.array_min(data);
 }
 
 function xtract_array_max(data) {
     if (!xtract_assert_array(data))
-        return -Infinity;
-    if (data.reduce) {
-        return data.reduce(function (a, b) {
-            if (b > a) {
-                return b;
-            }
-            return a;
-        }, data[0]);
-    }
-    var max = data[0],
-        l = data.length;
-    for (var n = 1; n < l; n++) {
-        if (data[n] > max) {
-            max = data[n];
-        }
-    }
-    return max;
+        return 0;
+    return jsXtract.functions.array_max(data);
 }
 
 function xtract_array_scale(data, factor) {
     if (!xtract_assert_array(data))
         return 0;
-    if (typeof factor !== "number") {
-        return 0;
-    }
-    var i = 0,
-        l = data.length;
-    for (i = 0; i < l; i++) {
-        data[i] *= factor;
-    }
-    return data;
+    return jsXtract.functions.array_scale(data, factor);
 }
 
 function xtract_array_normalise(data) {
@@ -2889,19 +3574,7 @@ function xtract_variance(array, mean) {
     if (typeof mean !== "number") {
         mean = xtract_mean(array);
     }
-    var result = 0.0;
-    if (array.reduce) {
-        result = array.reduce(function (a, b) {
-            a += Math.pow(b - mean, 2);
-            return a;
-        }, 0);
-    } else {
-        for (var n = 0; n < array.length; n++) {
-            result += Math.pow(array[n] - mean, 2);
-        }
-    }
-    result /= (array.length - 1);
-    return result;
+    return jsXtract.functions.variance(array, mean);
 }
 
 function xtract_standard_deviation(array, variance) {
@@ -2919,17 +3592,7 @@ function xtract_average_deviation(array, mean) {
     if (typeof mean !== "number") {
         mean = xtract_mean(array);
     }
-    var result = 0.0;
-    if (array.reduce) {
-        result = array.reduce(function (a, b) {
-            return a + Math.abs(b - mean);
-        }, 0);
-    } else {
-        for (var n = 0; n < array.length; n++) {
-            result += Math.abs(array[n] - mean);
-        }
-    }
-    return result / array.length;
+    return jsXtract.functions.average_deviation(array, mean);
 }
 
 function xtract_skewness_kurtosis(array, mean, standard_deviation) {
@@ -2965,19 +3628,7 @@ function xtract_kurtosis(array, mean, standard_deviation) {
 function xtract_spectral_centroid(spectrum) {
     if (!xtract_assert_array(spectrum))
         return 0;
-    var N = spectrum.length;
-    var n = N >> 1;
-    var amps = spectrum.subarray(0, n);
-    var freqs = spectrum.subarray(n);
-    var A_d = xtract_array_sum(amps);
-    if (A_d === 0.0) {
-        return 0.0;
-    }
-    var sum = 0.0;
-    while (n--) {
-        sum += freqs[n] * (amps[n] / A_d);
-    }
-    return sum;
+    return jsXtract.functions.spectral_centroid(spectrum);
 }
 
 function xtract_spectral_mean(spectrum) {
@@ -2997,17 +3648,7 @@ function xtract_spectral_variance(spectrum, spectral_centroid) {
     if (typeof spectral_centroid !== "number") {
         spectral_centroid = xtract_spectral_centroid(spectrum);
     }
-    var A = 0,
-        result = 0;
-    var N = spectrum.length;
-    var n = N >> 1;
-    var amps = spectrum.subarray(0, n);
-    var freqs = spectrum.subarray(n, N);
-    var A_d = xtract_array_sum(amps);
-    while (n--) {
-        result += Math.pow(freqs[n] - spectral_centroid, 2) * (amps[n] / A_d);
-    }
-    return result;
+    return jsXtract.functions.spectral_variance(spectrum, spectral_centroid);
 }
 
 function xtract_spectral_spread(spectrum, spectral_centroid) {
@@ -3122,7 +3763,7 @@ function xtract_tristimulus(spectrum, f0) {
         if (temp !== 0) {
             den += temp;
             h = Math.floor(freqs[i] / f0 + 0.5);
-            p[h - 1] += temp
+            p[h - 1] += temp;
         }
     }
 
@@ -3160,8 +3801,8 @@ function xtract_smoothness(spectrum) {
     for (var n = 1; n < K - 1; n++) {
         next = Math.max(1e-5, spectrum[n + 1]);
         temp += Math.abs(20.0 * Math.log(current) - (20.0 * Math.log(prev) + 20.0 * Math.log(current) + 20.0 * Math.log(next)) / 3.0);
-        prev = current
-        current = next
+        prev = current;
+        current = next;
     }
     return temp;
 }
@@ -3231,7 +3872,7 @@ function xtract_flatness(spectrum) {
     var K = N >> 1;
     var amps = spectrum.subarray(0, K);
     for (var n = 0; n < K; n++) {
-        temp = Math.max(1e-32, amps[n])
+        temp = Math.max(1e-32, amps[n]);
         num *= temp;
         den += temp;
         count++;
@@ -3288,16 +3929,7 @@ function xtract_rms_amplitude(timeArray) {
     if (!xtract_assert_array(timeArray))
         return 0;
     var result = 0;
-    if (timeArray.reduce) {
-        result = timeArray.reduce(function (a, b) {
-            return a + b * b;
-        }, 0);
-    } else {
-        for (var n = 0; n < timeArray.length; n++) {
-            result += timeArray[n] * timeArray[n];
-        }
-    }
-    return Math.sqrt(result / timeArray.length);
+    return jsXtract.functions.rms_amplitude(timeArray);
 }
 
 function xtract_spectral_inharmonicity(peakSpectrum, f0) {
@@ -3643,7 +4275,8 @@ function xtract_wavelet_f0(timeArray, sampleRate, pitchtracker) { // eslint-disa
             return;
         }
         var dv, previousDV = -1000;
-        var nbMins = nbMaxs = 0;
+        var nbMins = 0,
+            nbMaxs = 0;
         var lastMinIndex = -1000000;
         var lastmaxIndex = -1000000;
         var findMax = 0;
@@ -3896,7 +4529,8 @@ function xtract_wavelet_f0(timeArray, sampleRate, pitchtracker) { // eslint-disa
 
     function getamplitudeMax(sam, samplecount) {
         var si, i;
-        var minValue = maxValue = 0.0;
+        var minValue = 0.0,
+            maxValue = 0.0;
         for (i = 0; i < samplecount; i++) {
             si = sam[i];
             if (si > maxValue) {
@@ -4177,16 +4811,7 @@ function xtract_dct_2(array, dct) {
 function xtract_autocorrelation(array) {
     if (!xtract_assert_array(array))
         return 0;
-    var n = array.length;
-    var result = new Float64Array(n);
-    while (n--) {
-        var corr = 0;
-        for (var i = 0; i < array.length - n; i++) {
-            corr += array[i] * array[i + n];
-        }
-        result[n] = corr / array.length;
-    }
-    return result;
+    return jsXtract.functions.autocorrelation(array);
 }
 
 function xtract_amdf(array) {
@@ -4502,6 +5127,7 @@ function xtract_onset(timeData, frameSize) {
     var X = get_X(frames, frameSize);
 
     var E = new timeData.constructor(N);
+    var n;
     for (var k = 0; k < K; k++) {
         var phase_prev = angle(X[0].subarray(2 * k, 2 * k + 2));
         var phase_delta = angle(X[0].subarray(2 * k, 2 * k + 2));
@@ -4608,7 +5234,8 @@ function xtract_resample(data, p, q, n) {
     }
 
     function W(N) {
-        var w = new Float64Array(N);
+        var w = new Float64Array(N),
+            i;
         for (i = 0; i < N; i++) {
             var rad = (Math.PI * i) / (N);
             w[i] = 0.35875 - 0.48829 * Math.cos(2 * rad) + 0.14128 * Math.cos(4 * rad) - 0.01168 * Math.cos(6 * rad);
@@ -4858,85 +5485,105 @@ function xtract_init_bark(N, sampleRate, bands) {
     return band_limits;
 }
 
-function xtract_init_chroma(N, sampleRate, nbins, A440, f_ctr, octwidth) {  
+function xtract_init_chroma(N, sampleRate, nbins, A440, f_ctr, octwidth) {
     /*run arg checks here... (if(nbins=='undefined')*/
+
     if (typeof nbins !== "number" || nbins <= 1) {
         nbins = 12;
     }
     if (typeof A440 !== "number" || A440 <= 27.5) {
-           A440 = 440;
-    }    
+        A440 = 440;
+    }
     if (typeof f_ctr !== "number") {
-           f_ctr = 1000;
-    }    
+        f_ctr = 1000;
+    }
     if (typeof octwidth !== "number") {
-           octwidth = 1;
-    }        
-    var A0 = 27.5; // A0 in Hz 
-    N2 =  N; // ignore freq values returned by xtract_spectrum - this relies on dc-offset being kept
-    var ctroct = Math.log(f_ctr/A0) / Math.LN2; // f_ctr in octaves    
-    var chromaFilters ={
+        octwidth = 1;
+    }
+    var A0 = 27.5; // A0 in Hz
+    var N2 = N; // ignore freq values returned by xtract_spectrum - this relies on dc-offset being kept
+    var ctroct = Math.log(f_ctr / A0) / Math.LN2; // f_ctr in octaves
+    var chromaFilters = {
         wts: [],
         nfft: N2,
-        nbins: nbins, 
-    };    
+        nbins: nbins,
+    };
     var fftfrqbins = new Float64Array(N2);
-    var binwidthbins = new Float64Array(N2);        
+    var binwidthbins = new Float64Array(N2);
     // Convert a frequency in Hz into a real number counting the octaves above A0. So hz2octs(440) = 4.0
-    var hz2octs = function(freq) {
-        return Math.log(freq/(A440/16))/Math.LN2;
-    }    
-    for(var i=1; i<N2; i++) {
-        fftfrqbins[i] = nbins * hz2octs( i / N*sampleRate);    
-    } 
-    fftfrqbins[0] = fftfrqbins[1]-1.5*nbins; //DC offset bin         
-    for(var i=0; i<N2-1; i++) {
-        var diffVal = fftfrqbins[i+1] - fftfrqbins[i];
+    var hz2octs = function (freq) {
+        return Math.log(freq / (A440 / 16)) / Math.LN2;
+    };
+    var i, j;
+    for (i = 1; i < N2; i++) {
+        fftfrqbins[i] = nbins * hz2octs(i / N * sampleRate);
+    }
+    fftfrqbins[0] = fftfrqbins[1] - 1.5 * nbins; //DC offset bin
+    for (i = 0; i < N2 - 1; i++) {
+        var diffVal = fftfrqbins[i + 1] - fftfrqbins[i];
         if (diffVal >= 1) {
             binwidthbins[i] = diffVal;
-        }            
-        else {
+        } else {
             binwidthbins[i] = 1;
-        }            
+        }
     }
-    binwidthbins[N2-1] = 1            
-    var nbins2 = Math.round(nbins/2.0)
+    binwidthbins[N2 - 1] = 1;
+    var nbins2 = Math.round(nbins / 2.0);
     var wts = [];
-    for(var i=0; i<nbins; i++) {    
+    for (i = 0; i < nbins; i++) {
         wts[i] = [];
-        for(var j=0; j<N2; j++) {               
-            var tmpF = fftfrqbins[j] - i
-            var tmpB = binwidthbins[j]
-            var remF = ((tmpF + nbins2 + 10*nbins) % nbins) - nbins2;                          
+        for (j = 0; j < N2; j++) {
+            var tmpF = fftfrqbins[j] - i;
+            var tmpB = binwidthbins[j];
+            var remF = ((tmpF + nbins2 + 10 * nbins) % nbins) - nbins2;
             wts[i][j] = Math.exp(-0.5 * Math.pow((2 * remF / tmpB), 2));
         }
     }
-    const sum = xs => xs.reduce((x,y) => x + y, 0)
-    const head = ([x,...xs]) => x
-    const tail = ([x,...xs]) => xs
-    const transpose = ([xs, ...xxs]) => {
-    const aux = ([x,...xs]) =>
-        x === undefined
-          ? transpose (xxs)
-          : [ [x, ...xxs.map(head)], ...transpose ([xs, ...xxs.map(tail)])]
-      return xs === undefined ? [] : aux(xs)
-    }    
-    wtsColumnSums = transpose(wts).map(sum)
-    for(var i=0; i<nbins; i++) {
-        for(var j=0; j<N2; j++) {
-            wts[i][j] *= 1/wtsColumnSums[j];
+    /* We don't use ES6! */
+    var sum = xtract_array_sum;
+
+    function head(a) {
+        return a[0];
+    }
+
+    function tail(a) {
+        return a.slice(1);
+    }
+
+    function transpose(a) {
+        if (a === undefined) {
+            return [];
         }
-    }     
-    if (octwidth > 0) {        
-      for(var i=0; i<nbins; i++) {
-        for(var j=0; j<N2; j++) {
-                wts[i][j] *= Math.exp(-0.5*(Math.pow ( ((fftfrqbins[j]/nbins - ctroct)/octwidth), 2)))
-            }                
+        var x = a.length,
+            y = a[0].length,
+            mtx = [],
+            i, j;
+        for (i = 0; i < y; i++) {
+            mtx[i] = new Float64Array(x);
         }
-    }           
-    chromaFilters.wts = wts;    
-    return chromaFilters;    
- }  
+        for (i = 0; i < x; i++) {
+            for (j = 0; j < y; j++) {
+                mtx[j][i] = a[i][j];
+            }
+        }
+        return mtx;
+    }
+    var wtsColumnSums = transpose(wts).map(sum);
+    for (i = 0; i < nbins; i++) {
+        for (j = 0; j < N2; j++) {
+            wts[i][j] *= 1 / wtsColumnSums[j];
+        }
+    }
+    if (octwidth > 0) {
+        for (i = 0; i < nbins; i++) {
+            for (j = 0; j < N2; j++) {
+                wts[i][j] *= Math.exp(-0.5 * (Math.pow(((fftfrqbins[j] / nbins - ctroct) / octwidth), 2)));
+            }
+        }
+    }
+    chromaFilters.wts = wts;
+    return chromaFilters;
+}
 
 // Window functions
 
@@ -5023,19 +5670,19 @@ function xtract_create_window(N, type) {
 
 function xtract_chroma(spectrum, chromaFilters) {
     if (!xtract_assert_array(spectrum)) {
-        return 0;        
-    }    
+        return 0;
+    }
     if (chromaFilters.wts === undefined) {
         throw ("xtract_chroma requires chroma filters from xtract_init_chroma");
     }
-    if(chromaFilters.nfft !== spectrum.length/2) {
-        throw ("the FFT lengths of the spectrum ("+spectrum.length/2+") and chroma filterbank ("+chromaFilters.nfft+") do not match");
+    if (chromaFilters.nfft !== spectrum.length / 2) {
+        throw ("the FFT lengths of the spectrum (" + spectrum.length / 2 + ") and chroma filterbank (" + chromaFilters.nfft + ") do not match");
     }
     var result = new Float64Array(chromaFilters.nbins);
     for (var i = 0; i < chromaFilters.nbins; i++) {
         var sum = 0;
         for (var j = 0; j < chromaFilters.nfft; j++) {
-            sum += chromaFilters.wts[i][j] * spectrum[j]                        
+            sum += chromaFilters.wts[i][j] * spectrum[j];
         }
         result[i] = sum;
     }
@@ -5283,7 +5930,7 @@ function convolveComplex(xreal, ximag, yreal, yimag, outreal, outimag) {
 }
 
 /*globals Float32Array, Float64Array */
-/*globals xtract_init_dct, xtract_init_mfcc, xtract_init_bark */
+/*globals jsXtract, xtract_array_to_JSON, xtract_init_dct, xtract_init_mfcc, xtract_init_bark */
 
 // Create the Singleton
 var DataProto = function (N, sampleRate) {
@@ -5399,7 +6046,7 @@ var DataProto = function (N, sampleRate) {
         if (a.result && b.result) {
             return recursiveDelta(a[param].result, b[param].result);
         } else if (a.length && b.length) {
-            return deltaArray(a[param], b[param])
+            return deltaArray(a[param], b[param]);
         }
         return undefined;
     }
@@ -6262,6 +6909,7 @@ HarmonicSpectrumData.prototype = Object.create(PeakSpectrumData.prototype);
 HarmonicSpectrumData.prototype.constructor = HarmonicSpectrumData;
 
 /*globals Float32Array, Float64Array */
+/*globals TimeData, SpectrumData, PeakSpectrumData, HarmonicSpectrumData */
 TimeData.prototype.features = [
     {
         name: "Minimum",
