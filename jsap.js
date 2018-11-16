@@ -1039,7 +1039,8 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
 /*
     This is an optional module which will attempt to create a graphical implementation.
     As with other audio plugins for DAWs, the GUI is an optional element which can be accepted or rejected by the host.
-    The same applies here as the underlying host will have to either accept or ignore the tools' GUI
+
+    The actual GUI is launched as an <iframe> element in the browser to keep each plugin isolated from the rest
 */
 
 var PluginUserInterface = function (BasePluginInstance, width, height) {
@@ -1251,7 +1252,7 @@ var PluginFactory = function (context, rootURL) {
             xhr.send();
         });
     }
-    
+
     function copyFactory(newcontext) {
         var BFactory = new PluginFactory(newcontext);
         // Now copy in all of the plugin prototypes
@@ -1593,7 +1594,8 @@ var PluginFactory = function (context, rootURL) {
             return p.id === id;
         });
         if (index >= 0) {
-            pluginsList.splice(index, 1);
+            var p = pluginsList.splice(index, 1);
+            this.pluginGUI.deleteAllPluginInterfaces(p);
         }
     };
 
@@ -2362,6 +2364,115 @@ var PluginFactory = function (context, rootURL) {
             }
         });
     };
+
+    var PluginUserInterfaceMessageHub = (function(factory){
+        function dec2hex (dec) {
+            return ('0' + dec.toString(16)).substr(-2);
+        }
+        function generateId (len) {
+            var arr = new Uint8Array((len || 40) / 2);
+            window.crypto.getRandomValues(arr);
+            return Array.from(arr, dec2hex).join('');
+        }
+        function createUniqueMessageKey() {
+            var key = generateId(16);
+            var duplicate = messageKeyMap.findIndex(function(k) {
+                return k.key == key;
+            }) >= 0;
+            if (duplicate) {
+                return createUniqueMessageKey();
+            } else {
+                return key;
+            }
+        }
+        function getPluginFromKey(key) {
+            var i = messageKeyMap.findIndex(function(m) {
+                return m.key == key;
+            });
+            if (i == -1) {
+                throw("Cannot find plugin with key \""+key+"\"");
+            }
+            return messageKeyMap[i].plugin;
+        }
+        function buildPluginInterface(plugin_object, interface_object) {
+            var key = createUniqueMessageKey();
+            var iframe = document.createElement("iframe");
+            iframe.src = interface_object.src;
+            if (interface_object.width) {
+                iframe.width = interface_object.width;
+            }
+            if (interface_object.height) {
+                iframe.height = interface_object.height;
+            }
+            iframe.style.border = "0";
+            iframe.setAttribute("data-jsap-key", key);
+            messageKeyMap.push({key: key, plugin: plugin_object, element: iframe});
+            return iframe;
+        }
+        function setDefaultInterface(url, width, height) {
+            default_interface = {
+                url: url,
+                width: width,
+                height: height
+            };
+            return default_interface;
+        }
+        function deletePluginInterface(iframe) {
+            var key = iframe.getAttribute("data-jsap-key");
+            var keyloc = messageKeyMap.findIndex(function(k) {
+                return k.key == key;
+            });
+            if (keyloc == -1) {
+                throw("Cannot find plugin in message board");
+            }
+            messageKeyMap.splice(keyloc, 1);
+        }
+        function deleteAllPluginInterfaces(plugin_object) {
+            var interfaces = messageKeyMap.filter(function(m) {
+                return m.plugin == plugin_object;
+            });
+            interfaces.forEach(function(i) {
+                deletePluginInterface(i.element);
+            });
+        }
+        function pollAllPlugins() {
+            messageKeyMap.forEach(function(m) {
+                channel.postMessage({
+                    "key": m.key,
+                    "parameters": m.plugin.getParameterObject()
+                });
+            });
+        }
+
+        var channel = new BroadcastChannel('jsap_plugin_interfaces');
+        var default_interface = {
+            src: "jsap_default.html"
+        };
+        var messageKeyMap = [];
+
+        channel.onmessage = function(e) {
+            var plugin = getPluginFromKey(e.data.key);
+            if (e.data.message == "set parameters" && e.data.parameters) {
+                plugin.setParametersByObject(e.data.parameters);
+            }
+            if (e.data.message == "get parameters") {
+                channel.postMessage({
+                    "key": e.data.key,
+                    "parameters": plugin.getParameterObject()
+                });
+
+            }
+        };
+
+        return Object.create({
+            "setDefaultInterface": setDefaultInterface,
+            "buildPluginInterface":buildPluginInterface,
+            "deletePluginInterface":deletePluginInterface,
+            "deleteAllPluginInterfaces": deleteAllPluginInterfaces,
+            "pollAllPlugins": pollAllPlugins
+        });
+    })(this);
+
     Object.defineProperties(this, {
         "context": {
             "value": audio_context
@@ -2382,6 +2493,9 @@ var PluginFactory = function (context, rootURL) {
             "value": function (context) {
                 return copyFactory(context);
             }
+        },
+        "PluginGUI": {
+            "value": PluginUserInterfaceMessageHub
         }
     });
 };
