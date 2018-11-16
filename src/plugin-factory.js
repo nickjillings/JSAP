@@ -1254,6 +1254,21 @@ var PluginFactory = function (context, rootURL) {
             }
             return messageKeyMap[i].plugin;
         }
+        function buildPluginParameterJSON(plugin) {
+            var names = plugin.parameters.getParameterNames();
+            var O = {};
+            names.forEach(function(name) {
+                var param = plugin.parameters.getParameterByName(name);
+                O[name] = {
+                    value: param.value,
+                    maximum: param.maximum,
+                    minimum: param.minimum,
+                    defaultValue: param.defaultValue,
+                    type: param.constructor.name
+                }
+            });
+            return O;
+        }
         function buildPluginInterface(plugin_object, interface_object) {
             var key = createUniqueMessageKey();
             var iframe = document.createElement("iframe");
@@ -1318,9 +1333,12 @@ var PluginFactory = function (context, rootURL) {
                 });
             }
             if (e.data.message == "get parameters") {
+                names.forEach(function)
+                var payload = buildPluginParameterJSON(plugin);
+                payload = JSON.stringify(payload);
                 channel.postMessage({
                     "key": e.data.key,
-                    "parameters": plugin.getParameterObject()
+                    "parameters": payload
                 });
 
             }
