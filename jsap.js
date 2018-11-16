@@ -1175,8 +1175,9 @@ var PluginInterfaceMessageHub = function(owner) {
         });
     }
     function setParameterMessage(message) {
-        message.parameters.forEach(function(p) {
-            owner.parameters.setParameterByName(p.name,p.value);
+        var parameters = JSON.parse(message.parameters)
+        Object.keys(parameters).forEach(function(name) {
+            owner.parameters.setParameterByName(name,parameters[name].value);
         });
     }
     
