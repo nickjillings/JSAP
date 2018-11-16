@@ -1076,7 +1076,7 @@ var PluginInterfaceMessageHub = function(owner) {
             }
         },
         "closeChannel": {
-            value: {function() {
+            value: function() {
                 if (state === 0) {
                     channel.onmessage = undefined;
                     channel.postMessage("close");
