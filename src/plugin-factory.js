@@ -1313,7 +1313,9 @@ var PluginFactory = function (context, rootURL) {
         channel.onmessage = function(e) {
             var plugin = getPluginFromKey(e.data.key);
             if (e.data.message == "set parameters" && e.data.parameters) {
-                plugin.setParametersByObject(e.data.parameters);
+                e.data.parameters.forEach(function(p) {
+                    plugin.setParameterByName(p.name,p.value);
+                });
             }
             if (e.data.message == "get parameters") {
                 channel.postMessage({
