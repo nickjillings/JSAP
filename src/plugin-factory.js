@@ -1258,12 +1258,24 @@ var PluginFactory = function (context, rootURL) {
             var key = createUniqueMessageKey();
             var iframe = document.createElement("iframe");
             iframe.src = interface_object.src;
-            iframe.width = interface_object.width;
-            iframe.height = interface_object.height;
+            if (interface_object.width) {
+                iframe.width = interface_object.width;
+            }
+            if (interface_object.height) {
+                iframe.height = interface_object.height;
+            }
             iframe.style.border = "0";
             iframe.setAttribute("data-jsap-key", key);
             messageKeyMap.push({key: key, plugin: plugin_object, element: iframe});
             return iframe;
+        }
+        function setDefaultInterface(url, width, height) {
+            default_interface = {
+                url: url,
+                width: width,
+                height: height
+            };
+            return default_interface;
         }
         function deletePluginInterface(iframe) {
             var key = iframe.getAttribute("data-jsap-key");
@@ -1293,6 +1305,9 @@ var PluginFactory = function (context, rootURL) {
         }
 
         var channel = new BroadcastChannel('jsap_plugin_interfaces');
+        var default_interface = {
+            src: "jsap_default.html"
+        };
         var messageKeyMap = [];
 
         channel.onmessage = function(e) {
@@ -1310,6 +1325,7 @@ var PluginFactory = function (context, rootURL) {
         };
 
         return Object.create({
+            "setDefaultInterface": setDefaultInterface,
             "buildPluginInterface":buildPluginInterface,
             "deletePluginInterface":deletePluginInterface,
             "deleteAllPluginInterfaces": deleteAllPluginInterfaces,
