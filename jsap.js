@@ -2461,6 +2461,7 @@ var PluginFactory = function (context, rootURL) {
         }
         function deletePluginInterface(iframe) {
             var key = iframe.getAttribute("data-jsap-key");
+            iframe.parentElement.remove(iframe);
             closePluginChannelByKey(key);
         }
         function deleteAllPluginInterfaces(plugin_object) {
