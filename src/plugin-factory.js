@@ -1280,7 +1280,7 @@ var PluginFactory = function (context, rootURL) {
             var plugin = getPluginFromKey(message.key);
             var payload = buildPluginParameterJSON(plugin);
             channel.postMessage({
-                "key": e.data.key,
+                "key": message.key,
                 "parameters": JSON.stringify(payload)
             });
         }
