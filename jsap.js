@@ -2413,6 +2413,29 @@ var PluginFactory = function (context, rootURL) {
             });
             return O;
         }
+        function setParameterMessage(message) {
+            var plugin = getPluginFromKey(message.key);
+            message.parameters.forEach(function(p) {
+                plugin.parameters.setParameterByName(p.name,p.value);
+            });
+        }
+        function getParameterMessage(message) {
+            var plugin = getPluginFromKey(message.key);
+            var payload = buildPluginParameterJSON(plugin);
+            channel.postMessage({
+                "key": e.data.key,
+                "parameters": JSON.stringify(payload)
+            });
+        }
+        function closePluginChannelByKey(key) {
+            var keyloc = messageKeyMap.findIndex(function(k) {
+                return k.key == key;
+            });
+            if (keyloc == -1) {
+                throw("Cannot find plugin in message board");
+            }
+            messageKeyMap.splice(keyloc, 1);
+        }
         function buildPluginInterface(plugin_object, interface_object) {
             var key = createUniqueMessageKey();
             var iframe = document.createElement("iframe");
@@ -2438,13 +2461,7 @@ var PluginFactory = function (context, rootURL) {
         }
         function deletePluginInterface(iframe) {
             var key = iframe.getAttribute("data-jsap-key");
-            var keyloc = messageKeyMap.findIndex(function(k) {
-                return k.key == key;
-            });
-            if (keyloc == -1) {
-                throw("Cannot find plugin in message board");
-            }
-            messageKeyMap.splice(keyloc, 1);
+            closePluginChannelByKey(key);
         }
         function deleteAllPluginInterfaces(plugin_object) {
             var interfaces = messageKeyMap.filter(function(m) {
@@ -2471,20 +2488,21 @@ var PluginFactory = function (context, rootURL) {
         var messageKeyMap = [];
 
         channel.onmessage = function(e) {
-            var plugin = getPluginFromKey(e.data.key);
-            if (e.data.message == "set parameters" && e.data.parameters) {
-                e.data.parameters.forEach(function(p) {
-                    plugin.setParameterByName(p.name,p.value);
-                });
-            }
-            if (e.data.message == "get parameters") {
-                var payload = buildPluginParameterJSON(plugin);
-                payload = JSON.stringify(payload);
-                channel.postMessage({
-                    "key": e.data.key,
-                    "parameters": payload
-                });
-
+            switch(e.data.message) {
+                case "set parameters":
+                    if (e.data.parameters) {
+                        setParameterMessage(e.data);
+                    }
+                    break;
+                case "get parameters":
+                    getParameterMessage(e.data);
+                    break;
+                case "close":
+                    closePluginChannelByKey(e.data.key);
+                    break;
+                default:
+                    throw("Unknown message type \""+e.data.message+"\"");
+                    
             }
         };
 
