@@ -1264,7 +1264,8 @@ var PluginFactory = function (context, rootURL) {
                     maximum: param.maximum,
                     minimum: param.minimum,
                     defaultValue: param.defaultValue,
-                    type: param.constructor.name
+                    type: param.constructor.name,
+                    name: name
                 }
             });
             return O;
@@ -1312,9 +1313,10 @@ var PluginFactory = function (context, rootURL) {
         }
         function pollAllPlugins() {
             messageKeyMap.forEach(function(m) {
+                var payload = buildPluginParameterJSON(m.plugin);
                 channel.postMessage({
                     "key": m.key,
-                    "parameters": m.plugin.getParameterObject()
+                    "parameters": JSON.stringify(payload)
                 });
             });
         }

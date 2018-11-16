@@ -907,6 +907,9 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
 */
 
 var PluginUserInterface = function (BasePluginInstance, width, height) {
+    console.log("DEPRECATED!!");
+    console.log("The class PluginUserInterface has been deprecated");
+    console.log("Please look at the documents for the new methods for building plugins");
     this.processor = BasePluginInstance;
     this.root = document.createElement("div");
     if (width > 0) {

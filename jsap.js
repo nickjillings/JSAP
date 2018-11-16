@@ -1044,6 +1044,9 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
 */
 
 var PluginUserInterface = function (BasePluginInstance, width, height) {
+    console.log("DEPRECATED!!");
+    console.log("The class PluginUserInterface has been deprecated");
+    console.log("Please look at the documents for the new methods for building plugins");
     this.processor = BasePluginInstance;
     this.root = document.createElement("div");
     if (width > 0) {
@@ -2404,7 +2407,8 @@ var PluginFactory = function (context, rootURL) {
                     maximum: param.maximum,
                     minimum: param.minimum,
                     defaultValue: param.defaultValue,
-                    type: param.constructor.name
+                    type: param.constructor.name,
+                    name: name
                 }
             });
             return O;
@@ -2452,9 +2456,10 @@ var PluginFactory = function (context, rootURL) {
         }
         function pollAllPlugins() {
             messageKeyMap.forEach(function(m) {
+                var payload = buildPluginParameterJSON(m.plugin);
                 channel.postMessage({
                     "key": m.key,
-                    "parameters": m.plugin.getParameterObject()
+                    "parameters": JSON.stringify(payload)
                 });
             });
         }
