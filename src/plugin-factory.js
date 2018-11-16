@@ -1227,7 +1227,7 @@ var PluginFactory = function (context, rootURL) {
 
     var PluginUserInterfaceMessageHub = (function(factory){
         function buildPluginInterface(plugin_object, interface_object) {
-            var key = plugin_object.getMessageChannelID();
+            var key = plugin_object.externalInterface.getMessageChannelID();
             var iframe = document.createElement("iframe");
             iframe.src = interface_object.src;
             if (interface_object.width) {
