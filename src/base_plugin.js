@@ -15,7 +15,8 @@ var BasePlugin = function (factory, owner) {
     this.context = factory.context;
     this.factory = factory;
     this.featureMap = new PluginFeatureInterface(this);
-    this.parameters = new ParameterManager(this);
+    this.externalInterface = new PluginInterfaceMessageHub(this);
+    this.parameters = new ParameterManager(this, this.externalInterface);
 
     function deleteIO(node, list) {
         var i = list.findIndex(function (e) {
@@ -149,7 +150,7 @@ var BasePlugin = function (factory, owner) {
     });
 };
 
-var ParameterManager = function (owner) {
+var ParameterManager = function (owner, pluginExternalInterface) {
     var parameterList = [];
 
     function findParameter(name) {
@@ -1003,3 +1004,87 @@ PluginUserInterface.prototype.clearGUI = function () {
     this.stopCallbacks();
     this.root.innerHTML = "";
 };
+
+var PluginInterfaceMessageHub = function(owner) {
+    function dec2hex (dec) {
+        return ('0' + dec.toString(16)).substr(-2);
+    }
+    function generateId (len) {
+        var arr = new Uint8Array((len || 40) / 2);
+        window.crypto.getRandomValues(arr);
+        return Array.from(arr, dec2hex).join('');
+    }
+    function buildPluginParameterJSON(plugin) {
+        var names = owner.parameters.getParameterNames();
+        var O = {};
+        names.forEach(function(name) {
+            var param = owner.parameters.getParameterByName(name);
+            O[name] = {
+                value: param.value,
+                maximum: param.maximum,
+                minimum: param.minimum,
+                defaultValue: param.defaultValue,
+                type: param.constructor.name,
+                name: name
+            }
+        });
+        return O;
+    }
+    function getParameterMessage(message) {
+        var payload = buildPluginParameterJSON(owner);
+        channel.postMessage(JSON.stringify(payload));
+    }
+    function setParameterMessage(message) {
+        message.parameters.forEach(function(p) {
+            owner.parameters.setParameterByName(p.name,p.value);
+        });
+    }
+    
+    var message_id = "jsap-ei-"+generateId(32);
+    
+    var channel = new BroadcastChannel(message_id);
+    var state = 0;
+    
+    channel.onmessage = function(e) {
+        switch(e.data.message) {
+            case "set parameters":
+                if (e.data.parameters) {
+                    setParameterMessage(e.data);
+                }
+                break;
+            case "get parameters":
+                getParameterMessage(e.data);
+                break;
+            default:
+                throw("Unknown message type \""+e.data.message+"\"");
+        }
+    };
+    
+    Object.defineProperties(this, {
+        "updateInterfaces": {
+            "value": function() {
+                getParameterMessage(e.data);
+            }
+        },
+        "getMessageChannelID": {
+            "value": function() {
+                if (state === 0) {
+                    return message_id;
+                } else {
+                    throw("Cannel closed");
+                }
+            }
+        },
+        "closeChannel": {
+            value: {function() {
+                if (state === 0) {
+                    channel.onmessage = undefined;
+                    channel.postMessage("close");
+                    channel.close();
+                } else {
+                    throw("Cannel already closed");
+                }
+            }
+        }
+    })
+}

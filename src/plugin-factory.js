@@ -1226,75 +1226,8 @@ var PluginFactory = function (context, rootURL) {
     };
 
     var PluginUserInterfaceMessageHub = (function(factory){
-        function dec2hex (dec) {
-            return ('0' + dec.toString(16)).substr(-2);
-        }
-        function generateId (len) {
-            var arr = new Uint8Array((len || 40) / 2);
-            window.crypto.getRandomValues(arr);
-            return Array.from(arr, dec2hex).join('');
-        }
-        function createUniqueMessageKey() {
-            var key = generateId(16);
-            var duplicate = messageKeyMap.findIndex(function(k) {
-                return k.key == key;
-            }) >= 0;
-            if (duplicate) {
-                return createUniqueMessageKey();
-            } else {
-                return key;
-            }
-        }
-        function getPluginFromKey(key) {
-            var i = messageKeyMap.findIndex(function(m) {
-                return m.key == key;
-            });
-            if (i == -1) {
-                throw("Cannot find plugin with key \""+key+"\"");
-            }
-            return messageKeyMap[i].plugin;
-        }
-        function buildPluginParameterJSON(plugin) {
-            var names = plugin.parameters.getParameterNames();
-            var O = {};
-            names.forEach(function(name) {
-                var param = plugin.parameters.getParameterByName(name);
-                O[name] = {
-                    value: param.value,
-                    maximum: param.maximum,
-                    minimum: param.minimum,
-                    defaultValue: param.defaultValue,
-                    type: param.constructor.name,
-                    name: name
-                }
-            });
-            return O;
-        }
-        function setParameterMessage(message) {
-            var plugin = getPluginFromKey(message.key);
-            message.parameters.forEach(function(p) {
-                plugin.parameters.setParameterByName(p.name,p.value);
-            });
-        }
-        function getParameterMessage(message) {
-            var plugin = getPluginFromKey(message.key);
-            var payload = buildPluginParameterJSON(plugin);
-            channel.postMessage({
-                "key": message.key,
-                "parameters": JSON.stringify(payload)
-            });
-        }
-        function closePluginChannelByKey(key) {
-            var keyloc = messageKeyMap.findIndex(function(k) {
-                return k.key == key;
-            });
-            if (keyloc == -1) {
-                throw("Cannot find plugin in message board");
-            }
-            messageKeyMap.splice(keyloc, 1);
-        }
         function buildPluginInterface(plugin_object, interface_object) {
-            var key = createUniqueMessageKey();
+            var key = plugin_object.getMessageChannelID();
             var iframe = document.createElement("iframe");
             iframe.src = interface_object.src;
             if (interface_object.width) {
@@ -1305,7 +1238,6 @@ var PluginFactory = function (context, rootURL) {
             }
             iframe.style.border = "0";
             iframe.setAttribute("data-jsap-key", key);
-            messageKeyMap.push({key: key, plugin: plugin_object, element: iframe});
             return iframe;
         }
         function setDefaultInterface(url, width, height) {
@@ -1316,59 +1248,18 @@ var PluginFactory = function (context, rootURL) {
             };
             return default_interface;
         }
-        function deletePluginInterface(iframe) {
-            var key = iframe.getAttribute("data-jsap-key");
-            iframe.parentElement.remove(iframe);
-            closePluginChannelByKey(key);
-        }
-        function deleteAllPluginInterfaces(plugin_object) {
-            var interfaces = messageKeyMap.filter(function(m) {
-                return m.plugin == plugin_object;
-            });
-            interfaces.forEach(function(i) {
-                deletePluginInterface(i.element);
-            });
-        }
         function pollAllPlugins() {
-            messageKeyMap.forEach(function(m) {
-                var payload = buildPluginParameterJSON(m.plugin);
-                channel.postMessage({
-                    "key": m.key,
-                    "parameters": JSON.stringify(payload)
-                });
+            factory.getAllPlugins().forEach(function(plugin) {
+                plugin.node.externalInterface.updateInterfaces();
             });
         }
-
-        var channel = new BroadcastChannel('jsap_plugin_interfaces');
         var default_interface = {
             src: "jsap_default.html"
-        };
-        var messageKeyMap = [];
-
-        channel.onmessage = function(e) {
-            switch(e.data.message) {
-                case "set parameters":
-                    if (e.data.parameters) {
-                        setParameterMessage(e.data);
-                    }
-                    break;
-                case "get parameters":
-                    getParameterMessage(e.data);
-                    break;
-                case "close":
-                    closePluginChannelByKey(e.data.key);
-                    break;
-                default:
-                    throw("Unknown message type \""+e.data.message+"\"");
-                    
-            }
         };
 
         return Object.create({
             "setDefaultInterface": setDefaultInterface,
             "buildPluginInterface":buildPluginInterface,
-            "deletePluginInterface":deletePluginInterface,
-            "deleteAllPluginInterfaces": deleteAllPluginInterfaces,
             "pollAllPlugins": pollAllPlugins
         });
     })(this);
