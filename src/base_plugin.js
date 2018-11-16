@@ -902,7 +902,8 @@ var PluginFeatureInterfaceSender = function (FeatureInterfaceInstance, FactoryFe
 /*
     This is an optional module which will attempt to create a graphical implementation.
     As with other audio plugins for DAWs, the GUI is an optional element which can be accepted or rejected by the host.
-    The same applies here as the underlying host will have to either accept or ignore the tools' GUI
+
+    The actual GUI is launched as an <iframe> element in the browser to keep each plugin isolated from the rest
 */
 
 var PluginUserInterface = function (BasePluginInstance, width, height) {
