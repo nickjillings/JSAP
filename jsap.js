@@ -2473,7 +2473,6 @@ var PluginFactory = function (context, rootURL) {
                 });
             }
             if (e.data.message == "get parameters") {
-                names.forEach(function)
                 var payload = buildPluginParameterJSON(plugin);
                 payload = JSON.stringify(payload);
                 channel.postMessage({
