@@ -1598,7 +1598,7 @@ var PluginFactory = function (context, rootURL) {
         });
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
-            this.pluginGUI.deleteAllPluginInterfaces(p);
+            this.PluginGUI.deleteAllPluginInterfaces(p);
         }
     };
 
