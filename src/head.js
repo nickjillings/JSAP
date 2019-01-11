@@ -1,6 +1,15 @@
 /*globals document */
 /*eslint-env browser */
 
+// Load jsXtract
+(function() {
+    if (!jsXtract) {
+        var s = document.createElement("script");
+        s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
+        document.getElementsByTagName("head")[0].appendChild(s);
+    }
+})()
+
 var LinkedStore = function (storeName) {
     // Store for the semantic terms, each store holds its own data tree
     // Terms are added as key/value paris to a root node

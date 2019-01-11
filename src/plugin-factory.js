@@ -3,10 +3,7 @@
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
 /*eslint-env browser */
 
-var PluginFactory = function (context, rootURL) {
-
-
-    var audio_context = context,
+var PluginFactory = function (audio_context, rootURL) {
         subFactories = [],
         plugin_prototypes = [],
         pluginsList = [],
@@ -208,6 +205,7 @@ var PluginFactory = function (context, rootURL) {
             }
         });
     };
+    PluginInstance.prototype.factory = this;
 
     var PluginPrototype = function (proto) {
         Object.defineProperties(this, {
@@ -225,41 +223,56 @@ var PluginFactory = function (context, rootURL) {
             }
         });
 
-        this.createPluginInstance = function (owner) {
-            if (!this.ready) {
-                throw ("Plugin Not Read");
-            }
-            var plugin = new proto(this.factory, owner);
-            var node = new PluginInstance(currentPluginId++, plugin);
-            var basePluginInstance = plugin;
-            Object.defineProperties(plugin, {
-                'pluginInstance': {
-                    'value': node
-                },
-                'prototypeObject': {
-                    'value': this
-                },
-                'name': {
-                    value: proto.prototype.name
-                },
-                'version': {
-                    value: proto.prototype.version
-                },
-                'uniqueID': {
-                    value: proto.prototype.uniqueID
-                },
-                'SesionData': {
-                    value: this.factory.SessionData
-                },
-                'UserData': {
-                    value: this.factory.UserData
+        this.createPluginInstance = function (owner, async) {
+            var p = new Promise(function(resolve, reject) {
+                if (!this.ready) {
+                    reject(new Error("Plugin not ready"));
+                } else {
+                    resolve(new proto(this.factory, owner););
                 }
+            }).then(function(plugin) {
+                if (plugin.initialise) {
+                    return plugin.initialise();
+                } else {
+                    return plugin;
+                }
+            }).then(function(plugin) {
+                var node = new PluginInstance(currentPluginId++, plugin);
+                var basePluginInstance = plugin;
+                Object.defineProperties(plugin, {
+                    'pluginInstance': {
+                        'value': node
+                    },
+                    'prototypeObject': {
+                        'value': this
+                    },
+                    'name': {
+                        value: proto.prototype.name
+                    },
+                    'version': {
+                        value: proto.prototype.version
+                    },
+                    'uniqueID': {
+                        value: proto.prototype.uniqueID
+                    },
+                    'SesionData': {
+                        value: this.factory.SessionData
+                    },
+                    'UserData': {
+                        value: this.factory.UserData
+                    }
+                });
+                Object.defineProperty(node, "prototypeObject", {
+                    'value': this
+                });
+                this.factory.registerPluginInstance(node);
+                return node;
             });
-            Object.defineProperty(node, "prototypeObject", {
-                'value': this
-            });
-            this.factory.registerPluginInstance(node);
-            return node;
+            if (async === true) {
+                return p;
+            } else {
+                return await p;
+            }
         };
 
         function loadResourceChain(resourceObject, p) {
