@@ -3,7 +3,7 @@
 
 // Load jsXtract
 (function() {
-    if (!jsXtract) {
+    if (window.jsXtract === undefined) {
         var s = document.createElement("script");
         s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
         document.getElementsByTagName("head")[0].appendChild(s);
@@ -1448,7 +1448,8 @@ var PluginFactory = function (audio_context, rootURL) {
     };
     PluginInstance.prototype.factory = this;
 
-    var PluginPrototype = function (proto) {
+    var PluginPrototype = function (proto, factory) {
+	var self = this;
         Object.defineProperties(this, {
             'name': {
                 value: proto.prototype.name
@@ -1464,12 +1465,22 @@ var PluginFactory = function (audio_context, rootURL) {
             }
         });
 
-        this.createPluginInstance = function (owner, async) {
-            var p = new Promise(function(resolve, reject) {
-                if (!this.ready) {
+        this.createPluginInstance = async function(owner, async) {
+            var p = createPluginInstance(owner);
+            if (async === true) {
+                return p;
+            } else {
+                await p;
+                return p;
+            }
+        };
+
+        function createPluginInstance(owner) {
+            return new Promise(function(resolve, reject) {
+                if (!checkIsReady()) {
                     reject(new Error("Plugin not ready"));
                 } else {
-                    resolve(new proto(this.factory, owner));
+                    resolve(new proto(factory, owner));
                 }
             }).then(function(plugin) {
                 if (plugin.initialise) {
@@ -1497,24 +1508,19 @@ var PluginFactory = function (audio_context, rootURL) {
                         value: proto.prototype.uniqueID
                     },
                     'SesionData': {
-                        value: this.factory.SessionData
+                        value: factory.SessionData
                     },
                     'UserData': {
-                        value: this.factory.UserData
+                        value: factory.UserData
                     }
                 });
                 Object.defineProperty(node, "prototypeObject", {
-                    'value': this
+                    'value': self
                 });
-                this.factory.registerPluginInstance(node);
+                factory.registerPluginInstance(node);
                 return node;
             });
-            if (async === true) {
-                return p;
-            } else {
-                return await p;
-            }
-        };
+        }
 
         function loadResourceChain(resourceObject, p) {
             if (!p) {
@@ -1580,7 +1586,7 @@ var PluginFactory = function (audio_context, rootURL) {
         this.getResourcePromises = function () {
             return resourcePromises;
         };
-        this.ready = function () {
+        function checkIsReady() {
             var state = true;
             for (var i = 0; i < resourcePromises.length; i++) {
                 if (resourcePromises[i].state !== 1 || !resourcePromises[i].test()) {
@@ -1626,7 +1632,7 @@ var PluginFactory = function (audio_context, rootURL) {
         if (obj) {
             throw ("The plugin must be unique!");
         }
-        obj = new PluginPrototype(plugin_proto);
+        obj = new PluginPrototype(plugin_proto, this);
         plugin_prototypes.push(obj);
         Object.defineProperties(obj, {
             'factory': {
@@ -2357,13 +2363,17 @@ var PluginFactory = function (audio_context, rootURL) {
 
         // Plugin creation / destruction
 
-        this.createPlugin = function (prototypeObject) {
+        this.createPlugin = async function (prototypeObject) {
             var node, last_node;
             if (state === 0) {
                 throw ("SubFactory has been destroyed! Cannot add new plugins");
             }
             cutChain();
-            node = prototypeObject.createPluginInstance(this);
+            var promise = prototypeObject.createPluginInstance(this)
+            .then(function(n) {
+                node = n;
+            });
+            await promise;
             Object.defineProperties(node, {
                 'TrackData': {
                     value: this.TrackData

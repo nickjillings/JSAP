@@ -3,7 +3,7 @@
 
 // Load jsXtract
 (function() {
-    if (!jsXtract) {
+    if (window.jsXtract === undefined) {
         var s = document.createElement("script");
         s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
         document.getElementsByTagName("head")[0].appendChild(s);
