@@ -228,7 +228,7 @@ var PluginFactory = function (audio_context, rootURL) {
                 if (!this.ready) {
                     reject(new Error("Plugin not ready"));
                 } else {
-                    resolve(new proto(this.factory, owner););
+                    resolve(new proto(this.factory, owner));
                 }
             }).then(function(plugin) {
                 if (plugin.initialise) {

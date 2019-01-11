@@ -1,6 +1,15 @@
 /*globals document */
 /*eslint-env browser */
 
+// Load jsXtract
+(function() {
+    if (!jsXtract) {
+        var s = document.createElement("script");
+        s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
+        document.getElementsByTagName("head")[0].appendChild(s);
+    }
+})()
+
 var LinkedStore = function (storeName) {
     // Store for the semantic terms, each store holds its own data tree
     // Terms are added as key/value paris to a root node
@@ -1179,12 +1188,12 @@ var PluginInterfaceMessageHub = function(owner) {
             owner.parameters.setParameterByName(name,parameters[name].value);
         });
     }
-
+    
     var message_id = "jsap-ei-"+generateId(32);
-
+    
     var channel = new BroadcastChannel(message_id);
     var state = 0;
-
+    
     channel.onmessage = function(e) {
         switch(e.data.message) {
             case "set parameters":
@@ -1201,7 +1210,7 @@ var PluginInterfaceMessageHub = function(owner) {
                 throw("Unknown message type \""+e.data.message+"\"");
         }
     };
-
+    
     Object.defineProperties(this, {
         "updateInterfaces": {
             "value": function() {
@@ -1460,7 +1469,7 @@ var PluginFactory = function (audio_context, rootURL) {
                 if (!this.ready) {
                     reject(new Error("Plugin not ready"));
                 } else {
-                    resolve(new proto(this.factory, owner););
+                    resolve(new proto(this.factory, owner));
                 }
             }).then(function(plugin) {
                 if (plugin.initialise) {
