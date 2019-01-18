@@ -254,7 +254,7 @@ var PluginFactory = function (audio_context, rootURL) {
                     if (plugin.initialise) {
                         return plugin.initialise().then(function() {
                             resolve(plugin);
-                        };
+                        });
                     } else {
                         resolve(plugin);
                     }
