@@ -242,6 +242,7 @@ var PluginFactory = function (audio_context, rootURL) {
         };
 
         function createPluginInstance(owner) {
+            var self = this;
             return new Promise(function(resolve, reject) {
                 if (!checkIsReady()) {
                     reject(new Error("Plugin not ready"));
@@ -262,7 +263,7 @@ var PluginFactory = function (audio_context, rootURL) {
                         'value': node
                     },
                     'prototypeObject': {
-                        'value': this
+                        'value': self
                     },
                     'name': {
                         value: proto.prototype.name
@@ -280,8 +281,13 @@ var PluginFactory = function (audio_context, rootURL) {
                         value: factory.UserData
                     }
                 });
-                Object.defineProperty(node, "prototypeObject", {
-                    'value': self
+                Object.defineProperties(node, {
+                    "prototypeObject": {
+                        'value': self
+                    },
+                    "externalInterface": {
+                        'value': plugin.externalInterface
+                    }
                 });
                 factory.registerPluginInstance(node);
                 return node;
