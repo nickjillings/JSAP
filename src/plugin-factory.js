@@ -4,7 +4,7 @@
 /*eslint-env browser */
 
 var PluginFactory = function (audio_context, rootURL) {
-        subFactories = [],
+        var subFactories = [],
         plugin_prototypes = [],
         pluginsList = [],
         currentPluginId = 0,
@@ -18,65 +18,59 @@ var PluginFactory = function (audio_context, rootURL) {
             .test: function to call, returns true if resource already loaded, false if not
     */
     this.loadResource = function (resourceObject) {
-        (function (resourceObject) {
+        return new Promise(function(resolve, reject) {
             if (typeof resourceObject !== "object") {
-                throw ("Error");
+                reject("Error");
             }
-            if (typeof resourceObject.url !== "string") {
-                throw ("resourceObject.url must be a string");
+            else if (typeof resourceObject.url !== "string") {
+                reject("resourceObject.url must be a string");
             }
-            if (typeof resourceObject.test !== "function") {
-                throw ("resourceObject.test must be a function");
+            else if (typeof resourceObject.test !== "function") {
+                reject("resourceObject.test must be a function");
+            } else {
+                resolve(resourceObject);
             }
-        })(resourceObject);
-        var response = resourceObject.test();
-        if (response !== false && response !== true) {
-            throw ("resourceObject.test must return true or false");
-        }
-        if (!resourceObject.type) {
-            resourceObject.type = "javascript";
-        }
-        resourceObject.type = resourceObject.type.toLowerCase();
-        switch (resourceObject.type) {
-            case "css":
-                return new Promise(function (resolve, reject) {
-                    var css = document.createElement("link");
-                    css.setAttribute("rel", "stylesheet");
-                    css.setAttribute("type", "text/css");
-                    css.setAttribute("href", resourceObject.url);
-                    document.getElementsByTagName("head")[0].appendChild(css);
-                    resolve(resourceObject);
-                });
-            case "javascript":
-                if (!response) {
-                    return loadResource(resourceObject).then(function (resourceObject) {
-                        if (typeof resourceObject.returnObject === "string") {
-                            var returnObject;
-                            if (window.hasOwnProperty(resourceObject.returnObject)) {
-                                return window[resourceObject.returnObject];
-                            }
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    });
-                } else {
-                    return new Promise(function (resolve, reject) {
-                        if (typeof resourceObject.returnObject === "string") {
-                            if (window.hasOwnProperty(resourceObject.returnObject)) {
-                                resolve(window[resourceObject.returnObject]);
+        }).then(function(resourceObject){
+            var response = resourceObject.test();
+            if (response !== false && response !== true) {
+                throw ("resourceObject.test must return true or false");
+            }
+            if (!resourceObject.type) {
+                resourceObject.type = "javascript";
+            }
+            resourceObject.type = resourceObject.type.toLowerCase();
+            switch (resourceObject.type) {
+                case "javascript":
+                    if (!response) {
+                        return loadResource(resourceObject).then(function (resourceObject) {
+                            if (typeof resourceObject.returnObject === "string") {
+                                var returnObject;
+                                if (window.hasOwnProperty(resourceObject.returnObject)) {
+                                    return window[resourceObject.returnObject];
+                                }
+                                return false;
                             } else {
-                                reject(false);
+                                return true;
                             }
-                        } else {
-                            resolve(true);
-                        }
-                    });
-                }
-                break;
-            default:
-                throw ("Invalid type " + String(resourceObject.type));
-        }
+                        });
+                    } else {
+                        return new Promise(function (resolve, reject) {
+                            if (typeof resourceObject.returnObject === "string") {
+                                if (window.hasOwnProperty(resourceObject.returnObject)) {
+                                    resolve(window[resourceObject.returnObject]);
+                                } else {
+                                    reject(false);
+                                }
+                            } else {
+                                resolve(true);
+                            }
+                        });
+                    }
+                    break;
+                default:
+                    throw ("Invalid type " + String(resourceObject.type));
+            }
+        });
     };
 
     this.loadPluginScript = function (resourceObject) {
@@ -111,12 +105,25 @@ var PluginFactory = function (audio_context, rootURL) {
     }
 
     function copyFactory(newcontext) {
-        var BFactory = new PluginFactory(newcontext);
-        // Now copy in all of the plugin prototypes
-        plugin_prototypes.forEach(function (proto) {
-            BFactory.addPrototype(proto.proto);
+        return new Promise(function(resolve, reject) {
+            if (newcontext.sampleRate === undefined) {
+                //Maybe not a real AudioContext
+                reject(new Error("Invalid audio context provided"));
+            } else {
+                resolve(newcontext);
+            }
+        }).then(function(newcontext) {
+            var BFactory = new PluginFactory(newcontext);
+            var promises = [];
+            plugin_prototypes.forEach(function (proto) {
+                promises.push(BFactory.addPrototype(proto.proto));
+            });
+            return new Promise.all(promises).then(function() {
+                return BFactory;
+            })
+        }).then(function(newFactory) {
+            return newFactory;
         });
-        return BFactory;
     }
 
     var PluginInstance = function (id, plugin_node) {
@@ -358,47 +365,50 @@ var PluginFactory = function (audio_context, rootURL) {
     };
 
     this.addPrototype = function (plugin_proto) {
-        (function (plugin_proto) {
+        return new Promise(function(resolve, reject) {
             if (typeof plugin_proto !== "function") {
-                throw ("The Prototype must be a function!");
+                reject("The Prototype must be a function!");
             }
-            if (typeof plugin_proto.prototype.name !== "string" || plugin_proto.prototype.name.length === 0) {
-                throw ("Malformed plugin. Name not defined");
+            else if (typeof plugin_proto.prototype.name !== "string" || plugin_proto.prototype.name.length === 0) {
+                reject("Malformed plugin. Name not defined");
             }
-            if (typeof plugin_proto.prototype.version !== "string" || plugin_proto.prototype.version.length === 0) {
-                throw ("Malformed plugin. Version not defined");
+            else if (typeof plugin_proto.prototype.version !== "string" || plugin_proto.prototype.version.length === 0) {
+                reject("Malformed plugin. Version not defined");
             }
-            if (typeof plugin_proto.prototype.uniqueID !== "string" || plugin_proto.prototype.uniqueID.length === 0) {
-                throw ("Malformed plugin. uniqueID not defined");
+            else if (typeof plugin_proto.prototype.uniqueID !== "string" || plugin_proto.prototype.uniqueID.length === 0) {
+                reject("Malformed plugin. uniqueID not defined");
+            } else {
+                resolve(plugin_proto);
             }
-        })(plugin_proto);
-        var testObj = {
-            'proto': plugin_proto,
-            'name': plugin_proto.prototype.name,
-            'version': plugin_proto.prototype.version,
-            'uniqueID': plugin_proto.prototype.uniqueID
-        };
-        var obj = plugin_prototypes.find(function (e) {
-            var param;
-            var match = 0;
-            for (param in this) {
-                if (e[param] === this[param]) {
-                    match++;
+        }).then(function(plugin_proto) {
+            var testObj = {
+                'proto': plugin_proto,
+                'name': plugin_proto.prototype.name,
+                'version': plugin_proto.prototype.version,
+                'uniqueID': plugin_proto.prototype.uniqueID
+            };
+            var obj = plugin_prototypes.find(function (e) {
+                var param;
+                var match = 0;
+                for (param in this) {
+                    if (e[param] === this[param]) {
+                        match++;
+                    }
                 }
+                return match === 4;
+            }, testObj);
+            if (obj) {
+                throw ("The plugin must be unique!");
             }
-            return match === 4;
-        }, testObj);
-        if (obj) {
-            throw ("The plugin must be unique!");
-        }
-        obj = new PluginPrototype(plugin_proto, this);
-        plugin_prototypes.push(obj);
-        Object.defineProperties(obj, {
-            'factory': {
-                'value': this
-            }
+            obj = new PluginPrototype(plugin_proto, this);
+            plugin_prototypes.push(obj);
+            Object.defineProperties(obj, {
+                'factory': {
+                    'value': this
+                }
+            });
+            return obj;
         });
-        return obj;
     };
 
     this.getPrototypes = function () {
@@ -1083,6 +1093,7 @@ var PluginFactory = function (audio_context, rootURL) {
             } else {
                 pluginChainStart.disconnect(pluginChainStop);
             }
+            return true;
         }
 
         function joinChain() {
@@ -1111,39 +1122,50 @@ var PluginFactory = function (audio_context, rootURL) {
             return this.parent;
         };
 
-        this.destroy = function () {
+        this.destroy = function (reconnect) {
             var i;
             for (i = 0; i < plugin_list.length; i++) {
                 this.destroyPlugin(plugin_list[i]);
             }
             pluginChainStart.disconnect();
-            pluginChainStart.connect(pluginChainStop);
+            if (reconnect === true) {
+                pluginChainStart.connect(pluginChainStop);
+            }
         };
 
         // Plugin creation / destruction
 
-        this.createPlugin = async function (prototypeObject) {
-            var node, last_node;
-            if (state === 0) {
-                throw ("SubFactory has been destroyed! Cannot add new plugins");
-            }
-            cutChain();
-            var promise = prototypeObject.createPluginInstance(this)
-            .then(function(n) {
-                node = n;
-            });
-            await promise;
-            Object.defineProperties(node, {
-                'TrackData': {
-                    value: this.TrackData
+        this.createPlugin = function (prototypeObject) {
+            var self = this;
+            return new Promise(function(resolve, reject) {
+                if (state === 0) {
+                    reject ("SubFactory has been destroyed! Cannot add new plugins");
+                } else {
+                    resolve(prototypeObject);
                 }
+            }).then(function(prototypeObject) {
+                return cutChain();
+            }).then(function() {
+                return prototypeObject.createPluginInstance(this, false)
+                .then(function(node) {
+                    Object.defineProperties(node, {
+                        'TrackData': {
+                            value: self.TrackData
+                        }
+                    });
+                    return node;
+                });
+            }).catch(function(e){
+                joinChain();
+                throw("Plugin did not get created! Aborting");
+            }).then(function(node) {
+                plugin_list.push(node);
+                isolate();
+                rebuild();
+                joinChain();
+                node.node.onloaded.call(node.node);
+                return node;
             });
-            plugin_list.push(node);
-            isolate();
-            rebuild();
-            joinChain();
-            node.node.onloaded.call(node.node);
-            return node;
         };
 
         this.destroyPlugin = function (plugin_object) {
@@ -1154,7 +1176,7 @@ var PluginFactory = function (audio_context, rootURL) {
             if (index >= 0) {
                 cutChain();
                 plugin_object.node.stop.call(plugin_object.node);
-                plugin_object.node.onloaded.call(plugin_object.node);
+                plugin_object.node.onunloaded.call(plugin_object.node);
                 plugin_object.node.deconstruct.call(plugin_object.node);
                 plugin_list.splice(index, 1);
                 this.parent.deletePlugin(plugin_object.id);
