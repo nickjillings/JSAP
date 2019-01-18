@@ -375,7 +375,7 @@ var PluginFactory = function (audio_context, rootURL) {
             return state;
         };
         function waitUntilReady() {
-            return Promise.All(resourcePromises);
+            return Promise.all(resourcePromises);
         }
     };
 
