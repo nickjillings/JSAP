@@ -1493,11 +1493,15 @@ var PluginFactory = function (audio_context, rootURL) {
                     resolve(new proto(factory, owner));
                 }
             }).then(function(plugin) {
-                if (plugin.initialise) {
-                    return plugin.initialise();
-                } else {
-                    return plugin;
-                }
+                return new Promise(function(resolve, reject){
+                    if (plugin.initialise) {
+                        return plugin.initialise().then(function() {
+                            resolve(plugin);
+                        };
+                    } else {
+                        resolve(plugin);
+                    }
+                });
             }).then(function(plugin) {
                 var node = new PluginInstance(currentPluginId++, plugin);
                 var basePluginInstance = plugin;
