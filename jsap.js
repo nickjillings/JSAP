@@ -1608,6 +1608,7 @@ var PluginFactory = function (audio_context, rootURL) {
     };
 
     this.addPrototype = function (plugin_proto) {
+        var factory = this;
         return new Promise(function(resolve, reject) {
             if (typeof plugin_proto !== "function") {
                 reject("The Prototype must be a function!");
@@ -1643,11 +1644,11 @@ var PluginFactory = function (audio_context, rootURL) {
             if (obj) {
                 throw ("The plugin must be unique!");
             }
-            obj = new PluginPrototype(plugin_proto, this);
+            obj = new PluginPrototype(plugin_proto, factory);
             plugin_prototypes.push(obj);
             Object.defineProperties(obj, {
                 'factory': {
-                    'value': this
+                    'value': factory
                 }
             });
             return obj;
@@ -2389,7 +2390,7 @@ var PluginFactory = function (audio_context, rootURL) {
             }).then(function(prototypeObject) {
                 return cutChain();
             }).then(function() {
-                return prototypeObject.createPluginInstance(this, false)
+                return prototypeObject.createPluginInstance(self, false)
                 .then(function(node) {
                     Object.defineProperties(node, {
                         'TrackData': {
