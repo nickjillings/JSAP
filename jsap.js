@@ -1486,12 +1486,14 @@ var PluginFactory = function (audio_context, rootURL) {
 
         function createPluginInstance(owner) {
             var self = this;
-            return new Promise(function(resolve, reject) {
-                if (!checkIsReady()) {
-                    reject(new Error("Plugin not ready"));
-                } else {
-                    resolve(new proto(factory, owner));
-                }
+            return waitUntilReady().then(function() {
+                return new Promise(function(resolve, reject) {
+                    if (!checkIsReady()) {
+                        reject(new Error("Plugin not ready"));
+                    } else {
+                        resolve(new proto(factory, owner));
+                    }
+                })
             }).then(function(plugin) {
                 return new Promise(function(resolve, reject){
                     if (plugin.initialise) {
@@ -1615,6 +1617,9 @@ var PluginFactory = function (audio_context, rootURL) {
             }
             return state;
         };
+        function waitUntilReady() {
+            return Promise.All(resourcePromises);
+        }
     };
 
     this.addPrototype = function (plugin_proto) {
