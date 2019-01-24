@@ -1189,12 +1189,12 @@ var PluginInterfaceMessageHub = function(owner) {
             owner.parameters.setParameterByName(name,parameters[name].value);
         });
     }
-    
+
     var message_id = "jsap-ei-"+generateId(32);
-    
+
     var channel = new BroadcastChannel(message_id);
     var state = 0;
-    
+
     channel.onmessage = function(e) {
         switch(e.data.message) {
             case "set parameters":
@@ -1211,7 +1211,7 @@ var PluginInterfaceMessageHub = function(owner) {
                 throw("Unknown message type \""+e.data.message+"\"");
         }
     };
-    
+
     Object.defineProperties(this, {
         "updateInterfaces": {
             "value": function() {
@@ -1743,7 +1743,7 @@ var PluginFactory = function (audio_context, rootURL) {
         });
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
-            this.PluginGUI.deleteAllPluginInterfaces(p[0].node);
+            PluginUserInterfaceMessageHub.deleteAllPluginInterfaces(p[0].node);
             p[0].node.externalInterface.closeChannel();
         }
     };
@@ -2595,4 +2595,3 @@ var PluginFactory = function (audio_context, rootURL) {
         }
     });
 };
-
