@@ -500,7 +500,6 @@ var PluginFactory = function (audio_context, rootURL) {
         });
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
-            PluginUserInterfaceMessageHub.deleteAllPluginInterfaces(p[0].node);
             p[0].node.externalInterface.closeChannel();
         }
     };
