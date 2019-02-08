@@ -239,10 +239,9 @@ var PluginFactory = function (audio_context, rootURL) {
                 await p;
                 return p;
             }
-        };
+        }
 
         function createPluginInstance(owner) {
-            var self = this;
             return waitUntilReady().then(function() {
                 return new Promise(function(resolve, reject) {
                     if (!checkIsReady()) {
@@ -250,7 +249,7 @@ var PluginFactory = function (audio_context, rootURL) {
                     } else {
                         resolve(new proto(factory, owner));
                     }
-                })
+                });
             }).then(function(plugin) {
                 return new Promise(function(resolve, reject){
                     if (plugin.initialise) {
@@ -269,7 +268,7 @@ var PluginFactory = function (audio_context, rootURL) {
                         'value': node
                     },
                     'prototypeObject': {
-                        'value': self
+                        'value': owner
                     },
                     'name': {
                         value: proto.prototype.name
@@ -289,7 +288,7 @@ var PluginFactory = function (audio_context, rootURL) {
                 });
                 Object.defineProperties(node, {
                     "prototypeObject": {
-                        'value': self
+                        'value': owner
                     },
                     "externalInterface": {
                         'value': plugin.externalInterface
