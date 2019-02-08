@@ -1026,11 +1026,11 @@ var PluginInterfaceMessageHub = function(owner) {
                 defaultValue: param.defaultValue,
                 type: param.constructor.name,
                 name: name
-            }
+            };
         });
         return O;
     }
-    function getParameterMessage() {
+    function sendParameterUpdates() {
         var payload = buildPluginParameterJSON(owner);
         channel.postMessage({
             message: "update parameters",
@@ -1038,17 +1038,18 @@ var PluginInterfaceMessageHub = function(owner) {
         });
     }
     function setParameterMessage(message) {
-        var parameters = JSON.parse(message.parameters)
+        var parameters = JSON.parse(message.parameters);
         Object.keys(parameters).forEach(function(name) {
             owner.parameters.setParameterByName(name,parameters[name].value);
         });
+        sendParameterUpdates();
     }
-    
+
     var message_id = "jsap-ei-"+generateId(32);
-    
+
     var channel = new BroadcastChannel(message_id);
     var state = 0;
-    
+
     channel.onmessage = function(e) {
         switch(e.data.message) {
             case "set parameters":
@@ -1057,7 +1058,7 @@ var PluginInterfaceMessageHub = function(owner) {
                 }
                 break;
             case "get parameters":
-                getParameterMessage(e.data);
+                sendParameterUpdates(e.data);
                 break;
             case "update parameters":
                 return;
@@ -1065,11 +1066,11 @@ var PluginInterfaceMessageHub = function(owner) {
                 throw("Unknown message type \""+e.data.message+"\"");
         }
     };
-    
+
     Object.defineProperties(this, {
         "updateInterfaces": {
             "value": function() {
-                getParameterMessage();
+                sendParameterUpdates();
             }
         },
         "getMessageChannelID": {
