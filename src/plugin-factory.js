@@ -232,7 +232,7 @@ var PluginFactory = function (audio_context, rootURL) {
         });
 
         this.createPluginInstance = async function(owner, async) {
-            var p = createPluginInstance(self, owner);
+            var p = createPluginInstance(owner);
             if (async === true) {
                 return p;
             } else {
@@ -241,7 +241,7 @@ var PluginFactory = function (audio_context, rootURL) {
             }
         }
 
-        function createPluginInstance(proto, owner) {
+        function createPluginInstance(owner) {
             return waitUntilReady().then(function() {
                 return new Promise(function(resolve, reject) {
                     if (!checkIsReady()) {
@@ -288,7 +288,7 @@ var PluginFactory = function (audio_context, rootURL) {
                 });
                 Object.defineProperties(node, {
                     "prototypeObject": {
-                        'value': proto
+                        'value': owner
                     },
                     "externalInterface": {
                         'value': plugin.externalInterface
