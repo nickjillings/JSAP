@@ -1457,7 +1457,7 @@ var PluginFactory = function (audio_context, rootURL) {
     PluginInstance.prototype.factory = this;
 
     var PluginPrototype = function (proto, factory) {
-	var self = this;
+        var self = this;
         Object.defineProperties(this, {
             'name': {
                 value: proto.prototype.name
@@ -1484,7 +1484,6 @@ var PluginFactory = function (audio_context, rootURL) {
         };
 
         function createPluginInstance(owner) {
-            var self = this;
             return waitUntilReady().then(function() {
                 return new Promise(function(resolve, reject) {
                     if (!checkIsReady()) {
