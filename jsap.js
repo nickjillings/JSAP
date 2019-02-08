@@ -143,7 +143,6 @@ var LinkedStore = function (storeName) {
         }
     });
 };
-
 // Add getInputs to all AudioNodes to ease deployment
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 /*eslint-env browser */
@@ -1172,11 +1171,11 @@ var PluginInterfaceMessageHub = function(owner) {
                 defaultValue: param.defaultValue,
                 type: param.constructor.name,
                 name: name
-            }
+            };
         });
         return O;
     }
-    function getParameterMessage() {
+    function sendParameterUpdates() {
         var payload = buildPluginParameterJSON(owner);
         channel.postMessage({
             message: "update parameters",
@@ -1184,10 +1183,11 @@ var PluginInterfaceMessageHub = function(owner) {
         });
     }
     function setParameterMessage(message) {
-        var parameters = JSON.parse(message.parameters)
+        var parameters = JSON.parse(message.parameters);
         Object.keys(parameters).forEach(function(name) {
             owner.parameters.setParameterByName(name,parameters[name].value);
         });
+        sendParameterUpdates();
     }
 
     var message_id = "jsap-ei-"+generateId(32);
@@ -1203,7 +1203,7 @@ var PluginInterfaceMessageHub = function(owner) {
                 }
                 break;
             case "get parameters":
-                getParameterMessage(e.data);
+                sendParameterUpdates(e.data);
                 break;
             case "update parameters":
                 return;
@@ -1215,7 +1215,7 @@ var PluginInterfaceMessageHub = function(owner) {
     Object.defineProperties(this, {
         "updateInterfaces": {
             "value": function() {
-                getParameterMessage();
+                sendParameterUpdates();
             }
         },
         "getMessageChannelID": {
@@ -1240,7 +1240,6 @@ var PluginInterfaceMessageHub = function(owner) {
         }
     })
 }
-
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
