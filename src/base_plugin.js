@@ -1030,19 +1030,23 @@ var PluginInterfaceMessageHub = function(owner) {
         });
         return O;
     }
-    function sendParameterUpdates() {
+    function sendParameterUpdates(sender_id) {
         var payload = buildPluginParameterJSON(owner);
-        channel.postMessage({
+        var msg = {
             message: "update parameters",
             parameters: JSON.stringify(payload)
-        });
+        };
+        if (sender_id) {
+            msg.sender_id = sender_id;
+        }
+        channel.postMessage(msg);
     }
     function setParameterMessage(message) {
         var parameters = JSON.parse(message.parameters);
         Object.keys(parameters).forEach(function(name) {
             owner.parameters.setParameterByName(name,parameters[name].value);
         });
-        sendParameterUpdates();
+        sendParameterUpdates(message.sender_id);
     }
 
     var message_id = "jsap-ei-"+generateId(32);
