@@ -143,7 +143,6 @@ var LinkedStore = function (storeName) {
         }
     });
 };
-
 // Add getInputs to all AudioNodes to ease deployment
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 /*eslint-env browser */
@@ -1241,7 +1240,6 @@ var PluginInterfaceMessageHub = function(owner) {
         }
     })
 }
-
 // This defines a master object for holding all the plugins and communicating
 // This object will also handle creation and destruction of plugins
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
@@ -1483,9 +1481,10 @@ var PluginFactory = function (audio_context, rootURL) {
                 await p;
                 return p;
             }
-        }
+        };
 
         function createPluginInstance(owner) {
+            var self = this;
             return waitUntilReady().then(function() {
                 return new Promise(function(resolve, reject) {
                     if (!checkIsReady()) {
@@ -1493,7 +1492,7 @@ var PluginFactory = function (audio_context, rootURL) {
                     } else {
                         resolve(new proto(factory, owner));
                     }
-                });
+                })
             }).then(function(plugin) {
                 return new Promise(function(resolve, reject){
                     if (plugin.initialise) {
@@ -1512,7 +1511,7 @@ var PluginFactory = function (audio_context, rootURL) {
                         'value': node
                     },
                     'prototypeObject': {
-                        'value': owner
+                        'value': self
                     },
                     'name': {
                         value: proto.prototype.name
@@ -1532,7 +1531,7 @@ var PluginFactory = function (audio_context, rootURL) {
                 });
                 Object.defineProperties(node, {
                     "prototypeObject": {
-                        'value': owner
+                        'value': self
                     },
                     "externalInterface": {
                         'value': plugin.externalInterface
