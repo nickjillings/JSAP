@@ -4,7 +4,7 @@
     "author": "Nick Jillings",
     "version": "0.0.1",
     "devDependencies": {
-        "dummy-audio-context": "^0.0.1",
+        "web-audio-engine": "^0.13.4",
         "mocha": "5.2.0",
         "zombie": "6.1.3"
     },

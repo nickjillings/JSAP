@@ -21,12 +21,13 @@ server.listen(port, (err) => {
 
 const Browser = require('zombie');
 Browser.localhost('example.com', 3000);
-const dummy = require("dummy-audio-context");
+const wae = require("web-audio-engine");
+const OfflineAudioContext = wae.OfflineAudioContext;
 const fs = require("fs");
 //const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const assert = require('assert');
 
-var context = new dummy.AudioContext();
+var context = new OfflineAudioContext();
 
 describe("PluginFactory", function () {
     describe("Definitions", function () {
@@ -190,54 +191,6 @@ describe("PluginFactory", function () {
         });
         it("should define .chainStop", function (done) {
             assert.ok(sf.chainStop === browser.window.window.b);
-            done();
-        });
-    });
-    describe("Plugin Prototype", function () {
-        const browser = new Browser();
-        browser.debug = true;
-        var sf;
-        var prototype;
-        before(function (d) {
-            browser.on("idle", d);
-            browser.visit("/test/plugin.html", function () {});
-        });
-        it("should load a given plugin", function (done) {
-            assert.ok(browser.window.window.factory.getPrototypes().length > 0);
-            done();
-        });
-        it("should have a prototype called \"Gain\"", function (done) {
-            var protoList = browser.window.window.factory.getPrototypes();
-            assert.ok(protoList.length > 0);
-            prototype = protoList.find(function (a) {
-                return a.name == "Gain";
-            });
-            assert.ok(prototype.name == "Gain");
-            assert.ok(prototype.constructor.name == "PluginPrototype");
-            done();
-        });
-        it("should be ready", function (done) {
-            assert.equal(prototype.ready(), true);
-            done();
-        });
-        it("should have .createPluginInstance function", function (done) {
-            assert.ok(typeof prototype.createPluginInstance == "function");
-            done();
-        });
-        it("should have the plugin name", function (done) {
-            assert.ok(typeof prototype.name === "string");
-            done();
-        });
-        it("should have the plugin proto", function (done) {
-            assert.ok(typeof prototype.proto === "function");
-            done();
-        });
-        it("should have the plugin version", function (done) {
-            assert.ok(typeof prototype.version === "string");
-            done();
-        });
-        it("should have the plugin uniqueID", function (done) {
-            assert.ok(typeof prototype.uniqueID === "string");
             done();
         });
     });

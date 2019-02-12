@@ -2419,7 +2419,7 @@ var PluginFactory = function (audio_context, rootURL) {
 
         this.createPlugin = function (prototypeObject) {
             var self = this;
-            buildNewPlugin(prototypeObject).catch(function(e){
+            return buildNewPlugin(prototypeObject).catch(function(e){
                 throw("Plugin did not get created! Aborting");
             }).then(function(node) {
                 cutChain();
