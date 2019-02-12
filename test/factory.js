@@ -1,23 +1,16 @@
+/* jshint esversion: 6 */
 /*
     Test of the PluginFactory interfaces
 */
 
-const http = require('http')
-const port = 3000
+const http = require('http');
+const port = 3000;
 
 function requestHandler(request, response) {
     response.end(fs.readFileSync("." + request.url));
 }
 
-const server = http.createServer(requestHandler)
-
-server.listen(port, (err) => {
-    if (err) {
-        return console.log('something bad happened', err)
-    }
-
-    console.log(`server is listening on ${port}`)
-});
+const server = http.createServer(requestHandler);
 
 const Browser = require('zombie');
 Browser.localhost('example.com', 3000);
@@ -30,6 +23,19 @@ const assert = require('assert');
 var context = new OfflineAudioContext();
 
 describe("PluginFactory", function () {
+    before(function(d) {
+        server.listen(port, (err) => {
+            if (err) {
+                return console.log('something bad happened', err);
+            }
+
+            console.log(`server is listening on ${port}`);
+            d();
+        });
+    });
+    after(function(d) {
+        server.close(d);
+    });
     describe("Definitions", function () {
         const browser = new Browser();
         browser.debug = true;
