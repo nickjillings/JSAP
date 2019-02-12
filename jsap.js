@@ -2397,16 +2397,13 @@ var PluginFactory = function (audio_context, rootURL) {
 
         // Plugin creation / destruction
 
-        this.createPlugin = function (prototypeObject) {
-            var self = this;
+        function buildNewPlugin(prototypeObject) {
             return new Promise(function(resolve, reject) {
                 if (state === 0) {
                     reject ("SubFactory has been destroyed! Cannot add new plugins");
                 } else {
                     resolve(prototypeObject);
                 }
-            }).then(function(prototypeObject) {
-                return cutChain();
             }).then(function() {
                 return prototypeObject.createPluginInstance(self, false)
                 .then(function(node) {
@@ -2417,10 +2414,15 @@ var PluginFactory = function (audio_context, rootURL) {
                     });
                     return node;
                 });
-            }).catch(function(e){
-                joinChain();
+            });
+        }
+
+        this.createPlugin = function (prototypeObject) {
+            var self = this;
+            buildNewPlugin(prototypeObject).catch(function(e){
                 throw("Plugin did not get created! Aborting");
             }).then(function(node) {
+                cutChain();
                 plugin_list.push(node);
                 isolate();
                 rebuild();
@@ -2493,6 +2495,29 @@ var PluginFactory = function (audio_context, rootURL) {
                 joinChain();
                 plugin_object.node.onloaded.call(plugin_object.node);
             }
+        };
+
+        this.copyPlugin = function(plugin_object, copy_index) {
+            if (copy_index === undefined) {
+                copy_index = plugin_list.length;
+            }
+            if (typeof copy_index != "number" || copy_index < 0 || copy_index > plugin_list.length) {
+                throw("Plugin copy index outside of the chain scope.");
+            }
+            return buildNewPlugin(plugin_object.prototypeObject)
+            .catch(function(e){
+                throw("Plugin did not get created! Aborting");
+            }).then(function(node) {
+                node.node.parameters.setParametersByObject(plugin_object.node.parameters.getParameterObject());
+                cutChain();
+                isolate();
+                plugin_list.splice(copy_index, 0, node);
+                rebuild();
+                joinChain();
+                node.node.onloaded.call(node.node);
+                return node;
+            });
+
         };
 
         function recursiveProcessing(base, list) {
