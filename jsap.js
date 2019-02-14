@@ -2409,6 +2409,7 @@ var PluginFactory = function (audio_context, rootURL) {
         // Plugin creation / destruction
 
         function buildNewPlugin(prototypeObject) {
+            var self = this;
             return new Promise(function(resolve, reject) {
                 if (state === 0) {
                     reject ("SubFactory has been destroyed! Cannot add new plugins");
@@ -2430,7 +2431,7 @@ var PluginFactory = function (audio_context, rootURL) {
 
         this.createPlugin = function (prototypeObject) {
             var self = this;
-            return buildNewPlugin(prototypeObject).catch(function(e){
+            return buildNewPlugin.call(this, prototypeObject).catch(function(e){
                 throw("Plugin did not get created! Aborting");
             }).then(function(node) {
                 cutChain();
