@@ -1060,15 +1060,15 @@ var PluginInterfaceMessageHub = function(owner) {
             case "setParameterByName":
                 if (e.data.parameter) {
                     if (e.data.parameter.name && e.data.parameter.value) {
-                        owner.paramers.setParameterByName(e.data.parameter.name, e.data.parameter.value);
+                        owner.parameters.setParameterByName(e.data.parameter.name, e.data.parameter.value);
                     }
-                    broadcastParameterUpdates(e.message.sender_id);
+                    broadcastParameterUpdates(e.data.sender_id);
                 }
                 break;
             case "setParametersByObject":
                 if (e.data.parameter) {
                     setParameterMessage(e);
-                    broadcastParameterUpdates(e.message.sender_id);
+                    broadcastParameterUpdates(e.data.sender_id);
                 }
                 break;
             case "requestParameters":
