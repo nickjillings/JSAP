@@ -2581,6 +2581,7 @@ var PluginFactory = function (audio_context, rootURL) {
                 iframe.height = interface_object.height;
             }
             iframe.style.border = "0";
+            plugin_object.externalInterface.registerWindow(iframe.contentWindow);
             return iframe;
         }
         function setDefaultInterface(url, width, height) {
