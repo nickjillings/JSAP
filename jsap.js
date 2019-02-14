@@ -2572,7 +2572,6 @@ var PluginFactory = function (audio_context, rootURL) {
 
     var PluginUserInterfaceMessageHub = (function(factory){
         function buildPluginInterface(plugin_object, interface_object) {
-            var key = plugin_object.externalInterface.getMessageChannelID();
             var iframe = document.createElement("iframe");
             iframe.src = interface_object.src;
             if (interface_object.width) {
@@ -2582,7 +2581,6 @@ var PluginFactory = function (audio_context, rootURL) {
                 iframe.height = interface_object.height;
             }
             iframe.style.border = "0";
-            iframe.setAttribute("data-jsap-key", key);
             return iframe;
         }
         function setDefaultInterface(url, width, height) {
