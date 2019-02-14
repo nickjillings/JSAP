@@ -71,11 +71,6 @@ var BasePluginEditorChannel = function() {
                 if (typeof name != "string") {
                     throw ("Expects parameter name to be a string");
                 }
-                if (active_callback && typeof callback == "function") {
-                    throw("Already a callback waiting");
-                } else {
-                    active_callback = callback;
-                }
                 postMessage({
                     message: "setParameterByName",
                     parameter: {
