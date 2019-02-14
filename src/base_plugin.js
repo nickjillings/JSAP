@@ -1099,7 +1099,7 @@ var PluginInterfaceMessageHub = function(owner) {
         },
         "registerWindow": {
             "value": function(w) {
-                if (windowMessageList.contains(w)) {
+                if (windowMessageList.includes(w)) {
                     return false;
                 } else {
                     windowMessageList.push(w);
