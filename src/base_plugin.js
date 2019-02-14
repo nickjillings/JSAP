@@ -1006,14 +1006,6 @@ PluginUserInterface.prototype.clearGUI = function () {
 };
 
 var PluginInterfaceMessageHub = function(owner) {
-    function dec2hex (dec) {
-        return ('0' + dec.toString(16)).substr(-2);
-    }
-    function generateId (len) {
-        var arr = new Uint8Array((len || 40) / 2);
-        window.crypto.getRandomValues(arr);
-        return Array.from(arr, dec2hex).join('');
-    }
     function buildPluginParameterJSON(plugin) {
         var names = owner.parameters.getParameterNames();
         var O = {};
@@ -1030,42 +1022,58 @@ var PluginInterfaceMessageHub = function(owner) {
         });
         return O;
     }
-    function sendParameterUpdates(sender_id) {
-        var payload = buildPluginParameterJSON(owner);
+
+    function buildParameterUpdatePayload(sender_id) {
         var msg = {
-            message: "update parameters",
-            parameters: JSON.stringify(payload)
+            message: "updateParameters",
+            parameters: buildPluginParameterJSON(owner)
         };
         if (sender_id) {
             msg.sender_id = sender_id;
         }
-        channel.postMessage(msg);
+        return msg;
     }
-    function setParameterMessage(message) {
-        var parameters = JSON.parse(message.parameters);
+
+    function sendParameterUpdates(channel) {
+        channel.postMessage(buildParameterUpdatePayload());
+    }
+
+    function broadcastParameterUpdates(sender_id) {
+        var msg = buildParameterUpdatePayload(sender_id);
+        windowMessageList.forEach(function(w) {
+            w.postMessage(msg);
+        });
+    }
+
+    function setParameterMessage(e) {
+        var parameters = JSON.parse(e.message.parameters);
         Object.keys(parameters).forEach(function(name) {
             owner.parameters.setParameterByName(name,parameters[name].value);
         });
-        sendParameterUpdates(message.sender_id);
     }
 
-    var message_id = "jsap-ei-"+generateId(32);
-
-    var channel = new BroadcastChannel(message_id);
+    var windowMessageList = [];
     var state = 0;
 
     channel.onmessage = function(e) {
         switch(e.data.message) {
-            case "set parameters":
-                if (e.data.parameters) {
-                    setParameterMessage(e.data);
+            case "setParameterByName":
+                if (e.data.parameter) {
+                    if (e.data.parameter.name && e.data.parameter.value) {
+                        owner.paramers.setParameterByName(e.data.parameter.name, e.data.parameter.value);
+                    }
+                    broadcastParameterUpdates(e.message.sender_id);
                 }
                 break;
-            case "get parameters":
-                sendParameterUpdates(e.data);
+            case "setParametersByObject":
+                if (e.data.parameter) {
+                    setParameterMessage(e);
+                    broadcastParameterUpdates(e.message.sender_id);
+                }
                 break;
-            case "update parameters":
-                return;
+            case "requestParameters":
+                sendParameterUpdates(e.source);
+                break;
             default:
                 throw("Unknown message type \""+e.data.message+"\"");
         }
@@ -1074,28 +1082,31 @@ var PluginInterfaceMessageHub = function(owner) {
     Object.defineProperties(this, {
         "updateInterfaces": {
             "value": function() {
-                sendParameterUpdates();
+                broadcastParameterUpdates();
             }
         },
-        "getMessageChannelID": {
-            "value": function() {
-                if (state === 0) {
-                    return message_id;
-                } else {
-                    throw("Cannel closed");
-                }
-            }
-        },
-        "closeChannel": {
+        "closeWindows": {
             value: function() {
                 if (state === 0) {
-                    channel.onmessage = undefined;
-                    channel.postMessage("close");
-                    channel.close();
+                    while(windowMessageList.length > 0) {
+                        var w = windowMessageList.pop();
+                        w.close();
+                    }
                 } else {
                     throw("Cannel already closed");
                 }
             }
+        },
+        "registerWindow": {
+            "value": function(w) {
+                if (windowMessageList.contains(w)) {
+                    return false;
+                } else {
+                    windowMessageList.push(w);
+                    sendParameterUpdates(w);
+                    return true;
+                }
+            }
         }
-    })
-}
+    });
+};
