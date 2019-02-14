@@ -1055,7 +1055,7 @@ var PluginInterfaceMessageHub = function(owner) {
     var windowMessageList = [];
     var state = 0;
 
-    channel.onmessage = function(e) {
+    window.onmessage = function(e) {
         switch(e.data.message) {
             case "setParameterByName":
                 if (e.data.parameter) {
