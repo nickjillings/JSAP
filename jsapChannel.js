@@ -91,8 +91,7 @@ var BasePluginEditorChannel = function() {
         "requestParameters": {
             "value": function () {
                 postMessage({
-                    message: "requestParameters",
-                    parameters: object
+                    message: "requestParameters"
                 });
             }
         },
@@ -104,6 +103,9 @@ var BasePluginEditorChannel = function() {
                 onparameterListeners.push({
                     name: name,
                     callback: callback
+                });
+                postMessage({
+                    message: "requestParameters"
                 });
                 return onparameterListeners.length;
             }

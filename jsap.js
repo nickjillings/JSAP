@@ -1249,7 +1249,6 @@ var PluginInterfaceMessageHub = function(owner) {
                     return false;
                 } else {
                     windowMessageList.push(w);
-                    sendParameterUpdates(w);
                     return true;
                 }
             }
