@@ -1757,7 +1757,7 @@ var PluginFactory = function (audio_context, rootURL) {
         });
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
-            p[0].node.externalInterface.closeChannel();
+            p[0].node.externalInterface.closeWindows();
         }
     };
 
