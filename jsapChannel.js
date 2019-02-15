@@ -38,7 +38,7 @@ var BasePluginEditorChannel = function() {
         if (e.source != hostWindow) {
             throw ("Message did not come from our dear plugin hoster!");
         }
-        if (e.data.source_id == unique_id) {
+        if (e.data.sender_id == unique_id) {
             return;
         }
         var customEvent;
