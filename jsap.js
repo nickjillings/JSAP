@@ -1432,9 +1432,9 @@ var PluginFactory = function (audio_context, rootURL) {
             if (this.next_node !== undefined) {
                 this.disconnect();
             }
-            if (new_next !== undefined && typeof new_next.node.getInputs === "function") {
+            if (new_next !== undefined && new_next.node.input !== undefined) {
                 this.next_node = new_next;
-                _out.connect(this.next_node.node.getInputs()[0]);
+                _out.connect(this.next_node.input);
                 return true;
             }
             return false;
@@ -1442,7 +1442,7 @@ var PluginFactory = function (audio_context, rootURL) {
 
         this.disconnect = function () {
             if (this.next_node !== undefined) {
-                _out.disconnect(this.next_node.node.getInputs()[0]);
+                _out.disconnect(this.next_node.input);
                 this.next_node = undefined;
             }
         };
