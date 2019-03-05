@@ -138,14 +138,14 @@ var PluginFactory = function (audio_context, rootURL) {
         plugin_node.getOutputs()[0].connect(_out);
 
         function bypassEnable() {
-            _in.disconnect(plugin_node.getInputs()[0]);
+            _in.disconnect();
             _in.connect(_bp);
             _bypassed = true;
         }
 
         function bypassDisable() {
+            _in.disconnect();
             _in.connect(plugin_node.getInputs()[0]);
-            _in.disconnect(_bp);
             _bypassed = false;
         }
 
