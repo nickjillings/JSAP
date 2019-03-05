@@ -1409,6 +1409,9 @@ var PluginFactory = function (audio_context, rootURL) {
 
         this.bypass = function (state) {
             state = (state === true);
+            if (state === _bypassed) {
+                return _bypassed;
+            }
             if (state) {
                 bypassEnable();
             } else {
