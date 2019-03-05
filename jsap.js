@@ -1389,21 +1389,21 @@ var PluginFactory = function (audio_context, rootURL) {
         var _bypassed = false;
         var _in = audio_context.createGain(),
             _out = audio_context.createGain();
+            _bp = audio_context.createGain();
 
         _in.connect(plugin_node.getInputs()[0]);
+        _bp.connect(_out);
         plugin_node.getOutputs()[0].connect(_out);
 
         function bypassEnable() {
             _in.disconnect(plugin_node.getInputs()[0]);
-            plugin_node.getOutputs()[0].disconnect(_out);
-            _in.connect(_out);
+            _in.connect(_bp);
             _bypassed = true;
         }
 
         function bypassDisable() {
-            _in.disconnect(_out);
             _in.connect(plugin_node.getInputs()[0]);
-            plugin_node.getOutputs()[0].connect(_out);
+            _in.disconnect(_bp);
             _bypassed = false;
         }
 
