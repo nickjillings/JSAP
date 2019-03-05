@@ -96,7 +96,7 @@ var BasePluginEditorChannel = function() {
             }
         },
         "listenForParameterByName": {
-            "value": function(callback, name) {
+            "value": function(callback, name, triggerRequest) {
                 if (callback === undefined || typeof callback != "function") {
                     throw("Callback must be a defined function");
                 }
@@ -104,9 +104,11 @@ var BasePluginEditorChannel = function() {
                     name: name,
                     callback: callback
                 });
-                postMessage({
-                    message: "requestParameters"
-                });
+                if (triggerRequest !== false) {
+                    postMessage({
+                        message: "requestParameters"
+                    });
+                }
                 return onparameterListeners.length;
             }
         }
