@@ -174,7 +174,7 @@ var PluginFactory = function (audio_context, rootURL) {
             if (this.next_node !== undefined) {
                 this.disconnect();
             }
-            if (new_next !== undefined && new_next.node.input !== undefined) {
+            if (new_next !== undefined && new_next.input !== undefined) {
                 this.next_node = new_next;
                 _out.connect(this.next_node.input);
                 return true;
