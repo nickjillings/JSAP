@@ -131,15 +131,13 @@ var PluginFactory = function (audio_context, rootURL) {
         var _bypassed = false;
         var _in = audio_context.createGain(),
             _out = audio_context.createGain();
-            _bp = audio_context.createGain();
 
         _in.connect(plugin_node.getInputs()[0]);
-        _bp.connect(_out);
         plugin_node.getOutputs()[0].connect(_out);
 
         function bypassEnable() {
             _in.disconnect();
-            _in.connect(_bp);
+            _in.connect(_out);
             _bypassed = true;
         }
 
