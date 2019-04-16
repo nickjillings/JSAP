@@ -5,7 +5,7 @@
 (function() {
     if (window.jsXtract === undefined) {
         var s = document.createElement("script");
-        s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
+        s.src = "https://cdn.jsdelivr.net/gh/nickjillings/js-xtract@ASM/js-xtract.js";
         document.getElementsByTagName("head")[0].appendChild(s);
     }
 })()
