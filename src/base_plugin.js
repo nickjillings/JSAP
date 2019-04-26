@@ -316,10 +316,12 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     if (this.boundAudioParam) {
                         this.boundAudioParam.value = this.update(v);
                     }
-                    _value = v;
+                    if (_value !== v) {
+                        _value = v;
+                        var e = new Event("parameterset");
+                        eventTarget.dispatchEvent(e);
+                    }
                     this.trigger();
-                    var e = new Event("parameterset");
-                    eventTarget.dispatchEvent(e);
                 }
             },
             "stepSize": {
@@ -378,10 +380,12 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     if (this.boundAudioParam) {
                         this.boundAudioParam.value = this.update(v);
                     }
-                    _value = v;
+                    if (_value !== v) {
+                        _value = v;
+                        var e = new Event("parameterset");
+                        eventTarget.dispatchEvent(e);
+                    }
                     this.trigger();
-                    var e = new Event("parameterset");
-                    eventTarget.dispatchEvent(e);
                 }
             }
         });
@@ -441,10 +445,12 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                 this.boundAudioParam.value = this.update(v);
             }
             addAction.call(this, v);
-            _value = v;
+            if (_value !== v) {
+                _value = v;
+                var e = new Event("parameterset");
+                eventTarget.dispatchEvent(e);
+            }
             this.trigger();
-            var e = new Event("parameterset");
-            eventTarget.dispatchEvent(e);
             return v;
         }
 
@@ -525,10 +531,12 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                 this.boundAudioParam.value = this.update(v);
             }
             addAction.call(this, v);
-            _index = i;
+            if (_index !== i) {
+                _index = i;
+                var e = new Event("parameterset");
+                eventTarget.dispatchEvent(e);
+            }
             this.trigger();
-            var e = new Event("parameterset");
-            eventTarget.dispatchEvent(e);
             return listOfValues[_index];
         }
 
