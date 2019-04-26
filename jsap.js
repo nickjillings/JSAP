@@ -5,7 +5,7 @@
 (function() {
     if (window.jsXtract === undefined) {
         var s = document.createElement("script");
-        s.src = "https://cdn.jsdelivr.net/gh/nickjillings/js-xtract@ASM/jsXtract.js";
+        s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
         document.getElementsByTagName("head")[0].appendChild(s);
     }
 })()
@@ -157,12 +157,13 @@ if (typeof AudioNode === "function" && window.importScripts === undefined) {
 var BasePlugin = function (factory, owner) {
     var inputList = [],
         outputList = [],
-        pOwner = owner;
+        pOwner = owner,
+        eventTarget = new EventTarget();
     this.context = factory.context;
     this.factory = factory;
     this.featureMap = new PluginFeatureInterface(this);
     this.externalInterface = new PluginInterfaceMessageHub(this);
-    this.parameters = new ParameterManager(this, this.externalInterface);
+    this.parameters = new ParameterManager(this, this.externalInterface, eventTarget);
 
     function deleteIO(node, list) {
         var i = list.findIndex(function (e) {
@@ -292,11 +293,21 @@ var BasePlugin = function (factory, owner) {
             "value": function (object) {
                 return this.parameters.setParametersByObject(object);
             }
+        },
+        "addEventListener": {
+            "value": function(key, value) {
+                return eventTarget.addEventListener(key, value);
+            }
+        },
+        "removeEventListener": {
+            "value": function(key, value) {
+                return eventTarget.addEventListener(key, value);
+            }
         }
     });
 };
 
-var ParameterManager = function (owner, pluginExternalInterface) {
+var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
     var parameterList = [];
 
     function findParameter(name) {
@@ -453,6 +464,8 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                     }
                     _value = v;
                     this.trigger();
+                    var e = new Event("parameterset");
+                    eventTarget.dispatchEvent(e);
                 }
             },
             "stepSize": {
@@ -513,6 +526,8 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                     }
                     _value = v;
                     this.trigger();
+                    var e = new Event("parameterset");
+                    eventTarget.dispatchEvent(e);
                 }
             }
         });
@@ -574,6 +589,8 @@ var ParameterManager = function (owner, pluginExternalInterface) {
             addAction.call(this, v);
             _value = v;
             this.trigger();
+            var e = new Event("parameterset");
+            eventTarget.dispatchEvent(e);
             return v;
         }
 
@@ -631,6 +648,93 @@ var ParameterManager = function (owner, pluginExternalInterface) {
     }
     SwitchParameter.prototype = Object.create(PluginParameter.prototype);
     SwitchParameter.prototype.constructor = SwitchParameter;
+
+    function ListParameter(owner, name, defaultValue, listOfValues) {
+        PluginParameter.call(this, owner, name, "Button");
+        var onclick = function () {};
+        var _index = listOfValues.indexOf(defaultValue);
+
+        function addAction(v) {
+            var entry = {
+                'time': new Date(),
+                'value': v
+            };
+            this.actionList.push(entry);
+        }
+
+        function setV(v) {
+            var i = listOfValues.indexOf(v);
+            if (i === undefined || i < 0) {
+                throw("Not in list range");
+            }
+            if (this.boundAudioParam) {
+                this.boundAudioParam.value = this.update(v);
+            }
+            addAction.call(this, v);
+            _index = i;
+            this.trigger();
+            var e = new Event("parameterset");
+            eventTarget.dispatchEvent(e);
+            return listOfValues[_index];
+        }
+
+        Object.defineProperties(this, {
+            "destroy": {
+                "value": function () {
+                    owner = name = undefined;
+                }
+            },
+            "defaultValue": {
+                "value": defaultValue
+            },
+            "listValues": {
+                "get": function() {
+                    var l = [];
+                    listOfValues.forEach(function(v) {
+                        l.push(v);
+                    });
+                    return v;
+                }
+            },
+            "value": {
+                "get": function () {
+                    if (this.boundAudioParam) {
+                        return this.translate(this.boundAudioParam.value);
+                    }
+                    return listOfValues[_index];
+                },
+                "set": function (v) {
+                    if (v < minState) {
+                        throw ("Set value is less than " + minState);
+                    }
+                    if (v > maxState) {
+                        throw ("Set value is greater than " + maxState);
+                    }
+                    return setV.call(this, v);
+                }
+            },
+            "increment": {
+                "value": function () {
+                    var v = _value + 1;
+                    if (v > maxState) {
+                        v = minState;
+                    }
+                    return setV.call(this, v);
+                }
+            },
+            "decrement": {
+                "value": function () {
+                    var v = _value - 1;
+                    if (v < minState) {
+                        v = maxState;
+                    }
+                    return setV.call(this, v);
+                }
+            }
+        });
+    }
+    ListParameter.prototype = Object.create(PluginParameter.prototype);
+    ListParameter.prototype.constructor = ListParameter;
 
     Object.defineProperties(this, {
         'createNumberParameter': {
@@ -2411,7 +2515,6 @@ var PluginFactory = function (audio_context, rootURL) {
         // Plugin creation / destruction
 
         function buildNewPlugin(prototypeObject) {
-            var self = this;
             return new Promise(function(resolve, reject) {
                 if (state === 0) {
                     reject ("SubFactory has been destroyed! Cannot add new plugins");
@@ -2433,7 +2536,7 @@ var PluginFactory = function (audio_context, rootURL) {
 
         this.createPlugin = function (prototypeObject) {
             var self = this;
-            return buildNewPlugin.call(this, prototypeObject).catch(function(e){
+            return buildNewPlugin(prototypeObject).catch(function(e){
                 throw("Plugin did not get created! Aborting");
             }).then(function(node) {
                 cutChain();
