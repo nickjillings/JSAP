@@ -166,13 +166,13 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
 
     function findParameter(name) {
         return parameterList.find(function (e) {
-            return e.name === name;
+            return e.name.toLowerCase() === name.toLowerCase();
         });
     }
 
     function findParameterIndex(name) {
         return parameterList.findIndex(function (e) {
-            return e.name === name;
+            return e.name.toLowerCase() === name.toLowerCase();
         });
     }
 
