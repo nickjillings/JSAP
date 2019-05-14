@@ -132,7 +132,7 @@ export function PluginFactory(audio_context, rootURL) {
             plugin_prototypes.forEach(function (proto) {
                 promises.push(BFactory.addPrototype(proto.proto));
             });
-            return new Promise.all(promises).then(function() {
+            return Promise.all(promises).then(function() {
                 return BFactory;
             })
         }).then(function(newFactory) {
