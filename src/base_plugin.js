@@ -8,7 +8,7 @@ if (typeof AudioNode === "function" && window.importScripts === undefined) {
 }
 
 // This should simply define the BasePlugin from which custom plugins can be built from
-var BasePlugin = function (factory, owner) {
+var BasePlugin = function(factory, owner) {
     var inputList = [],
         outputList = [],
         pOwner = owner,
@@ -1221,3 +1221,9 @@ var PluginInterfaceMessageHub = function(owner) {
         }
     });
 };
+
+if (typeof window !== "undefined") {
+    window.BasePlugin = BasePlugin;
+}
+
+export {BasePlugin};

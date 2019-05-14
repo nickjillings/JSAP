@@ -2,8 +2,22 @@
 // This object will also handle creation and destruction of plugins
 /*globals Promise, document, console, LinkedStore, Worker, window, XMLHttpRequest */
 /*eslint-env browser */
+/* jshint esversion:6 */
 
-var PluginFactory = function (audio_context, rootURL) {
+// Load jsXtract
+(function() {
+    if (window.jsXtract === undefined) {
+        var s = document.createElement("script");
+        s.src = "https://gitcdn.xyz/repo/nickjillings/js-xtract/master/jsXtract.js";
+        document.getElementsByTagName("head")[0].appendChild(s);
+    }
+})();
+
+import LinkedStore from './head';
+export {BasePlugin} from './base_plugin';
+
+
+export function PluginFactory(audio_context, rootURL) {
         var subFactories = [],
         plugin_prototypes = [],
         pluginsList = [],
@@ -847,7 +861,7 @@ var PluginFactory = function (audio_context, rootURL) {
     var stores = [];
 
     this.createStore = function (storeName) {
-        var node = new LinkedStore(storeName);
+        var node = new LinkedStore.LinkedStore(storeName);
         stores.push(node);
         return node;
     };
@@ -863,8 +877,8 @@ var PluginFactory = function (audio_context, rootURL) {
     };
 
     // Build the default Stores
-    this.SessionData = new LinkedStore("Session");
-    this.UserData = new LinkedStore("User");
+    this.SessionData = new LinkedStore.LinkedStore("Session");
+    this.UserData = new LinkedStore.LinkedStore("User");
 
     // Created for the input of each SubFactory plugin chain
     var SubFactoryFeatureSender = function (owner, FactoryFeatureMap) {
@@ -1078,8 +1092,8 @@ var PluginFactory = function (audio_context, rootURL) {
         pluginChainStart.disconnect();
         pluginChainStart.connect(chainStop);
 
-        this.TrackData = new LinkedStore("Track");
-        this.PluginData = new LinkedStore("Plugin");
+        this.TrackData = new LinkedStore.LinkedStore("Track");
+        this.PluginData = new LinkedStore.LinkedStore("Plugin");
 
         this.featureSender = chainStartFeature;
 
