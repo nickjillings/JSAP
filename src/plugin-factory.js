@@ -310,7 +310,7 @@ export function PluginFactory(audio_context, rootURL) {
                 });
             }).then(function(plugin) {
                 var node;
-                if (plugin.hasMidiInput !== true && plguin.hasMidiOutput !== true) {
+                if (plugin.hasMidiInput !== true && plugin.hasMidiOutput !== true) {
                     node = new PluginInstance(currentPluginId++, plugin);
                 } else if (plugin.hasMidiInput === true && plugin.hasMidiOutput !== true) {
                     node = new MidiSynthesisInstance(currentPluginId++, plugin);
