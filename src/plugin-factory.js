@@ -13,12 +13,14 @@
     }
 })();
 
-import LinkedStore from './head';
+import LinkedStore from './LinkedStore';
 export {BasePlugin} from './base_plugin';
+export {SynthesiserBasePlugin} from './synth_base';
 
 
 export function PluginFactory(audio_context, rootURL) {
         var subFactories = [],
+        synthesiserHosts = [],
         plugin_prototypes = [],
         pluginsList = [],
         currentPluginId = 0,
@@ -134,7 +136,7 @@ export function PluginFactory(audio_context, rootURL) {
             });
             return Promise.all(promises).then(function() {
                 return BFactory;
-            })
+            });
         }).then(function(newFactory) {
             return newFactory;
         });
@@ -231,6 +233,29 @@ export function PluginFactory(audio_context, rootURL) {
     };
     PluginInstance.prototype.factory = this;
 
+    var MidiSynthesisInstance = function(id, synthNode) {
+        var _out = audio_context.createGain();
+        synthNode.getOutputs()[0].connect(_out);
+
+        this.destroy = function () {
+            synthNode.destroy();
+        };
+
+        Object.defineProperties(this, {
+            'id': {
+                'value': id
+            },
+            'node': {
+                'value': synthNode
+            },
+            'output': {
+                'get': function () {
+                    return _out;
+                }
+            },
+        });
+    };
+
     var PluginPrototype = function (proto, factory) {
 	    var self = this;
         Object.defineProperties(this, {
@@ -245,6 +270,12 @@ export function PluginFactory(audio_context, rootURL) {
             },
             'uniqueID': {
                 value: proto.prototype.uniqueID
+            },
+            'hasMidiInput': {
+                value: proto.prototype.hasMidiInput || false
+            },
+            'hasMidiOutput': {
+                value: proto.prototype.hasMidiOutput || false
             }
         });
 
@@ -278,8 +309,14 @@ export function PluginFactory(audio_context, rootURL) {
                     }
                 });
             }).then(function(plugin) {
-                var node = new PluginInstance(currentPluginId++, plugin);
-                var basePluginInstance = plugin;
+                var node;
+                if (plugin.hasMidiInput !== true && plguin.hasMidiOutput !== true) {
+                    node = new PluginInstance(currentPluginId++, plugin);
+                } else if (plugin.hasMidiInput === true && plugin.hasMidiOutput !== true) {
+                    node = new MidiSynthesisInstance(currentPluginId++, plugin);
+                } else {
+                    throw("No Instance Holder Available!");
+                }
                 Object.defineProperties(plugin, {
                     'pluginInstance': {
                         'value': node
@@ -447,6 +484,24 @@ export function PluginFactory(audio_context, rootURL) {
         return plugin_prototypes;
     };
 
+    this.getAudioPluginPrototypes = function() {
+        return plugin_prototypes.filter(function(proto) {
+            return proto.hasMidiInput == false && proto.hasMidiOutput == false;
+        });
+    };
+
+    this.getMidiSynthPrototypes = function() {
+        return plugin_prototypes.filter(function(proto) {
+            return proto.hasMidiInput == true && proto.hasMidiOutput == false;
+        });
+    };
+
+    this.getMidiPluginPrototypes = function() {
+        return plugin_prototypes.filter(function(proto) {
+            return proto.hasMidiInput == true && proto.hasMidiOutput == true;
+        });
+    };
+
     this.getAllPlugins = function () {
         return pluginsList;
     };
@@ -466,8 +521,18 @@ export function PluginFactory(audio_context, rootURL) {
         return obj;
     };
 
-    this.createSubFactory = function (chainStart, chainStop) {
-        var node = new PluginSubFactory(this, chainStart, chainStop);
+    this.createSubFactory = function(chainStart, chainStop) {
+        console.warn("DEPRECATED - This function will be deprecated in favour of \"createAudioPluginChainManager\"");
+        return this.createAudioPluginChainManager(chainStart, chainStop);
+    };
+
+    this.destroySubFactory = function(chainStart, chainStop) {
+        console.warn("DEPRECATED - This function will be deprecated in favour of \"destroyAudioPluginChainManager\"");
+        return this.destroyAudioPluginChainManager(chainStart, chainStop);
+    };
+
+    this.createAudioPluginChainManager = function (chainStart, chainStop) {
+        var node = new AudioPluginChainManager(this, chainStart, chainStop);
         Object.defineProperties(node, {
             'SessionData': {
                 value: this.SessionData
@@ -480,7 +545,7 @@ export function PluginFactory(audio_context, rootURL) {
         return node;
     };
 
-    this.destroySubFactory = function (SubFactory) {
+    this.destroyAudioPluginChainManager = function (SubFactory) {
         var index = subFactories.findIndex(function (element) {
             if (element === this) {
                 return true;
@@ -490,6 +555,33 @@ export function PluginFactory(audio_context, rootURL) {
         if (index >= 0) {
             subFactories.splice(index, 1);
             SubFactory.destroy();
+        }
+    };
+
+    this.createMidiSynthesiserHost = function(factory) {
+        var host = new MidiSynthesiserHost(factory);
+        Object.defineProperties(host, {
+            'SessionData': {
+                value: this.SessionData
+            },
+            'UserData': {
+                value: this.UserData
+            }
+        });
+        synthesiserHosts.push(host);
+        return host;
+    };
+
+    this.destroyMidiSynthesiserHost = function (host) {
+        var index = synthesiserHosts.findIndex(function (element) {
+            if (element === this) {
+                return true;
+            }
+            return false;
+        }, host);
+        if (index >= 0) {
+            synthesiserHosts.splice(index, 1);
+            host.destroy();
         }
     };
 
@@ -504,10 +596,6 @@ export function PluginFactory(audio_context, rootURL) {
             instance.node.start.call(instance.node);
         }
         return true;
-    };
-
-    this.createPluginInstance = function (PluginPrototype) {
-        throw ("DEPRECATED - Use PluginPrototype.createPluginInstance(owner);");
     };
 
     this.deletePlugin = function (id) {
@@ -1079,7 +1167,7 @@ export function PluginFactory(audio_context, rootURL) {
         FactoryFeatureMap.createSourceMap(this, undefined);
     };
 
-    var PluginSubFactory = function (PluginFactory, chainStart, chainStop) {
+    var AudioPluginChainManager = function (PluginFactory, chainStart, chainStop) {
 
         var plugin_list = [],
             pluginChainStart = chainStart,
@@ -1324,6 +1412,163 @@ export function PluginFactory(audio_context, rootURL) {
                     return recursiveProcessing;
                 }
             }
+        });
+    };
+
+    var MidiSynthesiserHost = function(factory) {
+        function buildNewSynthesiserObject(prototypeObject) {
+            var self = this;
+            return new Promise(function(resolve, reject) {
+                if (prototypeObject.hasMidiInput == false || prototypeObject.hasMidiOutput == true) {
+                    reject ("Prototype is not a MidiSynthesis type. hasMidiInput must be true and hasMidiOutput must be false");
+                } else {
+                    resolve(prototypeObject);
+                }
+            }).then(function() {
+                return prototypeObject.createPluginInstance(self, false)
+                .then(function(node) {
+                    Object.defineProperties(node, {
+                        'TrackData': {
+                            value: self.TrackData
+                        }
+                    });
+                    return node;
+                });
+            });
+        }
+
+        var midiSynthSlot;
+        var connections = [];
+        Object.defineProperties(this, {
+            "connect": {
+                "value": function(destinationNode, output, input) {
+                    if (destinationNode === undefined) {
+                        throw ("Must define an AudioNode object");
+                    }
+                    var exists = connections.find(function(conn) {
+                        return conn.destinationNode == destinationNode && conn.output == output && conn.input == input;
+                    });
+                    if (exists) {
+                        return;
+                    } else {
+                        connections.push({
+                            destinationNode:destinationNode,
+                            output:output,
+                            input:input
+                        });
+                    }
+                    if (midiSynthSlot === undefined) {
+                        console.warn("MIDI Synthesiser is not loaded, connections will be validated on load");
+                    } else {
+                        midiSynthSlot.node.connect(destinationNode, output, input);
+                    }
+                }
+            },
+            "disconnect": {
+                "value": function(destinationNode, output, input) {
+                    if (destinationNode === undefined) {
+                        if (midiSynthSlot) {
+                            midiSynthSlot.disconnect();
+                        }
+                        connections = [];
+                    }
+                    else if (typeof destinationNode == "number" && typeof output == "undefined") {
+                        output = destinationNode;
+                        destinationNode = undefined;
+                        connections = connections.filter(function(conn) {
+                            if (conn.output == output) {
+                                if (midiSynthSlot) {
+                                    midiSynthSlot.node.disconnect(conn.destinationNode, conn.output);
+                                }
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        });
+                    } else if (typeof destinationNode == "object" && typeof output == "undefined") {
+                        connections = connections.filter(function(conn) {
+                            if (conn.destinationNode == destinationNode) {
+                                if (midiSynthSlot) {
+                                    midiSynthSlot.node.disconnect(conn.destinationNode);
+                                }
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        });
+                    } else if (typeof destinationNode == "object" && typeof output == "number") {
+                        connections = connections.filter(function(conn) {
+                            if (conn.destinationNode == destinationNode && conn.output == output) {
+                                if (midiSynthSlot) {
+                                    midiSynthSlot.node.disconnect(conn.destinationNode, conn.output);
+                                }
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        });
+                    } else if (typeof destinationNode == "object" && typeof output == "number" && typeof input == "number") {
+                        connections = connections.filter(function(conn) {
+                            if (conn.destinationNode == destinationNode && conn.output == output && conn.input == input) {
+                                if (midiSynthSlot) {
+                                    midiSynthSlot.node.disconnect(conn.destinationNode, conn.output, conn.input);
+                                }
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        });
+                    }
+                }
+            },
+            "scheduleEvent": {
+                "value": function(msg, t) {
+                    if (midiSynthSlot) {
+                        midiSynthSlot.node.scheduleEvent(msg, t);
+                    } else {
+                        throw("MIDI Synthesiser not loaded");
+                    }
+                }
+            },
+            "cancelAllEvents": {
+                "value": function(msg, t) {
+                    if (midiSynthSlot) {
+                        midiSynthSlot.node.cancelAllEvents();
+                    } else {
+                        throw("MIDI Synthesiser not loaded");
+                    }
+                }
+            },
+            "midiSynthesiser": {
+                "get": function () {
+                    return midiSynthSlot;
+                },
+                "set": function() {
+                    throw("Cannot set read-only attribute.");
+                }
+            },
+            "loadMidiSynthesiserModule": {
+                "value": function(prototype) {
+                    var self = this;
+                    return new Promise(function(resolve, reject) {
+                        if (prototype.hasMidiInput == false || prototype.hasMidiOutput == true) {
+                            reject ("Prototype is not a MidiSynthesis type. hasMidiInput must be true and hasMidiOutput must be false");
+                        } else {
+                            resolve(prototype);
+                        }
+                    }).then(function(prototypeObject) {
+                        return buildNewSynthesiserObject.call(self, prototypeObject).catch(function(e){
+                            throw("Plugin did not get created! Aborting");
+                        });
+                    }).then(function(node) {
+                        midiSynthSlot = node;
+                        connections.forEach(function(conn) {
+                            midiSynthSlot.node.connect(conn.destinationNode, conn.output, conn.input);
+                        });
+                        return midiSynthSlot;
+                    });
+                }
+            },
         });
     };
 

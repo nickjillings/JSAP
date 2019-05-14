@@ -1,6 +1,7 @@
 // Add getInputs to all AudioNodes to ease deployment
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 /*eslint-env browser */
+/*jshint esversion: 6 */
 if (typeof AudioNode === "function" && window.importScripts === undefined) {
     AudioNode.prototype.getInputs = function () {
         return [this];
@@ -13,8 +14,12 @@ var BasePlugin = function(factory, owner) {
         outputList = [],
         pOwner = owner,
         eventTarget = new EventTarget();
-    this.context = factory.context;
-    this.factory = factory;
+    if (this.context === undefined) {
+        this.context = factory.context;
+    }
+    if (this.factory === undefined) {
+        this.factory = factory;
+    }
     this.featureMap = new PluginFeatureInterface(this);
     this.externalInterface = new PluginInterfaceMessageHub(this);
     this.parameters = new ParameterManager(this, this.externalInterface, eventTarget);
