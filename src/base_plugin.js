@@ -556,11 +556,9 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
             },
             "listValues": {
                 "get": function() {
-                    var l = [];
-                    listOfValues.forEach(function(v) {
-                        l.push(v);
+                    return listOfValues.map(function(v) {
+                        return v
                     });
-                    return v;
                 }
             },
             "value": {
@@ -576,7 +574,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
             },
             "increment": {
                 "value": function () {
-                    var v = _value + 1;
+                    var v = _index + 1;
                     if (v >= listOfValues.length) {
                         v = 0;
                     }
@@ -585,7 +583,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
             },
             "decrement": {
                 "value": function () {
-                    var v = _value - 1;
+                    var v = _index - 1;
                     if (v < 0) {
                         v = listOfValues.length-1;
                     }
