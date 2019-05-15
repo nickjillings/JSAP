@@ -571,20 +571,14 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     return listOfValues[_index];
                 },
                 "set": function (v) {
-                    if (v < minState) {
-                        throw ("Set value is less than " + minState);
-                    }
-                    if (v > maxState) {
-                        throw ("Set value is greater than " + maxState);
-                    }
                     return setV.call(this, v);
                 }
             },
             "increment": {
                 "value": function () {
                     var v = _value + 1;
-                    if (v > maxState) {
-                        v = minState;
+                    if (v >= listOfValues.length) {
+                        v = 0;
                     }
                     return setV.call(this, v);
                 }
@@ -592,8 +586,8 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
             "decrement": {
                 "value": function () {
                     var v = _value - 1;
-                    if (v < minState) {
-                        v = maxState;
+                    if (v < 0) {
+                        v = listOfValues.length-1;
                     }
                     return setV.call(this, v);
                 }
