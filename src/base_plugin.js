@@ -656,6 +656,19 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                 return param;
             }
         },
+        'createListParameter': {
+            "value": function (name, defaultValue, listOfValues) {
+                if (typeof name !== "string" || typeof defaultValue !== "number" || !Array.isArray(listOfValues)) {
+                    throw ("Invlid constructor");
+                }
+                if (findParameterIndex(name) !== -1) {
+                    throw ("Parameter with name '" + name + "' already exists");
+                }
+                var param = new ListParameter(owner, name, defaultValue, listOfValues);
+                addParameter(param);
+                return param;
+            }
+        },
         'createParameter': {
             'value': function () {
                 throw ("This function is now deprecated");
