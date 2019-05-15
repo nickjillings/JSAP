@@ -658,8 +658,11 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         },
         'createListParameter': {
             "value": function (name, defaultValue, listOfValues) {
-                if (typeof name !== "string" || typeof defaultValue !== "number" || !Array.isArray(listOfValues)) {
+                if (typeof name !== "string" || typeof defaultValue === "undefined" || !Array.isArray(listOfValues)) {
                     throw ("Invlid constructor");
+                }
+                if (listOfValues.includes(defaultValue) === false) {
+                    hrow ("Invlid constructor - default value missing");
                 }
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
