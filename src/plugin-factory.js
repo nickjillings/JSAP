@@ -14,17 +14,16 @@
 })();
 
 import LinkedStore from './LinkedStore';
-export {BasePlugin} from './base_plugin';
-export {SynthesiserBasePlugin} from './synth_base';
+import {BasePlugin} from './base_plugin';
+import {SynthesiserBasePlugin} from './synth_base';
 
-
-export function PluginFactory(audio_context, rootURL) {
-        var subFactories = [],
-        synthesiserHosts = [],
-        plugin_prototypes = [],
-        pluginsList = [],
-        currentPluginId = 0,
-        audioStarted = false;
+function PluginFactory(audio_context, rootURL) {
+    var subFactories = [],
+    synthesiserHosts = [],
+    plugin_prototypes = [],
+    pluginsList = [],
+    currentPluginId = 0,
+    audioStarted = false;
 
     /*
         this.loadResource. Load a resource into the global namespace
@@ -33,6 +32,33 @@ export function PluginFactory(audio_context, rootURL) {
             .url: URL of the resource
             .test: function to call, returns true if resource already loaded, false if not
     */
+    this.loadPrototypeModule = function(resourceObject, mustModule) {
+        var factory = this;
+        return new Promise(function(resolve, reject) {
+            if (typeof global.define === "function" && global.define.amd) {
+                global.require([resourceObject.url], function(f) {
+                    resolve(f);
+                });
+            } else if (typeof global.module == "object" && global.module.exports) {
+                resolve(global.require(resourceObject.url));
+            } else {
+                reject("Cannot load using modular systems");
+            }
+        }).then(function(executable) {
+            if (typeof executable === "function") {
+                return factory.addPrototype(executable);
+            } else {
+                reject("Is not a module plugin");
+            }
+        }).catch(function() {
+            if (mustModule === true) {
+                reject("Cannot load using modular systems");
+            } else {
+                console.warn("Could not load using modular systems");
+                return factory.loadPluginScript(resourceObject);
+            }
+        });
+    };
     this.loadResource = function (resourceObject) {
         return new Promise(function(resolve, reject) {
             if (typeof resourceObject !== "object") {
@@ -1634,4 +1660,22 @@ export function PluginFactory(audio_context, rootURL) {
             "value": PluginUserInterfaceMessageHub
         }
     });
-};
+}
+
+export {BasePlugin, SynthesiserBasePlugin, PluginFactory};
+
+(function(root, factory) {
+    if (typeof define === "function" && define.amd) {
+        define([], factory);
+    } else if (typeof module == "object" && module.exports) {
+        module.exports = factory();
+    } else {
+        root.JSAP = factory();
+    }
+})(this, function() {
+    return {
+        PluginFactory: PluginFactory,
+        BasePlugin: BasePlugin,
+        SynthesiserBasePlugin: SynthesiserBasePlugin
+    };
+});

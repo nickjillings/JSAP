@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
     entry: "./src/plugin-factory.js",
     output: {
-        filename: "jsap.js",
+        filename: "JSAP.js",
         path: path.resolve(__dirname, ''),
         library: "JSAP"
     },
