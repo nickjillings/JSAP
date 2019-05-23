@@ -634,9 +634,9 @@ function PluginFactory(audio_context, rootURL) {
         }
     };
 
-    function triggerAudioStart() {
+    function triggerAudioStart(program_time) {
         pluginsList.forEach(function (n) {
-            n.node.start.call(n.node);
+            n.node.start.call(n.node, program_time);
         });
     }
 
@@ -646,9 +646,9 @@ function PluginFactory(audio_context, rootURL) {
         });
     }
 
-    this.audioStart = function () {
+    this.audioStart = function (program_time) {
         if (!audioStarted) {
-            triggerAudioStart();
+            triggerAudioStart(program_time);
             audioStarted = true;
         }
     };
