@@ -1639,6 +1639,11 @@ function PluginFactory(audio_context, rootURL) {
         "context": {
             "value": audio_context
         },
+        "hasAudioStarted": {
+            "get": function() {
+                return audioStarted;
+            }
+        },
         "pluginRootURL": {
             "get": function () {
                 return rootURL;
