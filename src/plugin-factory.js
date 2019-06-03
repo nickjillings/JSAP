@@ -1201,7 +1201,8 @@ function PluginFactory(audio_context, rootURL) {
             factoryName = "",
             state = 1,
             chainStartFeature = new SubFactoryFeatureSender(this, PluginFactory.FeatureMap),
-            semanticStores = [];
+            semanticStores = [],
+            self = this;
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
         pluginChainStart.connect(chainStop);
@@ -1301,7 +1302,6 @@ function PluginFactory(audio_context, rootURL) {
         }
 
         this.createPlugin = function (prototypeObject) {
-            var self = this;
             return buildNewPlugin(prototypeObject).catch(function(e){
                 throw("Plugin did not get created! Aborting");
             }).then(function(node) {
@@ -1442,8 +1442,8 @@ function PluginFactory(audio_context, rootURL) {
     };
 
     var MidiSynthesiserHost = function(factory) {
+        var self = this;
         function buildNewSynthesiserObject(prototypeObject) {
-            var self = this;
             return new Promise(function(resolve, reject) {
                 if (prototypeObject.hasMidiInput == false || prototypeObject.hasMidiOutput == true) {
                     reject ("Prototype is not a MidiSynthesis type. hasMidiInput must be true and hasMidiOutput must be false");
