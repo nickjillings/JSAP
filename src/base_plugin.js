@@ -286,6 +286,9 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         }
 
         Object.defineProperties(this, {
+            "type": {
+                "value": "Number"
+            },
             "destroy": {
                 "value": function () {
                     owner = name = defaultValue = minimum = maximum = _value = _stepSize = undefined;
@@ -358,6 +361,9 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         }
 
         Object.defineProperties(this, {
+            "type": {
+                "value": "String"
+            },
             "destroy": {
                 "value": function () {
                     owner = name = defaultValue = maxLength = _value = undefined;
@@ -411,6 +417,9 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         }
 
         Object.defineProperties(this, {
+            "type": {
+                "value": "Button"
+            },
             "destroy": {
                 "value": function () {
                     owner = name = undefined;
@@ -460,6 +469,9 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         }
 
         Object.defineProperties(this, {
+            "type": {
+                "value": "Switch"
+            },
             "destroy": {
                 "value": function () {
                     owner = name = undefined;
@@ -546,6 +558,9 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         }
 
         Object.defineProperties(this, {
+            "type": {
+                "value": "List"
+            },
             "destroy": {
                 "value": function () {
                     owner = name = undefined;
