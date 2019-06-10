@@ -1198,7 +1198,7 @@ var PluginInterfaceMessageHub = function(owner) {
     window.onmessage = function(e) {
         switch(e.data.message) {
             case "setParameterByName":
-                if (e.data.parameter.name && e.data.parameter.value) {
+                if (e.data.parameter.name) {
                     owner.parameters.setParameterByName(e.data.parameter.name, e.data.parameter.value);
                 }
                 broadcastParameterUpdates(e.data.sender_id);
