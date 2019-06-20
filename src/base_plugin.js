@@ -1194,8 +1194,10 @@ var PluginInterfaceMessageHub = function(owner) {
 
     var windowMessageList = [];
     var state = 0;
-
-    window.onmessage = function(e) {
+    window.addEventListener("message",function(e) {
+        if (!windowMessageList.includes(e.source)) {
+            return;
+        }
         switch(e.data.message) {
             case "setParameterByName":
                 if (e.data.parameter.name) {
@@ -1215,7 +1217,7 @@ var PluginInterfaceMessageHub = function(owner) {
             default:
                 throw("Unknown message type \""+e.data.message+"\"");
         }
-    };
+    });
 
     Object.defineProperties(this, {
         "updateInterfaces": {
