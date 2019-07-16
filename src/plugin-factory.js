@@ -1315,7 +1315,7 @@ function PluginFactory(audio_context, rootURL) {
             });
         };
 
-        this.destroyPlugin = function (plugin_object) {
+        this.removePlugin = function(plugin_object) {
             if (state === 0) {
                 return;
             }
@@ -1326,11 +1326,18 @@ function PluginFactory(audio_context, rootURL) {
                 plugin_object.node.onunloaded.call(plugin_object.node);
                 plugin_object.node.deconstruct.call(plugin_object.node);
                 plugin_list.splice(index, 1);
-                this.parent.deletePlugin(plugin_object.id);
                 isolate();
                 rebuild();
                 joinChain();
             }
+        };
+
+        this.destroyPlugin = function (plugin_object) {
+            if (state === 0) {
+                return;
+            }
+            this.removePlugin(plugin_object);
+            this.parent.deletePlugin(plugin_object.id);
         };
 
         this.getPlugins = function () {
@@ -1358,26 +1365,34 @@ function PluginFactory(audio_context, rootURL) {
             if (state === 0) {
                 return;
             }
-            var obj, index = this.getPluginIndex(plugin_object),
-                holdLow, holdHigh, i;
-            if (index >= 0) {
-                cutChain();
-                isolate();
+            var index = this.getPluginIndex(plugin_object),
+                obj, holdLow, holdHigh, i;
+            if (PluginFactory.getAllPlugins().includes(plugin_object) === false) {
+                throw("Plugin does not exist");
+            }
+            cutChain();
+            isolate();
+            if (plugin_object.node.owner !== this) {
+                // Different sub-factory
+                plugin_object.node.owner.removePlugin(plugin_object);
+                plugin_object.node.owner = this;
+                obj = [plugin_object];
+            } else {
                 obj = plugin_list.splice(index, 1);
                 plugin_object.node.onunloaded.call(plugin_object.node);
-                if (new_index === 0) {
-                    plugin_list = obj.concat(plugin_list);
-                } else if (new_index >= plugin_list.length) {
-                    plugin_list = plugin_list.concat(obj);
-                } else {
-                    holdLow = plugin_list.slice(0, new_index);
-                    holdHigh = plugin_list.slice(new_index);
-                    plugin_list = holdLow.concat(obj.concat(holdHigh));
-                }
-                rebuild();
-                joinChain();
-                plugin_object.node.onloaded.call(plugin_object.node);
             }
+            if (new_index === 0) {
+                plugin_list = obj.concat(plugin_list);
+            } else if (new_index >= plugin_list.length) {
+                plugin_list = plugin_list.concat(obj);
+            } else {
+                holdLow = plugin_list.slice(0, new_index);
+                holdHigh = plugin_list.slice(new_index);
+                plugin_list = holdLow.concat(obj.concat(holdHigh));
+            }
+            rebuild();
+            joinChain();
+            plugin_object.node.onloaded.call(plugin_object.node);
         };
 
         this.copyPlugin = function(plugin_object, copy_index) {
