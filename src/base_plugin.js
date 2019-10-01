@@ -753,7 +753,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                         if (typeof object[key] == "object") {
 
                             this.setParameterByName(key, object[key].value);
-                        } else if (typeof object[key] == "number") {
+                        } else if (typeof object[key] == "number" || typeof object[key] == "string") {
                             this.setParameterByName(key, object[key]);
                         } else {
                             throw ("Cannot set " + key + ": Not a valid object");
