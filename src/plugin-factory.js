@@ -1683,19 +1683,3 @@ function PluginFactory(audio_context, rootURL) {
 }
 
 export {BasePlugin, SynthesiserBasePlugin, PluginFactory};
-
-(function(root, factory) {
-    if (typeof define === "function" && define.amd) {
-        define("JSAP", [], factory);
-    } else if (typeof module == "object" && module.exports) {
-        module.exports = factory();
-    } else {
-        root.JSAP = factory();
-    }
-})(this, function() {
-    return {
-        PluginFactory: PluginFactory,
-        BasePlugin: BasePlugin,
-        SynthesiserBasePlugin: SynthesiserBasePlugin
-    };
-});

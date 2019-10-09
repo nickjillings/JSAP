@@ -1250,8 +1250,4 @@ var PluginInterfaceMessageHub = function(owner) {
     });
 };
 
-if (typeof window !== "undefined") {
-    window.BasePlugin = BasePlugin;
-}
-
 export {BasePlugin};

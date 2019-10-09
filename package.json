@@ -3,6 +3,7 @@
     "description": "JSAP",
     "author": "Nick Jillings",
     "version": "0.0.1",
+    "main": "jsap.js",
     "devDependencies": {
         "mocha": "^5.2.0",
         "web-audio-engine": "^0.13.4",
