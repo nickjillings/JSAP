@@ -571,6 +571,22 @@ function PluginFactory(audio_context, rootURL) {
         return node;
     };
 
+    this.duplicateAudioPluginChainManager = function(sourceChainManager, chainStart, chainStop) {
+        var node = this.createAudioPluginChainManager(chainStart, chainStop);
+        var promiseChain = Promise.resolve();
+        sourceChainManager.getPlugins().forEach(function(plugin_object) {
+            promiseChain = promiseChain.then(function() {
+                return node.createPlugin(plugin_object.prototypeObject)
+                .then(function(newPlugin) {
+                    newPlugin.parameters.setParametersByObject(plugin_object.parameters.getParameterObject);
+                });
+            });
+        });
+        return promiseChain.then(function() {
+            return node;
+        });
+    };
+
     this.destroyAudioPluginChainManager = function (SubFactory) {
         var index = subFactories.findIndex(function (element) {
             if (element === this) {
