@@ -578,7 +578,7 @@ function PluginFactory(audio_context, rootURL) {
             promiseChain = promiseChain.then(function() {
                 return node.createPlugin(plugin_object.prototypeObject)
                 .then(function(newPlugin) {
-                    newPlugin.parameters.setParametersByObject(plugin_object.parameters.getParameterObject);
+                    newPlugin.node.parameters.setParametersByObject(plugin_object.node.parameters.getParameterObject);
                 });
             });
         });
