@@ -79,7 +79,7 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                 if (typeof ap == "object" && ap.value) {
                     audioParameter = ap;
                     if (ap.setValueAtTime) {
-                        automation = new ParameterLinearAutomation(audioParameter, minimum, maximum);
+                        automation = new ParameterLinearAutomation(this, audioParameter, minimum, maximum);
                     } else {
                         console.warn("Cannot bind automation as AudioParameter is not automatable");
                     }

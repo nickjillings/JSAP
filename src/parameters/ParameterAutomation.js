@@ -122,7 +122,7 @@ var ParameterAutomation = function(parameter, min_value, max_value) {
 ParameterAutomation.prototype = Object.create(TimePointList.prototype);
 ParameterAutomation.prototype.constructor = ParameterAutomation;
 
-var ParameterLinearAutomation = function (parameter, min_value, max_value) {
+var ParameterLinearAutomation = function (owner, parameter, min_value, max_value) {
     ParameterAutomation.call(this, parameter, min_value, max_value);
     function linearInterpolation(time, pointA, pointB) {
         var t1 = pointA.time;
@@ -155,7 +155,8 @@ var ParameterLinearAutomation = function (parameter, min_value, max_value) {
         if (secondPoint === undefined || firstPoint.time > time) {
             return firstPoint.value;
         }
-        return linearInterpolation(time, firstPoint, secondPoint);
+        var v = linearInterpolation(time, firstPoint, secondPoint);
+        return owner.update(v);
     }
 
     function start(automationPoints, time, contextTime) {
@@ -164,7 +165,8 @@ var ParameterLinearAutomation = function (parameter, min_value, max_value) {
         automationPoints.forEach(function(p) {
             if (p.time > time) {
                 var t = p.time - time;
-                parameter.linearRampToValueAtTime(p.value, t+contextTime);
+                var v = owner.update(p.value);
+                parameter.linearRampToValueAtTime(v, t+contextTime);
             }
         });
     }
@@ -197,7 +199,7 @@ var ParameterLinearAutomation = function (parameter, min_value, max_value) {
 ParameterLinearAutomation.prototype = Object.create(ParameterAutomation.prototype);
 ParameterLinearAutomation.prototype.constructor = ParameterLinearAutomation;
 
-var ParameterStepAutomation = function (parameter, min_value, max_value) {
+var ParameterStepAutomation = function (owner, parameter, min_value, max_value) {
     ParameterAutomation.call(this, parameter, min_value, max_value);
     function getCurrentTimeValue(automationPoints, time) {
         if (automationPoints.length == 0) {
@@ -223,7 +225,8 @@ var ParameterStepAutomation = function (parameter, min_value, max_value) {
         automationPoints.forEach(function(p) {
             if (p.time > time) {
                 var t = p.time - time;
-                parameter.setValueAtTime(p.value, t+contextTime);
+                var v = owner.update(p.value);
+                parameter.setValueAtTime(v, t+contextTime);
             }
         });
     }

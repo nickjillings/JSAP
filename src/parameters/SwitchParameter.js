@@ -19,7 +19,6 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
         if (this.boundAudioParam) {
             this.boundAudioParam.value = this.update(v);
         }
-        addAction.call(this, v);
         if (_value !== v) {
             _value = v;
             var e = new Event("parameterset");
@@ -87,7 +86,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
                 if (typeof ap == "object" && ap.value) {
                     audioParameter = ap;
                     if (ap.setValueAtTime) {
-                        automation = new ParameterStepAutomation(audioParameter, minState, maxState);
+                        automation = new ParameterStepAutomation(this, audioParameter, minState, maxState);
                     } else {
                         console.warn("Cannot bind automation as AudioParameter is not automatable");
                     }
