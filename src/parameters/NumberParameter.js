@@ -8,14 +8,6 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
     var _value = defaultValue,
         _stepSize;
 
-    function addAction(v) {
-        var entry = {
-            'time': new Date(),
-            'value': v
-        };
-        this.actionList.push(entry);
-    }
-
     Object.defineProperties(this, {
         "type": {
             "value": "Number"
@@ -36,12 +28,19 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
         },
         "value": {
             "get": function () {
-                if (this.boundAudioParam) {
-                    return this.translate(this.boundAudioParam.value);
+                if (audioParameter) {
+                    if (automation && automation.enabled) {
+                        var t = owner.factory.getCurrentProgramTime();
+                        return automation.getCurrentTimeValue(t);
+                    }
+                    return this.translate(audioParameter.value);
                 }
                 return _value;
             },
             "set": function (v) {
+                if (automation && automation.enabled) {
+                    throw("Automation is enabled, cannot set the value!");
+                }
                 if (this.minimum) {
                     v = Math.max(v, this.minimum);
                 }
@@ -52,8 +51,13 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                     v = Math.round(v / _stepSize);
                     v = v * _stepSize;
                 }
-                if (this.boundAudioParam) {
-                    this.boundAudioParam.value = this.update(v);
+                v = this.update(v);
+                if (audioParameter) {
+                    if (automation) {
+                        audioParameter.setValueAtTime(v, owner.factory.context.currentTime);
+                    } else {
+                        audioParameter.value = v;
+                    }
                 }
                 if (_value !== v) {
                     _value = v;
@@ -80,6 +84,31 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                     audioParameter = ap;
                     if (ap.setValueAtTime) {
                         automation = new ParameterLinearAutomation(this, audioParameter, minimum, maximum);
+                        Object.defineProperties(this, {
+                            "getCurrentTimeValue": {
+                                "value": function(time) {
+                                    return automation.getCurrentTimeValue(time);
+                                }
+                            },
+                            "start": {
+                                "value": function(time, contextTime) {
+                                    return automation.start(time, contextTime);
+                                }
+                            },
+                            "stop": {
+                                "value": function(contextTime) {
+                                    automation.stop(contextTime);
+                                }
+                            },
+                            "enabled": {
+                                "get": function() {
+                                    return automation.enabled;
+                                },
+                                "set": function(t) {
+                                    return (automation.enabled = t);
+                                }
+                            }
+                        });
                     } else {
                         console.warn("Cannot bind automation as AudioParameter is not automatable");
                     }

@@ -130,7 +130,7 @@ var BasePlugin = function(factory, owner) {
                 return this.outputs;
             }
         },
-        "getParameterName": {
+        "getParameterNames": {
             "value": function () {
                 return this.parameters.getParameterNames();
             }
@@ -588,6 +588,7 @@ var PluginInterfaceMessageHub = function(owner) {
     }
 
     var windowMessageList = [];
+    var listener;
     var state = 0;
     window.addEventListener("message",function(e) {
         if (!windowMessageList.includes(e.source)) {

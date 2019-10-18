@@ -87,6 +87,31 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
                     audioParameter = ap;
                     if (ap.setValueAtTime) {
                         automation = new ParameterStepAutomation(this, audioParameter, minState, maxState);
+                        Object.defineProperties(this, {
+                            "getCurrentTimeValue": {
+                                "value": function(time) {
+                                    return automation.getCurrentTimeValue(time);
+                                }
+                            },
+                            "start": {
+                                "value": function(time, contextTime) {
+                                    return automation.start(time, contextTime);
+                                }
+                            },
+                            "stop": {
+                                "value": function(contextTime) {
+                                    automation.stop(contextTime);
+                                }
+                            },
+                            "enabled": {
+                                "get": function() {
+                                    return automation.enabled;
+                                },
+                                "set": function(t) {
+                                    return (automation.enabled = t);
+                                }
+                            }
+                        });
                     } else {
                         console.warn("Cannot bind automation as AudioParameter is not automatable");
                     }

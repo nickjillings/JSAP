@@ -155,12 +155,11 @@ var ParameterLinearAutomation = function (owner, parameter, min_value, max_value
         if (secondPoint === undefined || firstPoint.time > time) {
             return firstPoint.value;
         }
-        var v = linearInterpolation(time, firstPoint, secondPoint);
-        return owner.update(v);
+        return linearInterpolation(time, firstPoint, secondPoint);
     }
 
     function start(automationPoints, time, contextTime) {
-        var startPosition = getCurrentTimeValue(automationPoints, time);
+        var startPosition = owner.update(getCurrentTimeValue(automationPoints, time));
         parameter.setValueAtTime(startPosition, contextTime);
         automationPoints.forEach(function(p) {
             if (p.time > time) {
@@ -172,6 +171,9 @@ var ParameterLinearAutomation = function (owner, parameter, min_value, max_value
     }
 
     function stop(contextTime) {
+        if (contextTime === undefined) {
+            contextTime = 0;
+        }
         parameter.cancelScheduledValues(contextTime);
     }
 
@@ -220,7 +222,7 @@ var ParameterStepAutomation = function (owner, parameter, min_value, max_value) 
     }
 
     function start(automationPoints, time, contextTime) {
-        var startPosition = getCurrentTimeValue(automationPoints, time);
+        var startPosition = owner.update(getCurrentTimeValue(automationPoints, time));
         parameter.setValueAtTime(startPosition, contextTime);
         automationPoints.forEach(function(p) {
             if (p.time > time) {

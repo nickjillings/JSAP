@@ -23,6 +23,8 @@ function PluginFactory(audio_context, rootURL) {
     plugin_prototypes = [],
     pluginsList = [],
     currentPluginId = 0,
+    audioStartProgramTime,
+    audioStartContextTime,
     audioStarted = false;
 
     /*
@@ -635,7 +637,9 @@ function PluginFactory(audio_context, rootURL) {
         }
         pluginsList.push(instance);
         if (audioStarted) {
-            instance.node.start.call(instance.node);
+            var context_time = audio_context.currentTime;
+            var program_time = this.getCurrentProgramTime();
+            pluginAudioStart(instance.node, program_time, context_time);
         }
         return true;
     };
@@ -650,21 +654,70 @@ function PluginFactory(audio_context, rootURL) {
         }
     };
 
-    function triggerAudioStart(program_time) {
-        pluginsList.forEach(function (n) {
-            n.node.start.call(n.node, program_time);
+    this.getCurrentProgramTime = function() {
+        if (audioStarted) {
+            return audio_context.currentTime - audioStartContextTime + audioStartProgramTime;
+        } else {
+            return audioStartProgramTime
+        }
+    };
+
+    this.setCurrentProgramTime = function(time) {
+        if (audioStarted) {
+            throw("Must stop playback to set the current program time");
+        }
+        if (typeof time == "number" && time >= 0) {
+            audioStartProgramTime = time;
+            this.PluginGUI.pollAllPlugins();
+        }
+    };
+
+    function pluginAudioStart(node, program_time, context_time) {
+        node.start.call(node, program_time, context_time);
+        node.parameters.getParameterNames().forEach(function(n) {
+            var p = node.parameters.getParameterByName(n);
+            if (p.enabled) {
+                p.start(program_time, context_time);
+            }
         });
+    }
+
+    function pluginAudioStop(node) {
+        node.stop.call(node);
+        node.parameters.getParameterNames().forEach(function(n) {
+            var p = node.parameters.getParameterByName(n);
+            if (p.enabled) {
+                p.stop();
+            }
+        });
+    }
+
+    function triggerAudioStart(program_time, context_time) {
+        pluginsList.forEach(function (n) {
+            pluginAudioStart(n.node, program_time, context_time);
+        });
+
     }
 
     function triggerAudioStop() {
         pluginsList.forEach(function (n) {
-            n.node.stop.call(n.node);
+            pluginAudioStop(n.node);
         });
     }
 
-    this.audioStart = function (program_time) {
+    this.audioStart = function (program_time, context_time) {
+        if (context_time === undefined) {
+            context_time = audio_context.currentTime;
+        }
+        if (program_time === undefined) {
+            program_time = 0;
+            console.warn("Assuming start time at 0");
+        }
         if (!audioStarted) {
-            triggerAudioStart(program_time);
+            this.setCurrentProgramTime(program_time);
+            audioStartContextTime = context_time;
+            triggerAudioStart(program_time, context_time);
+            this.PluginGUI.beginListener(program_time, context_time);
             audioStarted = true;
         }
     };
@@ -672,6 +725,7 @@ function PluginFactory(audio_context, rootURL) {
         if (audioStarted) {
             triggerAudioStop();
             audioStarted = false;
+            this.PluginGUI.stopListener();
         }
     };
 
@@ -1655,6 +1709,22 @@ function PluginFactory(audio_context, rootURL) {
                 plugin.node.externalInterface.updateInterfaces();
             });
         }
+        function beginListener() {
+            listener = true;
+            animationFrame();
+        }
+        function stopListener() {
+            listener = false;
+        }
+        function animationFrame() {
+            if (!listener) {
+                return;
+            }
+            pollAllPlugins();
+            window.requestAnimationFrame(animationFrame);
+        }
+
+        var listener = false;
         var default_interface = {
             src: "jsap_default.html"
         };
@@ -1662,7 +1732,9 @@ function PluginFactory(audio_context, rootURL) {
         return Object.create({
             "setDefaultInterface": setDefaultInterface,
             "buildPluginInterface":buildPluginInterface,
-            "pollAllPlugins": pollAllPlugins
+            "pollAllPlugins": pollAllPlugins,
+            "beginListener": beginListener,
+            "stopListener": stopListener
         });
     })(this);
 
