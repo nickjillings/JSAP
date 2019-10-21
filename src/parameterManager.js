@@ -28,17 +28,26 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
         return obj;
     }
 
-    function addParameter(param) {
+    function addParameter(param, self) {
         var exists = parameterList.findIndex(function (e) {
             return e === param;
         }, param);
         if (exists === -1) {
+            param.addEventListener("parameterset", self);
             parameterList.push(param);
         }
         return param;
     }
 
     Object.defineProperties(this, {
+        "handleEvent": {
+            "value": function(e) {
+                var detail = e.detail;
+                if (e.type == "parameterset") {
+                    eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: detail}));
+                }
+            }
+        },
         'createNumberParameter': {
             "value": function (name, defaultValue, minimum, maximum) {
                 if (typeof name !== "string" || typeof defaultValue !== "number" || (minimum !== undefined && typeof minimum !== "number") || (maximum !== undefined && typeof maximum !== "number")) {
@@ -48,7 +57,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
                 var param = new NumberParameter(owner, name, defaultValue, minimum, maximum);
-                addParameter(param);
+                addParameter(param, this);
                 return param;
             }
         },
@@ -61,7 +70,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
                 var param = new StringParameter(owner, name, defaultValue, maxLength);
-                addParameter(param);
+                addParameter(param, this);
                 return param;
             }
         },
@@ -74,7 +83,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
                 var param = new ButtonParameter(owner, name);
-                addParameter(param);
+                addParameter(param, this);
                 return param;
             }
         },
@@ -87,7 +96,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
                 var param = new SwitchParameter(owner, name, defaultValue, minState, maxState);
-                addParameter(param);
+                addParameter(param, this);
                 return param;
             }
         },
@@ -103,7 +112,7 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
                 var param = new ListParameter(owner, name, defaultValue, listOfValues);
-                addParameter(param);
+                addParameter(param, this);
                 return param;
             }
         },

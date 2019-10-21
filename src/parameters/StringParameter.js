@@ -46,8 +46,7 @@ function StringParameter(owner, name, defaultValue, maxLength) {
                 }
                 if (_value !== v) {
                     _value = v;
-                    var e = new Event("parameterset");
-                    eventTarget.dispatchEvent(e);
+                    this.triggerParameterSet();
                 }
                 this.trigger();
             }

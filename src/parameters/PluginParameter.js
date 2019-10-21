@@ -1,11 +1,27 @@
 /* jshint esversion: 6 */
 function PluginParameter(owner, name, dataType) {
     var update, translate, trigger;
+    var eventTarget = new EventTarget();
     update = translate = function (v) {
         return v;
     };
     trigger = function () {};
     Object.defineProperties(this, {
+        "addEventListener": {
+            "value": function(type, listener, options) {
+                return eventTarget.addEventListener(type, listener, options);
+            }
+        },
+        "removeEventListener": {
+            "value": function(type, listener, options) {
+                return eventTarget.removeEventListener(type, listener, options);
+            }
+        },
+        "triggerParameterSet": {
+            "value": function() {
+                eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: this}));
+            }
+        },
         "name": {
             "value": name
         },

@@ -61,8 +61,7 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                 }
                 if (_value !== v) {
                     _value = v;
-                    var e = new Event("parameterset");
-                    eventTarget.dispatchEvent(e);
+                    this.triggerParameterSet();
                 }
                 this.trigger();
             }

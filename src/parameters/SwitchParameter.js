@@ -7,22 +7,13 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
     var onclick = function () {};
     var _value = defaultValue;
 
-    function addAction(v) {
-        var entry = {
-            'time': new Date(),
-            'value': v
-        };
-        this.actionList.push(entry);
-    }
-
     function setV(v) {
         if (this.boundAudioParam) {
             this.boundAudioParam.value = this.update(v);
         }
         if (_value !== v) {
             _value = v;
-            var e = new Event("parameterset");
-            eventTarget.dispatchEvent(e);
+            this.triggerParameterSet();
         }
         this.trigger();
         return v;

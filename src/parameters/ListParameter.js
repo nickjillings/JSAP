@@ -18,8 +18,7 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
         }
         if (_index !== i) {
             _index = i;
-            var e = new Event("parameterset");
-            eventTarget.dispatchEvent(e);
+            this.triggerParameterSet();
         }
         this.trigger();
         return listOfValues[_index];
