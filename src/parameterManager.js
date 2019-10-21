@@ -5,8 +5,9 @@ import {ButtonParameter} from "./parameters/ButtonParameter.js";
 import {SwitchParameter} from "./parameters/SwitchParameter.js";
 import {ListParameter} from "./parameters/ListParameter.js";
 
-var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
+var ParameterManager = function (owner, pluginExternalInterface) {
     var parameterList = [];
+    var eventTarget = new EventTarget();
 
     function findParameter(name) {
         return parameterList.find(function (e) {
@@ -40,6 +41,16 @@ var ParameterManager = function (owner, pluginExternalInterface, eventTarget) {
     }
 
     Object.defineProperties(this, {
+        "addEventListener": {
+            "value": function(type, listener, options) {
+                return eventTarget.addEventListener(type, listener, options);
+            }
+        },
+        "removeEventListener": {
+            "value": function(type, listener, options) {
+                return eventTarget.removeEventListener(type, listener, options);
+            }
+        },
         "handleEvent": {
             "value": function(e) {
                 var detail = e.detail;

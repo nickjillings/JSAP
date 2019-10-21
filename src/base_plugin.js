@@ -15,7 +15,8 @@ var BasePlugin = function(factory, owner) {
     var inputList = [],
         outputList = [],
         pOwner = owner,
-        eventTarget = new EventTarget();
+        eventTarget = new EventTarget(),
+        externalInterface = new PluginInterfaceMessageHub(this);
     if (this.context === undefined) {
         this.context = factory.context;
     }
@@ -23,8 +24,11 @@ var BasePlugin = function(factory, owner) {
         this.factory = factory;
     }
     this.featureMap = new PluginFeatureInterface(this);
-    this.externalInterface = new PluginInterfaceMessageHub(this);
-    this.parameters = new ParameterManager(this, this.externalInterface, eventTarget);
+    this.parameters = new ParameterManager(this, this.externalInterface);
+    this.parameters.addEventListener("parameterset", function(e) {
+        eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));
+        externalInterface.updateInterfaces();
+    });
 
     function deleteIO(node, list) {
         var i = list.findIndex(function (e) {
@@ -55,6 +59,9 @@ var BasePlugin = function(factory, owner) {
     this.start = this.stop = this.onloaded = this.onunloaded = this.deconstruct = function () {};
 
     Object.defineProperties(this, {
+        "externalInterface": {
+            "value": externalInterface
+        },
         "numInputs": {
             get: function () {
                 return inputList.length;
