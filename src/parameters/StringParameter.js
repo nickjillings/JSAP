@@ -4,6 +4,7 @@ import {PluginParameter} from "./PluginParameter.js";
 function StringParameter(owner, name, defaultValue, maxLength) {
     PluginParameter.call(this, owner, name, "String");
     var _value = defaultValue;
+    var audioParameter;
 
     function addAction(v) {
         var entry = {

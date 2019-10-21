@@ -6,6 +6,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
     PluginParameter.call(this, owner, name, "Button");
     var onclick = function () {};
     var _value = defaultValue;
+    var audioParameter;
 
     function setV(v) {
         if (this.boundAudioParam) {
