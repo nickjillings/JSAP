@@ -54,7 +54,7 @@ function StringParameter(owner, name, defaultValue, maxLength) {
         },
         "bindToAudioParam": {
             "value": function (ap) {
-                if (typeof ap == "object" && ap.value) {
+                if (typeof ap == "object" && ap.value != undefined) {
                     audioParameter = ap;
                 } else {
                     throw("Argument 1 is not a valid AudioParameter object");

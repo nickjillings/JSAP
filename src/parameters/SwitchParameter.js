@@ -75,7 +75,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
         },
         "bindToAudioParam": {
             "value": function (ap) {
-                if (typeof ap == "object" && ap.value) {
+                if (typeof ap == "object" && ap.value != undefined) {
                     audioParameter = ap;
                     if (ap.setValueAtTime) {
                         automation = new ParameterStepAutomation(this, audioParameter, minState, maxState);
