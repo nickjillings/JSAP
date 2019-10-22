@@ -81,6 +81,7 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
             "value": function (ap) {
                 if (typeof ap == "object" && ap.value != undefined) {
                     audioParameter = ap;
+                    audioParameter.value = this.update(_value);
                     if (ap.setValueAtTime) {
                         automation = new ParameterLinearAutomation(this, audioParameter, minimum, maximum);
                         Object.defineProperties(this, {

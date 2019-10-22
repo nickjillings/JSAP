@@ -76,6 +76,7 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
             "value": function (ap) {
                 if (typeof ap == "object" && ap.value != undefined) {
                     audioParameter = ap;
+                    audioParameter.value = this.update(_value);
                     if (ap.setValueAtTime) {
                         automation = new ParameterStepAutomation(this, audioParameter, 0, listValues.length);
                         Object.defineProperties(this, {
