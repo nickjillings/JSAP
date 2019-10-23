@@ -33,6 +33,7 @@ var BasePluginEditorChannel = function() {
     })(32);
 
     var onparameterListeners = [];
+    var onlisteners = [];
 
     window.onmessage = function(e) {
         if (e.source != hostWindow) {
@@ -54,6 +55,9 @@ var BasePluginEditorChannel = function() {
 
     window.addEventListener("parametersChanged", function(e) {
         if (e.detail.parameters) {
+            onlisteners.forEach(function(callback) {
+                callback(e.detail.parameters);
+            });
             Object.keys(e.detail.parameters).forEach(function(name) {
                 var listeners = onparameterListeners.filter(function(l) {
                     return l.name == name || l.name === undefined;
@@ -110,6 +114,20 @@ var BasePluginEditorChannel = function() {
                     });
                 }
                 return onparameterListeners.length;
+            }
+        },
+        "listenForParameters": {
+            "value": function(callback, triggerRequest) {
+                if (callback === undefined || typeof callback != "function") {
+                    throw("Callback must be a defined function");
+                }
+                onlisteners.push(callback);
+                if (triggerRequest !== false) {
+                    postMessage({
+                        message: "requestParameters"
+                    });
+                }
+                return onlisteners.length;
             }
         }
     });
