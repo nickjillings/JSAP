@@ -27,6 +27,7 @@ var BasePlugin = function(factory, owner) {
     this.parameters = new ParameterManager(this, this.externalInterface);
     this.parameters.addEventListener("parameterset", function(e) {
         eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));
+        externalInterface.updateInterfaces();
     });
 
     function deleteIO(node, list) {
