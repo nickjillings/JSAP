@@ -8,7 +8,7 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
     var onclick = function () {};
     var _index = listOfValues.indexOf(defaultValue);
 
-    function setV(v) {
+    function setV(v, updateInterfaces) {
         var i = listOfValues.indexOf(v);
         if (i === undefined || i < 0) {
             throw("Not in list range");
@@ -18,7 +18,7 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
         }
         if (_index !== i) {
             _index = i;
-            this.triggerParameterSet();
+            this.triggerParameterSet(updateInterfaces);
         }
         this.trigger();
         return listOfValues[_index];
@@ -51,7 +51,12 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
                 return listOfValues[_index];
             },
             "set": function (v) {
-                return setV.call(this, v);
+                return setV.call(this, v, true);
+            }
+        },
+        "setValue": {
+            "value": function(v, updateInterfaces) {
+                return setV.call(this, v, updateInterfaces);
             }
         },
         "increment": {

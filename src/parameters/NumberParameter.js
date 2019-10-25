@@ -8,6 +8,36 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
     var _value = defaultValue,
         _stepSize;
 
+    function setValue(v, updateInterfaces)
+    {
+        if (automation && automation.enabled) {
+            throw("Automation is enabled, cannot set the value!");
+        }
+        if (this.minimum) {
+            v = Math.max(v, this.minimum);
+        }
+        if (this.maximum) {
+            v = Math.min(v, this.maximum);
+        }
+        if (_stepSize) {
+            v = Math.round(v / _stepSize);
+            v = v * _stepSize;
+        }
+        v = this.update(v);
+        if (audioParameter) {
+            if (automation) {
+                audioParameter.setValueAtTime(v, owner.factory.context.currentTime);
+            } else {
+                audioParameter.value = v;
+            }
+        }
+        if (_value !== v) {
+            _value = v;
+            this.triggerParameterSet(updateInterfaces);
+        }
+        this.trigger();
+    }
+
     Object.defineProperties(this, {
         "type": {
             "value": "Number"
@@ -38,32 +68,12 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                 return _value;
             },
             "set": function (v) {
-                if (automation && automation.enabled) {
-                    throw("Automation is enabled, cannot set the value!");
-                }
-                if (this.minimum) {
-                    v = Math.max(v, this.minimum);
-                }
-                if (this.maximum) {
-                    v = Math.min(v, this.maximum);
-                }
-                if (_stepSize) {
-                    v = Math.round(v / _stepSize);
-                    v = v * _stepSize;
-                }
-                v = this.update(v);
-                if (audioParameter) {
-                    if (automation) {
-                        audioParameter.setValueAtTime(v, owner.factory.context.currentTime);
-                    } else {
-                        audioParameter.value = v;
-                    }
-                }
-                if (_value !== v) {
-                    _value = v;
-                    this.triggerParameterSet();
-                }
-                this.trigger();
+                return setValue.call(this, v, true);
+            }
+        },
+        "setValue": {
+            "value": function(v, updateInterfaces) {
+                return setValue.call(this, v, updateInterfaces);
             }
         },
         "stepSize": {

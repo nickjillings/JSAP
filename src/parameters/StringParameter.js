@@ -6,12 +6,20 @@ function StringParameter(owner, name, defaultValue, maxLength) {
     var _value = defaultValue;
     var audioParameter;
 
-    function addAction(v) {
-        var entry = {
-            'time': new Date(),
-            'value': v
-        };
-        this.actionList.push(entry);
+    function setValue(v, updateInterfaces) {
+        if (maxLength) {
+            if (v.length > maxLength) {
+                throw ("String longer than " + maxLength + " characters");
+            }
+        }
+        if (this.boundAudioParam) {
+            this.boundAudioParam.value = this.update(v);
+        }
+        if (_value !== v) {
+            _value = v;
+            this.triggerParameterSet(updateInterfaces);
+        }
+        this.trigger();
     }
 
     Object.defineProperties(this, {
@@ -37,19 +45,12 @@ function StringParameter(owner, name, defaultValue, maxLength) {
                 return _value;
             },
             "set": function (v) {
-                if (maxLength) {
-                    if (v.length > maxLength) {
-                        throw ("String longer than " + maxLength + " characters");
-                    }
-                }
-                if (this.boundAudioParam) {
-                    this.boundAudioParam.value = this.update(v);
-                }
-                if (_value !== v) {
-                    _value = v;
-                    this.triggerParameterSet();
-                }
-                this.trigger();
+                return setValue.call(this, v, true);
+            }
+        },
+        "setValue": {
+            "value": function(v, updateInterfaces) {
+                return setValue.call(this, v, updateInterfaces);
             }
         },
         "bindToAudioParam": {

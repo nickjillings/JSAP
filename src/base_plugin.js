@@ -24,10 +24,9 @@ var BasePlugin = function(factory, owner) {
         this.factory = factory;
     }
     this.featureMap = new PluginFeatureInterface(this);
-    this.parameters = new ParameterManager(this, this.externalInterface);
+    this.parameters = new ParameterManager(this, externalInterface);
     this.parameters.addEventListener("parameterset", function(e) {
         eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));
-        externalInterface.updateInterfaces();
     });
 
     function deleteIO(node, list) {
@@ -590,7 +589,7 @@ var PluginInterfaceMessageHub = function(owner) {
     function setParameterMessage(e) {
         var parameters = JSON.parse(e.message.parameters);
         Object.keys(parameters).forEach(function(name) {
-            owner.parameters.setParameterByName(name,parameters[name].value);
+            owner.parameters.setParameterByName(name,parameters[name].value, false);
         });
     }
 
@@ -604,7 +603,7 @@ var PluginInterfaceMessageHub = function(owner) {
         switch(e.data.message) {
             case "setParameterByName":
                 if (e.data.parameter.name) {
-                    owner.parameters.setParameterByName(e.data.parameter.name, e.data.parameter.value);
+                    owner.parameters.setParameterByName(e.data.parameter.name, e.data.parameter.value, false);
                 }
                 broadcastParameterUpdates(e.data.sender_id);
                 break;

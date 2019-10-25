@@ -8,13 +8,19 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
     var _value = defaultValue;
     var audioParameter;
 
-    function setV(v) {
+    function setValue(v, updateInterfaces) {
+        if (v < minState) {
+            throw ("Set value is less than " + minState);
+        }
+        if (v > maxState) {
+            throw ("Set value is greater than " + maxState);
+        }
         if (this.boundAudioParam) {
             this.boundAudioParam.value = this.update(v);
         }
         if (_value !== v) {
             _value = v;
-            this.triggerParameterSet();
+            this.triggerParameterSet(updateInterfaces);
         }
         this.trigger();
         return v;
@@ -46,13 +52,12 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
                 return _value;
             },
             "set": function (v) {
-                if (v < minState) {
-                    throw ("Set value is less than " + minState);
-                }
-                if (v > maxState) {
-                    throw ("Set value is greater than " + maxState);
-                }
-                return setV.call(this, v);
+                return setValue.call(this, v);
+            }
+        },
+        "setValue": {
+            "value": function(v, updateInterfaces) {
+                return setValue.call(this, v, updateInterfaces);
             }
         },
         "increment": {
@@ -61,7 +66,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
                 if (v > maxState) {
                     v = minState;
                 }
-                return setV.call(this, v);
+                return setValue.call(this, v);
             }
         },
         "decrement": {
@@ -70,7 +75,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
                 if (v < minState) {
                     v = maxState;
                 }
-                return setV.call(this, v);
+                return setValue.call(this, v);
             }
         },
         "bindToAudioParam": {

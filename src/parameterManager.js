@@ -54,8 +54,11 @@ var ParameterManager = function (owner, pluginExternalInterface) {
         "handleEvent": {
             "value": function(e) {
                 var detail = e.detail;
+                if (detail.updateInterfaces !== false) {
+                    pluginExternalInterface.updateInterfaces();
+                }
                 if (e.type == "parameterset") {
-                    eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: detail}));
+                    eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: detail.parameter}));
                 }
             }
         },
@@ -162,12 +165,12 @@ var ParameterManager = function (owner, pluginExternalInterface) {
             }
         },
         'setParameterByName': {
-            'value': function (n, v) {
+            'value': function (n, v, updateInterfaces) {
                 var parameter = findParameter(n);
                 if (!parameter) {
                     return;
                 }
-                parameter.value = v;
+                parameter.setValue(v, updateInterfaces);
             }
         },
         'deleteParameter': {
@@ -194,15 +197,15 @@ var ParameterManager = function (owner, pluginExternalInterface) {
             }
         },
         'setParametersByObject': {
-            'value': function (object) {
+            'value': function (object, updateInterfaces) {
                 var key;
                 for (key in object) {
                     if (object.hasOwnProperty(key)) {
                         if (typeof object[key] == "object") {
 
-                            this.setParameterByName(key, object[key].value);
+                            this.setParameterByName(key, object[key].value, updateInterfaces);
                         } else if (typeof object[key] == "number" || typeof object[key] == "string") {
-                            this.setParameterByName(key, object[key]);
+                            this.setParameterByName(key, object[key], updateInterfaces);
                         } else {
                             throw ("Cannot set " + key + ": Not a valid object");
                         }

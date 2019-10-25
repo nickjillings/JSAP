@@ -18,8 +18,12 @@ function PluginParameter(owner, name, dataType) {
             }
         },
         "triggerParameterSet": {
-            "value": function() {
-                eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: this}));
+            "value": function(updateInterfaces) {
+                var opts = {detail: {
+                    parameter: this,
+                    updateInterfaces: updateInterfaces
+                }};
+                eventTarget.dispatchEvent(new CustomEvent("parameterset", opts));
             }
         },
         "name": {

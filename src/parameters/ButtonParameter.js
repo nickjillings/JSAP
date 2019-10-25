@@ -5,14 +5,6 @@ function ButtonParameter(owner, name) {
     PluginParameter.call(this, owner, name, "Button");
     var onclick = function () {};
 
-    function addAction(v) {
-        var entry = {
-            'time': new Date(),
-            'value': "clicked"
-        };
-        this.actionList.push(entry);
-    }
-
     Object.defineProperties(this, {
         "type": {
             "value": "Button"
