@@ -10,6 +10,9 @@ import {BasePlugin, SynthesiserBasePlugin, PluginFactory} from "./plugin-factory
         module.exports = factory();
     } else {
         console.log("direct");
+        if (root === undefined) {
+            root = window;
+        }
         root.JSAP = factory();
     }
 })(this, function() {
