@@ -717,7 +717,6 @@ function PluginFactory(audio_context, rootURL) {
             this.setCurrentProgramTime(program_time);
             audioStartContextTime = context_time;
             triggerAudioStart(program_time, context_time);
-            this.PluginGUI.beginListener(program_time, context_time);
             audioStarted = true;
         }
     };
@@ -725,7 +724,6 @@ function PluginFactory(audio_context, rootURL) {
         if (audioStarted) {
             triggerAudioStop();
             audioStarted = false;
-            this.PluginGUI.stopListener();
         }
     };
 
@@ -1709,20 +1707,6 @@ function PluginFactory(audio_context, rootURL) {
                 plugin.node.externalInterface.updateInterfaces();
             });
         }
-        function beginListener() {
-            listener = true;
-            animationFrame();
-        }
-        function stopListener() {
-            listener = false;
-        }
-        function animationFrame() {
-            if (!listener) {
-                return;
-            }
-            pollAllPlugins();
-            window.requestAnimationFrame(animationFrame);
-        }
 
         var listener = false;
         var default_interface = {
@@ -1732,9 +1716,7 @@ function PluginFactory(audio_context, rootURL) {
         return Object.create({
             "setDefaultInterface": setDefaultInterface,
             "buildPluginInterface":buildPluginInterface,
-            "pollAllPlugins": pollAllPlugins,
-            "beginListener": beginListener,
-            "stopListener": stopListener
+            "pollAllPlugins": pollAllPlugins
         });
     })(this);
 
