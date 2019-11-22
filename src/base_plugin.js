@@ -576,13 +576,13 @@ var PluginInterfaceMessageHub = function(owner) {
     }
 
     function sendParameterUpdates(channel) {
-        channel.postMessage(buildParameterUpdatePayload());
+        channel.postMessage(buildParameterUpdatePayload(), location.origin);
     }
 
     function broadcastParameterUpdates(sender_id) {
         var msg = buildParameterUpdatePayload(sender_id);
         windowMessageList.forEach(function(w) {
-            w.postMessage(msg);
+            w.postMessage(msg, location.origin);
         });
     }
 
