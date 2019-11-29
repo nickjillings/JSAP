@@ -1,0 +1,43 @@
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel='stylesheet' type='text/css' href='style.css'>
+    <script crossorigin="anonymous" src="https://unpkg.com/@ungap/event-target"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jquery/jquery/dist/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+    <script src="require.js" charset="utf-8" data-main="main-synth.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>JSAP testbed</h1>
+                <p>Drag your plugin into the plugin drop point and an audio file into the audio drop point to test your plugin. If you have multiple plugin definitions in the page, the first found will be used.</p>
+                <div>
+                    <button type="button" class="btn btn-primary" onmousedown="fireNote(event);" onmouseup="killNote(event);">Send Random Note</button>
+                </div>
+                <div>
+                    <textarea type="text" id="js-synth-uri" style="width: 80%; margin: 0px 20%; height: 100px">
+                        {"url": "/plugins/free/SimpleOscillator/SimpleOscillator.js"}
+                    </textarea>
+                    <button type="button" class="btn btn-primary" onclick="loadPlugin(event);">Go</button>
+                </div>
+                <div>
+                    <button class="btn btn-success" id="play" onclick="playClick(event);">Play</button>
+                    <button type="button" class="btn btn-primary" onclick="spawn(event);">Spawn popout</button>
+                    <button type="button" class="btn btn-warning" onclick="reloadPlugin(event);">Reload Plugin</button>
+                </div>
+                <div class="parameter-controls" id="plugin-interface">
+                </div>
+                <div id="feedback">
+                    <canvas id="frequency-response" width="700" height="500" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

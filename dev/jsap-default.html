@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!-- AngularJS with Material Deign -->
+    <script src=  "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-aria.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-messages.min.js"></script>
+
+    <script src = "../jsapChannel.js"></script>
+
+    <!-- Plugin Dependencies -->
+    <script type="text/javascript">
+        var AngularInterface = angular.module("plugin-interface", [])
+        .directive('stringToNumber', function() {
+            return {
+                require: 'ngModel',
+                link: function(scope, element, attrs, ngModel) {
+                    ngModel.$parsers.push(function(value) {
+                        return '' + value;
+                    });
+                    ngModel.$formatters.push(function(value) {
+                        return parseFloat(value, 10);
+                    });
+                }
+            };
+        });
+
+        AngularInterface.controller("plugin", ['$scope', '$element', '$window', '$rootScope', function ($s, $e, $w, $root) {
+            function updateParameters(parameterInfo) {
+                var parameter = $s.parameters.find(function(p) {
+                    return p.name == parameterInfo.name;
+                });
+                if (parameter == undefined) {
+                    $s.parameters.push(parameterInfo);
+                } else {
+                    parameter.value = parameterInfo.value;
+                }
+                $s.$apply();
+            }
+            $s.plugin = new BasePluginEditorChannel();
+            $s.plugin.listenForParameterByName(updateParameters, undefined, true);
+            $s.parameters = [];
+        }]);
+
+        AngularInterface.controller("parameterController", ["$scope", "$element", function($s, $e) {
+            $e[0].addEventListener("input", function() {
+                var v = $e[0].querySelector("input").value;
+                $s.plugin.setParameterByName($s.parameter.name, v);
+            })
+        }]);
+
+    </script>
+</head>
+<body ng-app="plugin-interface" ng-controller="plugin">
+    <div class="plugin-root">
+        <div class="plugin-gui-default" ng-repeat="parameter in parameters" ng-controller="parameterController">
+            <p>{{parameter.name}}</p>
+            <input type="range" min="{{parameter.minimum}}" max="{{parameter.maximum}}" step={{parameter.stepSize}} ng-model="parameter.value">
+        </div>
+    </div>
+</body>
+</html>

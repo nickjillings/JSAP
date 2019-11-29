@@ -1,0 +1,27 @@
+div.parameter-controls {
+    text-align: center;
+}
+
+table.parameters {
+    margin:auto;
+    width: 420px;
+    height: 120px;
+}
+
+table.parameters td{
+    margin: 5px;
+    text-align: center;
+}
+
+div.drop-point {
+    border: 2px dashed black;
+    width: 90%;
+    height: 50px;
+    text-align: center;
+}
+
+canvas#frequency-response {
+    border: 2px solid black;
+    padding: 10px;
+    margin: 25px;
+}
