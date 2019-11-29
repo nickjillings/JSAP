@@ -547,10 +547,15 @@ PluginUserInterface.prototype.clearGUI = function () {
 };
 
 var PluginInterfaceMessageHub = function(owner) {
-    function buildPluginParameterJSON(plugin) {
+    function buildPluginParameterJSON(plugin, sources) {
         var names = owner.parameters.getParameterNames();
         var O = {};
-        names.forEach(function(name) {
+        if (sources === undefined || sources.length == 0) {
+            sources = names;
+        }
+        names.filter(function(name) {
+            return this.includes(name);
+        }, sources).forEach(function(name) {
             var param = owner.parameters.getParameterByName(name);
             O[name] = {
                 value: param.value,
@@ -564,10 +569,10 @@ var PluginInterfaceMessageHub = function(owner) {
         return O;
     }
 
-    function buildParameterUpdatePayload(sender_id) {
+    function buildParameterUpdatePayload(sender_id, sources) {
         var msg = {
             message: "updateParameters",
-            parameters: buildPluginParameterJSON(owner)
+            parameters: buildPluginParameterJSON(owner, sources)
         };
         if (sender_id) {
             msg.sender_id = sender_id;
@@ -579,18 +584,24 @@ var PluginInterfaceMessageHub = function(owner) {
         channel.postMessage(buildParameterUpdatePayload(), location.origin);
     }
 
-    function broadcastParameterUpdates(sender_id) {
-        var msg = buildParameterUpdatePayload(sender_id);
+    function broadcastParameterUpdates(sender_id, sources) {
+        var msg = buildParameterUpdatePayload(sender_id, sources);
         windowMessageList.forEach(function(w) {
             w.postMessage(msg, location.origin);
         });
     }
 
     function setParameterMessage(e) {
+        var updateObjects = [];
         var parameters = JSON.parse(e.message.parameters);
         Object.keys(parameters).forEach(function(name) {
-            owner.parameters.setParameterByName(name,parameters[name].value, false);
+            var parameterObject = owner.parameters.getParameterByName(name);
+            if (parameterObject) {
+                parameterObject.setValue(parameters[name].value, false);
+                updateObjects.push(name);
+            }
         });
+        return updateObjects;
     }
 
     var windowMessageList = [];
@@ -602,15 +613,19 @@ var PluginInterfaceMessageHub = function(owner) {
         }
         switch(e.data.message) {
             case "setParameterByName":
+            var parameterObject;
                 if (e.data.parameter.name) {
-                    owner.parameters.setParameterByName(e.data.parameter.name, e.data.parameter.value, false);
+                    parameterObject = owner.parameters.getParameterByName(e.data.parameter.name);
+                    if (parameterObject) {
+                        parameterObject.setValue(e.data.parameter.value, false);
+                        broadcastParameterUpdates(e.data.sender_id, [parameterObject.name]);
+                    }
                 }
-                broadcastParameterUpdates(e.data.sender_id);
                 break;
             case "setParametersByObject":
                 if (e.data.parameter) {
-                    setParameterMessage(e);
-                    broadcastParameterUpdates(e.data.sender_id);
+                    var updateObjects = setParameterMessage(e);
+                    broadcastParameterUpdates(e.data.sender_id, updateObjects);
                 }
                 break;
             case "requestParameters":
