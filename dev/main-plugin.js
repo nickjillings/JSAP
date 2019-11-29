@@ -179,7 +179,7 @@ define([
             var gui = pluginInstance.node.GUI;
             if (gui == undefined) {
                 gui = {
-                    src: "./jsap-default.html",
+                    src: "jsap-default.html",
                     width: 500,
                     height: 500
                 };
