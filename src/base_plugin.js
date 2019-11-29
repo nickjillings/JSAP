@@ -550,7 +550,7 @@ var PluginInterfaceMessageHub = function(owner) {
     function buildPluginParameterJSON(plugin, sources) {
         var names = owner.parameters.getParameterNames();
         var O = {};
-        if (sources === undefined || sources.length == 0) {
+        if (sources === undefined || sources.length == undefined) {
             sources = names;
         }
         names.filter(function(name) {
@@ -638,8 +638,25 @@ var PluginInterfaceMessageHub = function(owner) {
 
     Object.defineProperties(this, {
         "updateInterfaces": {
-            "value": function() {
-                broadcastParameterUpdates();
+            "value": function(automationOnly) {
+                if (automationOnly === undefined) {
+                    automationOnly = false;
+                }
+                var sources;
+                if (automationOnly) {
+                    var parameterNames = owner.parameters.getParameterNames();
+                    sources = parameterNames.filter(function(name) {
+                        var param = owner.parameters.getParameterByName(name);
+                        return param.automation;
+                    });
+                    if (sources.length > 0)
+                    {
+                        broadcastParameterUpdates(sources);
+                    }
+                } else {
+                    broadcastParameterUpdates();
+                }
+
             }
         },
         "closeWindows": {

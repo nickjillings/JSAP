@@ -1704,7 +1704,7 @@ function PluginFactory(audio_context, rootURL) {
         }
         function pollAllPlugins() {
             factory.getAllPlugins().forEach(function(plugin) {
-                plugin.node.externalInterface.updateInterfaces();
+                plugin.node.externalInterface.updateInterfaces(true);
             });
         }
 
