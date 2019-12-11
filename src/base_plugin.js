@@ -15,6 +15,7 @@ var BasePlugin = function(factory, owner) {
     var inputList = [],
         outputList = [],
         pOwner = owner,
+        delaySamples = 0,
         eventTarget = new EventTarget(),
         externalInterface = new PluginInterfaceMessageHub(this);
     if (this.context === undefined) {
@@ -53,6 +54,26 @@ var BasePlugin = function(factory, owner) {
     };
     this.deleteOutput = function (node) {
         return deleteIO(node, outputList);
+    };
+
+    this.setProcessingDelayAsSeconds = function(seconds) {
+        var fs = factory.context.sampleRate;
+        if (typeof seconds == "number" && isFinite(seconds) && seconds >= 0) {
+            return this.setProcessingDelayAsSamples(seconds*fs)/fs;
+        }
+        throw("setProcessingDelayAsSeconds Invalid argument");
+    };
+
+    this.setProcessingDelayAsSamples = function(samples) {
+        if (typeof samples == "number" && isFinite(samples) && samples >= 0) {
+            delaySamples = samples;
+            var e = new Event("alterdelay");
+            eventTarget.dispatchEvent(e);
+            return delaySamples;
+        } else {
+            throw("setProcessingDelayAsSamples Invalid argument");
+        }
+
     };
 
     this.start = this.stop = this.onloaded = this.onunloaded = this.deconstruct = function () {};
@@ -111,6 +132,18 @@ var BasePlugin = function(factory, owner) {
             set: function () {
                 throw ("Illegal attempt to modify BasePlugin");
             }
+        },
+        "processingDelayAsSamples": {
+            "get": function() {
+                return delaySamples;
+            },
+            "set": this.setProcessingDelayAsSamples
+        },
+        "processingDelayAsSeconds": {
+            "get": function() {
+                return delaySamples/factory.context.sampleRate;
+            },
+            "set": this.setProcessingDelayAsSeconds
         },
         "connect": {
             "value": function (dest) {

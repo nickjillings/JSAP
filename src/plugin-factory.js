@@ -1268,6 +1268,7 @@ function PluginFactory(audio_context, rootURL) {
             pluginChainStop = chainStop,
             factoryName = "",
             state = 1,
+            delaySamples = 0,
             chainStartFeature = new SubFactoryFeatureSender(this, PluginFactory.FeatureMap),
             semanticStores = [],
             self = this;
@@ -1378,6 +1379,7 @@ function PluginFactory(audio_context, rootURL) {
                 isolate();
                 rebuild();
                 joinChain();
+                node.node.addEventListener("alterdelay", self);
                 node.node.onloaded.call(node.node);
                 return node;
             });
@@ -1390,6 +1392,7 @@ function PluginFactory(audio_context, rootURL) {
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
                 cutChain();
+                plugin_object.node.removeEventListener("alterdelay", self);
                 plugin_object.node.stop.call(plugin_object.node);
                 plugin_object.node.onunloaded.call(plugin_object.node);
                 plugin_object.node.deconstruct.call(plugin_object.node);
@@ -1505,6 +1508,22 @@ function PluginFactory(audio_context, rootURL) {
             'chainStop': {
                 'value': chainStop
             },
+            "processingDelayAsSamples": {
+                "get": function() {
+                    return delaySamples;
+                },
+                "set": function() {
+                    throw("processingDelayAsSamples is read-only");
+                }
+            },
+            "processingDelayAsSeconds": {
+                "get": function() {
+                    return delaySamples/PluginFactory.context.sampleRate;
+                },
+                "set": function() {
+                    throw("processingDelayAsSeconds is read-only");
+                }
+            },
             'name': {
                 'get': function () {
                     return factoryName;
@@ -1519,6 +1538,15 @@ function PluginFactory(audio_context, rootURL) {
             'recursiveProcessing': {
                 'get': function () {
                     return recursiveProcessing;
+                }
+            },
+            'handleEvent': {
+                "value": function(e) {
+                    var sum = 0;
+                    plugin_list.forEach(function(plugin) {
+                        sum += plugin.node.processingDelayAsSamples;
+                    });
+                    delaySamples = sum;
                 }
             }
         });
