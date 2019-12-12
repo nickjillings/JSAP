@@ -1271,6 +1271,7 @@ function PluginFactory(audio_context, rootURL) {
             delaySamples = 0,
             chainStartFeature = new SubFactoryFeatureSender(this, PluginFactory.FeatureMap),
             semanticStores = [],
+            eventTarget = new EventTarget(),
             self = this;
         this.parent = PluginFactory;
         pluginChainStart.disconnect();
@@ -1501,6 +1502,18 @@ function PluginFactory(audio_context, rootURL) {
             }
         }
 
+        function updateDelayCompensation(dispatchEvent) {
+            var sum = 0;
+            plugin_list.forEach(function(plugin) {
+                sum += plugin.node.processingDelayAsSamples;
+            });
+            delaySamples = sum;
+            if (dispatchEvent) {
+                var ev = new Event("alterdelay");
+                eventTarget.dispatchEvent(ev);
+            }
+        }
+
         Object.defineProperties(this, {
             'chainStart': {
                 'value': chainStart
@@ -1542,11 +1555,19 @@ function PluginFactory(audio_context, rootURL) {
             },
             'handleEvent': {
                 "value": function(e) {
-                    var sum = 0;
-                    plugin_list.forEach(function(plugin) {
-                        sum += plugin.node.processingDelayAsSamples;
-                    });
-                    delaySamples = sum;
+                    if (e.type == "alterdelay") {
+                        updateDelayCompensation(true);
+                    }
+                }
+            },
+            "addEventListener": {
+                "value": function(key, value) {
+                    return eventTarget.addEventListener(key, value);
+                }
+            },
+            "removeEventListener": {
+                "value": function(key, value) {
+                    return eventTarget.addEventListener(key, value);
                 }
             }
         });
