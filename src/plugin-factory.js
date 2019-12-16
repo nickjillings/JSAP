@@ -1795,6 +1795,11 @@ function PluginFactory(audio_context, rootURL) {
                 return copyFactory(context);
             }
         },
+        "subFactories": {
+            "get": function() {
+                return subFactories;
+            }
+        },
         "PluginGUI": {
             "value": PluginUserInterfaceMessageHub
         }
