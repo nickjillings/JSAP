@@ -131,6 +131,7 @@ define([
 
         function animationFrame() {
             draw();
+            pluginFactory.PluginGUI.pollAllPlugins();
             window.requestAnimationFrame(animationFrame);
         }
         window.requestAnimationFrame(animationFrame);

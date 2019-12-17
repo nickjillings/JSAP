@@ -108,6 +108,7 @@ define([
     };
 
     function draw() {
+        pluginFactory.PluginGUI.pollAllPlugins();
         // Obtain the canvas
         var canvas = document.getElementById("frequency-response");
         // Clear the canvas

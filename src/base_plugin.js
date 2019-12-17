@@ -175,8 +175,8 @@ var BasePlugin = function(factory, owner) {
             }
         },
         "getParameterByName": {
-            "value": function () {
-                return this.parameters.getParameterByName();
+            "value": function (name) {
+                return this.parameters.getParameterByName(name);
             }
         },
         "getParameterObject": {
@@ -598,6 +598,9 @@ var PluginInterfaceMessageHub = function(owner) {
                 type: param.constructor.name,
                 name: name
             };
+            if (param.automation) {
+                O[name].automated = param.automation.enabled;
+            }
         });
         return O;
     }
@@ -680,11 +683,11 @@ var PluginInterfaceMessageHub = function(owner) {
                     var parameterNames = owner.parameters.getParameterNames();
                     sources = parameterNames.filter(function(name) {
                         var param = owner.parameters.getParameterByName(name);
-                        return param.automation;
+                        return (param.automation && param.automation.enabled === true);
                     });
                     if (sources.length > 0)
                     {
-                        broadcastParameterUpdates(sources);
+                        broadcastParameterUpdates(undefined, sources);
                     }
                 } else {
                     broadcastParameterUpdates();
