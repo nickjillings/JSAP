@@ -616,8 +616,8 @@ var PluginInterfaceMessageHub = function(owner) {
         return msg;
     }
 
-    function sendParameterUpdates(channel) {
-        channel.postMessage(buildParameterUpdatePayload(), location.origin);
+    function sendParameterUpdates(channel, sources) {
+        channel.postMessage(buildParameterUpdatePayload(undefined, sources), location.origin);
     }
 
     function broadcastParameterUpdates(sender_id, sources) {
@@ -665,7 +665,11 @@ var PluginInterfaceMessageHub = function(owner) {
                 }
                 break;
             case "requestParameters":
-                sendParameterUpdates(e.source);
+                if (typeof e.data.name == "string") {
+                    sendParameterUpdates(e.source, e.data.name);
+                } else {
+                    sendParameterUpdates(e.source);
+                }
                 break;
             default:
                 throw("Unknown message type \""+e.data.message+"\"");

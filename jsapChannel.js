@@ -99,6 +99,19 @@ var BasePluginEditorChannel = function() {
                 });
             }
         },
+        "requestParameterByName": {
+            "value": function (name) {
+                if (typeof name == "string") {
+                    postMessage({
+                        message: "requestParameters",
+                        name: name
+                    });
+                } else {
+                    throw("Name not set");
+                }
+
+            }
+        },
         "listenForParameterByName": {
             "value": function(callback, name, triggerRequest) {
                 if (callback === undefined || typeof callback != "function") {
@@ -110,7 +123,8 @@ var BasePluginEditorChannel = function() {
                 });
                 if (triggerRequest !== false) {
                     postMessage({
-                        message: "requestParameters"
+                        message: "requestParameters",
+                        name: name
                     });
                 }
                 return onparameterListeners.length;
