@@ -1382,6 +1382,7 @@ function PluginFactory(audio_context, rootURL) {
                 joinChain();
                 node.node.addEventListener("alterdelay", self);
                 node.node.onloaded.call(node.node);
+                updateDelayCompensation(true);
                 return node;
             });
         };
@@ -1401,6 +1402,7 @@ function PluginFactory(audio_context, rootURL) {
                 isolate();
                 rebuild();
                 joinChain();
+                updateDelayCompensation(true);
             }
         };
 
@@ -1484,6 +1486,7 @@ function PluginFactory(audio_context, rootURL) {
                 plugin_list.splice(copy_index, 0, node);
                 rebuild();
                 joinChain();
+                updateDelayCompensation(true);
                 node.node.onloaded.call(node.node);
                 return node;
             });
