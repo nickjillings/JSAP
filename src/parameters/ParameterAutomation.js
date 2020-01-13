@@ -28,6 +28,9 @@ var TimePoint = function(owner, time, value) {
             "value": function() {
                 return String(value);
             }
+        },
+        "owner": {
+            "value": owner
         }
     });
 };
