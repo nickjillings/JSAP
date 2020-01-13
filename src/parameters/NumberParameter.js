@@ -95,10 +95,13 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                     if (ap.setValueAtTime) {
                         automation = new ParameterLinearAutomation(this, audioParameter, minimum, maximum);
                         Object.defineProperties(this, {
-                            "getCurrentTimeValue": {
+                            "getValueAtTimePoint": {
                                 "value": function(time) {
-                                    return automation.getCurrentTimeValue(time);
+                                    return this.automationPoints.getValueAtTimePoint(time);
                                 }
+                            },
+                            "automationPoints": {
+                                "value": automation
                             },
                             "start": {
                                 "value": function(time, contextTime) {
@@ -133,9 +136,9 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                 return audioParameter;
             }
         },
-        "automation": {
+        "automatable": {
             "get": function () {
-                return automation;
+                return typeof automation !== "object";
             }
         }
     });

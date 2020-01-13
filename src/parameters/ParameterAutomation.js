@@ -23,6 +23,11 @@ var TimePoint = function(owner, time, value) {
                 value = Math.min(Math.max(v, min_value), max_value);
                 return value;
             }
+        },
+        "toString": {
+            "value": function() {
+                return String(value);
+            }
         }
     });
 };
@@ -74,7 +79,7 @@ var TimePointList = function(min_value, max_value) {
                 var point = new TimePoint(this, time, value);
                 automationPoints.push(point);
                 automationPoints = sortPoints(automationPoints);
-                return automationPoints.length;
+                return point;
             }
         },
         "getPoints": {
@@ -90,7 +95,7 @@ var TimePointList = function(min_value, max_value) {
                 });
             }
         },
-        "removePoint": {
+        "deletePoint": {
             "value": function(time) {
                 var index = automationPoints.findIndex(function(point) {
                     return point.time == time;
@@ -99,6 +104,33 @@ var TimePointList = function(min_value, max_value) {
                     automationPoints.splice(index, 1, 0);
                 }
                 return automationPoints.length;
+            }
+        },
+        "getStaticValueAsString": {
+            "writable": true,
+            "value": function (value) {
+                return String(value);
+            }
+        },
+        "getValueAtTimePoint": {
+            "value": function (time) {
+                return getPointAtTime(automationPoints, time);
+            }
+        },
+        "length": {
+            "value": function() {
+                return automationPoints.length;
+            }
+        },
+        "updatePoint": {
+            "value": function(time, new_value) {
+                var point = automationPoints.find(function(point) {
+                    return point.time == time;
+                });
+                if (point) {
+                    point.value = new_value;
+                }
+                return point;
             }
         }
     });
@@ -119,8 +151,6 @@ var ParameterAutomation = function(parameter, min_value, max_value) {
         }
     });
 };
-ParameterAutomation.prototype = Object.create(TimePointList.prototype);
-ParameterAutomation.prototype.constructor = ParameterAutomation;
 
 var ParameterLinearAutomation = function (owner, parameter, min_value, max_value) {
     ParameterAutomation.call(this, parameter, min_value, max_value);
