@@ -128,7 +128,7 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
         },
         "automatable": {
             "get": function () {
-                return typeof automation !== "object";
+                return typeof automation == "object";
             }
         }
     });

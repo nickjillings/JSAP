@@ -138,7 +138,7 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
         },
         "automatable": {
             "get": function () {
-                return typeof automation !== "object";
+                return typeof automation == "object";
             }
         }
     });

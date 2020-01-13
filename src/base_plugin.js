@@ -687,7 +687,7 @@ var PluginInterfaceMessageHub = function(owner) {
                     var parameterNames = owner.parameters.getParameterNames();
                     sources = parameterNames.filter(function(name) {
                         var param = owner.parameters.getParameterByName(name);
-                        return (param.automation && param.automation.enabled === true);
+                        return (param.automatable && param.enabled === true);
                     });
                     if (sources.length > 0)
                     {

@@ -129,7 +129,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
         },
         "automatable": {
             "get": function () {
-                return typeof automation !== "object";
+                return typeof automation == "object";
             }
         }
     });
