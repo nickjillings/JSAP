@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 import {PluginParameter} from "./PluginParameter.js";
 
-function StringParameter(owner, name, defaultValue, maxLength) {
+function StringParameter(owner, name, defaultValue, maxLength, toStringFunc) {
     PluginParameter.call(this, owner, name, "String");
     var _value = defaultValue;
     var audioParameter;
@@ -67,6 +67,18 @@ function StringParameter(owner, name, defaultValue, maxLength) {
             "configurable": true,
             "get": function () {
                 return audioParameter;
+            }
+        },
+        "toString": {
+            "value": function(v) {
+                if (v == undefined) {
+                    v = this.value;
+                }
+                if (typeof toStringFunc == "function") {
+                    return toStringFunc.call(this, v);
+                } else {
+                    return String(v);
+                }
             }
         }
     });

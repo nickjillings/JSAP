@@ -2,7 +2,7 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterStepAutomation} from "./ParameterAutomation.js";
 
-function ListParameter(owner, name, defaultValue, listOfValues) {
+function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc) {
     PluginParameter.call(this, owner, name, "Button");
     var audioParameter, automation;
     var onclick = function () {};
@@ -83,7 +83,7 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
                     audioParameter = ap;
                     audioParameter.value = this.update(_value);
                     if (ap.setValueAtTime) {
-                        automation = new ParameterStepAutomation(this, audioParameter, 0, listValues.length);
+                        automation = new ParameterStepAutomation(this, audioParameter, 0, listValues.length, toStringFunc);
                         Object.defineProperties(this, {
                             "getValueAtTimePoint": {
                                 "value": function(time) {
@@ -129,6 +129,18 @@ function ListParameter(owner, name, defaultValue, listOfValues) {
         "automatable": {
             "get": function () {
                 return typeof automation == "object";
+            }
+        },
+        "toString": {
+            "value": function(v) {
+                if (v == undefined) {
+                    v = this.value;
+                }
+                if (typeof toStringFunc == "function") {
+                    return toStringFunc.call(this, v);
+                } else {
+                    return String(v);
+                }
             }
         }
     });

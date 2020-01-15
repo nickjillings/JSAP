@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-var TimePoint = function(owner, time, value) {
+var TimePoint = function(owner, time, value, toStringFunc) {
     if (typeof time != "number" || !isFinite(time) || time < 0) {
         throw("Invalid Constructor: Time must be a positive number");
     }
@@ -26,6 +26,9 @@ var TimePoint = function(owner, time, value) {
         },
         "toString": {
             "value": function() {
+                if (typeof toStringFunc == "function") {
+                    return toStringFunc.call(this, value);
+                }
                 return String(value);
             }
         },
@@ -35,7 +38,7 @@ var TimePoint = function(owner, time, value) {
     });
 };
 
-var TimePointList = function(min_value, max_value) {
+var TimePointList = function(min_value, max_value, toStringFunc) {
     function getPointAtTime(automationPoints, time) {
         return automationPoints.find(function(p) {
             return p.time == time;
@@ -79,7 +82,7 @@ var TimePointList = function(min_value, max_value) {
                     throw("Already a value entry at time "+time);
                 }
                 value = Math.min(Math.max(value, min_value), max_value);
-                var point = new TimePoint(this, time, value);
+                var point = new TimePoint(this, time, value, toStringFunc);
                 automationPoints.push(point);
                 automationPoints = sortPoints(automationPoints);
                 return point;
@@ -139,8 +142,8 @@ var TimePointList = function(min_value, max_value) {
     });
 };
 
-var ParameterAutomation = function(parameter, min_value, max_value) {
-    TimePointList.call(this, min_value, max_value);
+var ParameterAutomation = function(parameter, min_value, max_value, toStringFunc) {
+    TimePointList.call(this, min_value, max_value, toStringFunc);
     var enabled = false;
     Object.defineProperties(this, {
         "enabled": {
@@ -155,8 +158,8 @@ var ParameterAutomation = function(parameter, min_value, max_value) {
     });
 };
 
-var ParameterLinearAutomation = function (owner, parameter, min_value, max_value) {
-    ParameterAutomation.call(this, parameter, min_value, max_value);
+var ParameterLinearAutomation = function (owner, parameter, min_value, max_value, toStringFunc) {
+    ParameterAutomation.call(this, parameter, min_value, max_value, toStringFunc);
     function linearInterpolation(time, pointA, pointB) {
         var t1 = pointA.time;
         var t2 = pointB.time;
@@ -234,8 +237,8 @@ var ParameterLinearAutomation = function (owner, parameter, min_value, max_value
 ParameterLinearAutomation.prototype = Object.create(ParameterAutomation.prototype);
 ParameterLinearAutomation.prototype.constructor = ParameterLinearAutomation;
 
-var ParameterStepAutomation = function (owner, parameter, min_value, max_value) {
-    ParameterAutomation.call(this, parameter, min_value, max_value);
+var ParameterStepAutomation = function (owner, parameter, min_value, max_value, toStringFunc) {
+    ParameterAutomation.call(this, parameter, min_value, max_value, toStringFunc);
     function getCurrentTimeValue(automationPoints, time) {
         if (automationPoints.length == 0) {
             throw("No automation points available");

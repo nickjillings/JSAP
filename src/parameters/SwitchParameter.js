@@ -2,7 +2,7 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterStepAutomation} from "./ParameterAutomation.js";
 
-function SwitchParameter(owner, name, defaultValue, minState, maxState) {
+function SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc) {
     PluginParameter.call(this, owner, name, "Button");
     var onclick = function () {};
     var _value = defaultValue;
@@ -84,7 +84,7 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
                     audioParameter = ap;
                     audioParameter.value = this.update(_value);
                     if (ap.setValueAtTime) {
-                        automation = new ParameterStepAutomation(this, audioParameter, minState, maxState);
+                        automation = new ParameterStepAutomation(this, audioParameter, minState, maxState, toStringFunc);
                         Object.defineProperties(this, {
                             "getValueAtTimePoint": {
                                 "value": function(time) {
@@ -130,6 +130,18 @@ function SwitchParameter(owner, name, defaultValue, minState, maxState) {
         "automatable": {
             "get": function () {
                 return typeof automation == "object";
+            }
+        },
+        "toString": {
+            "value": function(v) {
+                if (v == undefined) {
+                    v = this.value;
+                }
+                if (typeof toStringFunc == "function") {
+                    return toStringFunc.call(this, v);
+                } else {
+                    return String(v);
+                }
             }
         }
     });

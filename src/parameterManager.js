@@ -63,27 +63,33 @@ var ParameterManager = function (owner, pluginExternalInterface) {
             }
         },
         'createNumberParameter': {
-            "value": function (name, defaultValue, minimum, maximum) {
+            "value": function (name, defaultValue, minimum, maximum, toStringFunc) {
                 if (typeof name !== "string" || typeof defaultValue !== "number" || (minimum !== undefined && typeof minimum !== "number") || (maximum !== undefined && typeof maximum !== "number")) {
                     throw ("Invlid constructor");
+                }
+                if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
+                    throw ("toStringFunc must be a function or undefined");
                 }
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
-                var param = new NumberParameter(owner, name, defaultValue, minimum, maximum);
+                var param = new NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc);
                 addParameter(param, this);
                 return param;
             }
         },
         'createStringParameter': {
-            "value": function (name, defaultValue, maxLength) {
+            "value": function (name, defaultValue, maxLength, toStringFunc) {
                 if (typeof name !== "string" || typeof defaultValue !== "string" || (maxLength !== undefined && typeof maxLength !== "number")) {
                     throw ("Invlid constructor");
+                }
+                if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
+                    throw ("toStringFunc must be a function or undefined");
                 }
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
-                var param = new StringParameter(owner, name, defaultValue, maxLength);
+                var param = new StringParameter(owner, name, defaultValue, maxLength, toStringFunc);
                 addParameter(param, this);
                 return param;
             }
@@ -102,30 +108,36 @@ var ParameterManager = function (owner, pluginExternalInterface) {
             }
         },
         'createSwitchParameter': {
-            "value": function (name, defaultValue, minState, maxState) {
+            "value": function (name, defaultValue, minState, maxState, toStringFunc) {
                 if (typeof name !== "string" || typeof defaultValue !== "number" || typeof minState !== "number" || typeof maxState !== "number") {
                     throw ("Invlid constructor");
+                }
+                if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
+                    throw ("toStringFunc must be a function or undefined");
                 }
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
-                var param = new SwitchParameter(owner, name, defaultValue, minState, maxState);
+                var param = new SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc);
                 addParameter(param, this);
                 return param;
             }
         },
         'createListParameter': {
-            "value": function (name, defaultValue, listOfValues) {
+            "value": function (name, defaultValue, listOfValues, toStringFunc) {
                 if (typeof name !== "string" || typeof defaultValue === "undefined" || !Array.isArray(listOfValues)) {
                     throw ("Invlid constructor");
                 }
+                if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
+                    throw ("toStringFunc must be a function or undefined");
+                }
                 if (listOfValues.includes(defaultValue) === false) {
-                    hrow ("Invlid constructor - default value missing");
+                    throw ("Invlid constructor - default value missing");
                 }
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
-                var param = new ListParameter(owner, name, defaultValue, listOfValues);
+                var param = new ListParameter(owner, name, defaultValue, listOfValues, toStringFunc);
                 addParameter(param, this);
                 return param;
             }

@@ -2,7 +2,7 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterLinearAutomation} from "./ParameterAutomation.js";
 
-function NumberParameter(owner, name, defaultValue, minimum, maximum) {
+function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc) {
     PluginParameter.call(this, owner, name, "Number");
     var audioParameter, automation;
     var _value = defaultValue,
@@ -93,7 +93,7 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
                     audioParameter = ap;
                     audioParameter.value = this.update(_value);
                     if (ap.setValueAtTime) {
-                        automation = new ParameterLinearAutomation(this, audioParameter, minimum, maximum);
+                        automation = new ParameterLinearAutomation(this, audioParameter, minimum, maximum, toStringFunc);
                         Object.defineProperties(this, {
                             "getValueAtTimePoint": {
                                 "value": function(time) {
@@ -139,6 +139,18 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum) {
         "automatable": {
             "get": function () {
                 return typeof automation == "object";
+            }
+        },
+        "toString": {
+            "value": function(v) {
+                if (v == undefined) {
+                    v = this.value;
+                }
+                if (typeof toStringFunc == "function") {
+                    return toStringFunc.call(this, v);
+                } else {
+                    return String(v);
+                }
             }
         }
     });
