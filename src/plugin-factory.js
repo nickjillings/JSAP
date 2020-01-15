@@ -173,22 +173,30 @@ function PluginFactory(audio_context, rootURL) {
     var PluginInstance = function (id, plugin_node) {
         this.next_node = undefined;
         var _bypassed = false;
+        var ev = new EventTarget();
         var _in = audio_context.createGain(),
             _out = audio_context.createGain();
 
         _in.connect(plugin_node.getInputs()[0]);
         plugin_node.getOutputs()[0].connect(_out);
+        plugin_node.addEventListener(this);
 
         function bypassEnable() {
             _in.disconnect();
             _in.connect(_out);
             _bypassed = true;
+            if (plugin_node.processingDelayAsSamples != 0) {
+                ev.dispatchEvent(new Event("alterdelay"));
+            }
         }
 
         function bypassDisable() {
             _in.disconnect();
             _in.connect(plugin_node.getInputs()[0]);
             _bypassed = false;
+            if (plugin_node.processingDelayAsSamples != 0) {
+                ev.dispatchEvent(new Event("alterdelay"));
+            }
         }
 
         this.bypass = function (state) {
@@ -236,6 +244,21 @@ function PluginFactory(audio_context, rootURL) {
         };
 
         Object.defineProperties(this, {
+            "handleEvent": {
+                "value": function(e) {
+                    ev.dispatchEvent(new Event(e.type));
+                }
+            },
+            "addEventListener": {
+                "value": function(a,b,c) {
+                    return ev.addEventListener(a,b,c);
+                }
+            },
+            "removeEventListener": {
+                "value": function(a,b,c) {
+                    return ev.removeEventListener(a,b,c);
+                }
+            },
             'id': {
                 'value': id
             },
@@ -1380,9 +1403,9 @@ function PluginFactory(audio_context, rootURL) {
                 isolate();
                 rebuild();
                 joinChain();
-                node.node.addEventListener("alterdelay", self);
+                node.addEventListener("alterdelay", self);
                 node.node.onloaded.call(node.node);
-                updateDelayCompensation(true);
+                updateDelayCompensation();
                 return node;
             });
         };
@@ -1394,7 +1417,7 @@ function PluginFactory(audio_context, rootURL) {
             var index = this.getPluginIndex(plugin_object);
             if (index >= 0) {
                 cutChain();
-                plugin_object.node.removeEventListener("alterdelay", self);
+                plugin_object.removeEventListener("alterdelay", self);
                 plugin_object.node.stop.call(plugin_object.node);
                 plugin_object.node.onunloaded.call(plugin_object.node);
                 plugin_object.node.deconstruct.call(plugin_object.node);
@@ -1402,7 +1425,7 @@ function PluginFactory(audio_context, rootURL) {
                 isolate();
                 rebuild();
                 joinChain();
-                updateDelayCompensation(true);
+                updateDelayCompensation();
             }
         };
 
@@ -1486,7 +1509,7 @@ function PluginFactory(audio_context, rootURL) {
                 plugin_list.splice(copy_index, 0, node);
                 rebuild();
                 joinChain();
-                updateDelayCompensation(true);
+                updateDelayCompensation();
                 node.node.onloaded.call(node.node);
                 return node;
             });
@@ -1505,16 +1528,23 @@ function PluginFactory(audio_context, rootURL) {
             }
         }
 
-        function updateDelayCompensation(dispatchEvent) {
+        function getDelayCompensation() {
             var sum = 0;
-            plugin_list.forEach(function(plugin) {
+            plugin_list.filter(function(plugin) {
+                return !plugin.isBypassed();
+            }).forEach(function(plugin) {
                 sum += plugin.node.processingDelayAsSamples;
             });
-            delaySamples = sum;
-            if (dispatchEvent) {
-                var ev = new Event("alterdelay");
-                eventTarget.dispatchEvent(ev);
+            return sum;
+        }
+
+        function updateDelayCompensation() {
+            var sum = getDelayCompensation();
+            if (delaySamples != sum) {
+                delaySamples = sum;
+                eventTarget.dispatchEvent(new Event("alterdelay"));
             }
+            return delaySamples;
         }
 
         Object.defineProperties(this, {
@@ -1524,9 +1554,14 @@ function PluginFactory(audio_context, rootURL) {
             'chainStop': {
                 'value': chainStop
             },
+            "updateDelayCompensation": {
+                "value": function () {
+                    return updateDelayCompensation();
+                }
+            },
             "processingDelayAsSamples": {
                 "get": function() {
-                    return delaySamples;
+                    return updateDelayCompensation();
                 },
                 "set": function() {
                     throw("processingDelayAsSamples is read-only");
@@ -1534,7 +1569,7 @@ function PluginFactory(audio_context, rootURL) {
             },
             "processingDelayAsSeconds": {
                 "get": function() {
-                    return delaySamples/PluginFactory.context.sampleRate;
+                    return this.processingDelayAsSamples/PluginFactory.context.sampleRate;
                 },
                 "set": function() {
                     throw("processingDelayAsSeconds is read-only");
@@ -1559,7 +1594,7 @@ function PluginFactory(audio_context, rootURL) {
             'handleEvent': {
                 "value": function(e) {
                     if (e.type == "alterdelay") {
-                        updateDelayCompensation(true);
+                        updateDelayCompensation();
                     }
                 }
             },
