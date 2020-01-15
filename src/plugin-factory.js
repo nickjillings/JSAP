@@ -1435,6 +1435,7 @@ function PluginFactory(audio_context, rootURL) {
             }
             this.removePlugin(plugin_object);
             this.parent.deletePlugin(plugin_object.id);
+            updateDelayCompensation();
         };
 
         this.getPlugins = function () {
@@ -1490,6 +1491,7 @@ function PluginFactory(audio_context, rootURL) {
             rebuild();
             joinChain();
             plugin_object.node.onloaded.call(plugin_object.node);
+            updateDelayCompensation();
         };
 
         this.copyPlugin = function(plugin_object, copy_index) {
