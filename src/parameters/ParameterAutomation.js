@@ -8,11 +8,19 @@ var TimePoint = function(owner, time, value, toStringFunc) {
     }
     Object.defineProperties(this, {
         "time": {
-            "value": time
+            "get": function() {
+                return time;
+            },
+            "set": function(t) {
+                return this.setTime(t);
+            }
         },
         "value": {
             "get": function() {
                 return value;
+            },
+            "set": function(v) {
+                return this.setValue(v);
             }
         },
         "setValue": {
@@ -20,8 +28,16 @@ var TimePoint = function(owner, time, value, toStringFunc) {
                 if (typeof v != "number" || !isFinite(v)) {
                     throw("Value must be a number");
                 }
-                value = Math.min(Math.max(v, min_value), max_value);
+                value = Math.min(Math.max(v, owner.minimum), owner.maximum);
                 return value;
+            }
+        },
+        "setTime": {
+            "value": function(t) {
+                if (typeof t == "number" && isFinite(t) && t >= 0) {
+                    time = t;
+                }
+                return time;
             }
         },
         "toString": {
@@ -128,13 +144,27 @@ var TimePointList = function(min_value, max_value, toStringFunc) {
                 return automationPoints.length;
             }
         },
+        "minimum": {
+            "value": min_value
+        },
+        "maximum": {
+            "value": max_value
+        },
         "updatePoint": {
-            "value": function(time, new_value) {
+            "value": function(time, options) {
                 var point = automationPoints.find(function(point) {
                     return point.time == time;
                 });
                 if (point) {
-                    point.value = new_value;
+                    if (typeof options.time == "number" && options.time != point.time) {
+                        if (getPointAtTime(automationPoints, time)) {
+                            throw("A time-point already exists at \""+String(options.time)+"\" seconds");
+                        } else {
+                            point.time = options.time;
+                            automationPoints = sortPoints(automationPoints);
+                        }
+                    }
+                    point.value = options.value;
                 }
                 return point;
             }
