@@ -1406,6 +1406,7 @@ function PluginFactory(audio_context, rootURL) {
                 node.addEventListener("alterdelay", self);
                 node.node.onloaded.call(node.node);
                 updateDelayCompensation();
+                eventTarget.dispatchEvent(new Event("change"));
                 return node;
             });
         };
@@ -1426,6 +1427,7 @@ function PluginFactory(audio_context, rootURL) {
                 rebuild();
                 joinChain();
                 updateDelayCompensation();
+                eventTarget.dispatchEvent(new Event("change"));
             }
         };
 
@@ -1492,6 +1494,7 @@ function PluginFactory(audio_context, rootURL) {
             joinChain();
             plugin_object.node.onloaded.call(plugin_object.node);
             updateDelayCompensation();
+            eventTarget.dispatchEvent(new Event("change"));
         };
 
         this.copyPlugin = function(plugin_object, copy_index) {
@@ -1513,6 +1516,7 @@ function PluginFactory(audio_context, rootURL) {
                 joinChain();
                 updateDelayCompensation();
                 node.node.onloaded.call(node.node);
+                eventTarget.dispatchEvent(new Event("change"));
                 return node;
             });
 
