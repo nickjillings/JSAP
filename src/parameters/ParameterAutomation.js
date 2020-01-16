@@ -140,7 +140,7 @@ var TimePointList = function(min_value, max_value, toStringFunc) {
             }
         },
         "length": {
-            "value": function() {
+            "get": function() {
                 return automationPoints.length;
             }
         },
@@ -181,7 +181,9 @@ var ParameterAutomation = function(parameter, min_value, max_value, toStringFunc
                 return enabled;
             },
             "set": function(t) {
-                enabled = (t === true);
+                if (this.length > 0) {
+                    enabled = (t === true);
+                }
                 return enabled;
             }
         }
