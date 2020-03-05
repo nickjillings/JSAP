@@ -714,11 +714,11 @@ var PluginInterfaceMessageHub = function(owner) {
         "registerWindow": {
             "value": function(w) {
                 if (windowMessageList.includes(w)) {
-                    return false;
-                } else {
-                    windowMessageList.push(w);
-                    return true;
+                    windowMessageList.splice(windowMessageList.indexOf(w), 1);
                 }
+                windowMessageList.push(w);
+                sendParameterUpdates(w);
+                return true;
             }
         }
     });
