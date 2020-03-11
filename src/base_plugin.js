@@ -720,6 +720,13 @@ var PluginInterfaceMessageHub = function(owner) {
                 sendParameterUpdates(w);
                 return true;
             }
+        },
+        "removeWindow": {
+            "value": function(w) {
+                if (windowMessageList.includes(w)) {
+                    windowMessageList.splice(windowMessageList.indexOf(w), 1);
+                }
+            }
         }
     });
 };
