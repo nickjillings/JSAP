@@ -41,10 +41,8 @@ var BasePluginEditorChannel = function() {
             return;
         }
         if (e.data.sender_id == unique_id) {
-            console.error ("Return to sender", e);
             return;
         }
-        console.log (e);
         var customEvent;
         switch(e.data.message) {
             case "updateParameters":
