@@ -1769,6 +1769,7 @@ function PluginFactory(audio_context, rootURL) {
                             throw("Plugin did not get created! Aborting");
                         });
                     }).then(function(node) {
+                        node.node.onloaded.call(node.node);
                         midiSynthSlot = node;
                         connections.forEach(function(conn) {
                             midiSynthSlot.node.connect(conn.destinationNode, conn.output, conn.input);
