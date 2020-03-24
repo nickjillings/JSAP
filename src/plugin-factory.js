@@ -626,6 +626,9 @@ function PluginFactory(audio_context, rootURL) {
     };
 
     this.createMidiSynthesiserHost = function(factory) {
+        if (factory === undefined) {
+            factory = this;
+        }
         var host = new MidiSynthesiserHost(factory);
         Object.defineProperties(host, {
             'SessionData': {
@@ -1620,6 +1623,9 @@ function PluginFactory(audio_context, rootURL) {
     var MidiSynthesiserHost = function(factory) {
         var self = this;
         function buildNewSynthesiserObject(prototypeObject) {
+            if (midiSynthSlot) {
+                factory.deletePlugin(midiSynthSlot.id);
+            }
             return new Promise(function(resolve, reject) {
                 if (prototypeObject.hasMidiInput == false || prototypeObject.hasMidiOutput == true) {
                     reject ("Prototype is not a MidiSynthesis type. hasMidiInput must be true and hasMidiOutput must be false");
