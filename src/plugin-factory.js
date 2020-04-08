@@ -1739,9 +1739,9 @@ function PluginFactory(audio_context, rootURL) {
                 }
             },
             "cancelAllEvents": {
-                "value": function(msg, t) {
+                "value": function(t) {
                     if (midiSynthSlot) {
-                        midiSynthSlot.node.cancelAllEvents();
+                        midiSynthSlot.node.cancelAllEvents(t);
                     } else {
                         throw("MIDI Synthesiser not loaded");
                     }
