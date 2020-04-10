@@ -59,11 +59,11 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFu
         "value": {
             "get": function () {
                 if (audioParameter) {
-                    if (automation && automation.enabled) {
+                    if (automation && automation.length > 0) {
                         var t = owner.factory.getCurrentProgramTime();
                         return automation.getCurrentTimeValue(t);
                     }
-                    return this.translate(audioParameter.value);
+                    return this.translate(_value);
                 }
                 return _value;
             },
