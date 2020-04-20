@@ -709,11 +709,12 @@ function PluginFactory(audio_context, rootURL) {
     }
 
     function pluginAudioStop(node) {
-        node.stop.call(node);
+        var ct = audio_context.currentTime;
+        node.stop.call(node, ct);
         node.parameters.getParameterNames().forEach(function(n) {
             var p = node.parameters.getParameterByName(n);
             if (p.enabled) {
-                p.stop();
+                p.stop(ct);
             }
         });
     }
