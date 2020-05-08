@@ -2,8 +2,8 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterStepAutomation} from "./ParameterAutomation.js";
 
-function SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc) {
-    PluginParameter.call(this, owner, name, "Button");
+function SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc, visibleName) {
+    PluginParameter.call(this, owner, name, "Button", visibleName);
     var onclick = function () {};
     var _value = defaultValue;
     var audioParameter, automation;

@@ -1,11 +1,14 @@
 /* jshint esversion: 6 */
-function PluginParameter(owner, name, dataType) {
+function PluginParameter(owner, name, dataType, visibleName) {
     var update, translate, trigger;
     var eventTarget = new EventTarget();
     update = translate = function (v) {
         return v;
     };
     trigger = function () {};
+    if (typeof visibleName != "string" || visibleName.length == 0) {
+        visibleName = name;
+    }
     Object.defineProperties(this, {
         "addEventListener": {
             "value": function(type, listener, options) {
@@ -31,6 +34,9 @@ function PluginParameter(owner, name, dataType) {
         },
         "owner": {
             "value": owner
+        },
+        "visibleName": {
+            "value": visibleName
         },
         "update": {
             "get": function () {

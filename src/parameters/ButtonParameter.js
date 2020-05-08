@@ -1,8 +1,8 @@
 /* jshint esversion: 6 */
 import {PluginParameter} from "./PluginParameter.js";
 
-function ButtonParameter(owner, name) {
-    PluginParameter.call(this, owner, name, "Button");
+function ButtonParameter(owner, name, visibleName) {
+    PluginParameter.call(this, owner, name, "Button", visibleName);
     var onclick = function () {};
 
     Object.defineProperties(this, {

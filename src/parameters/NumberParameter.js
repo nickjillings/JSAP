@@ -2,8 +2,8 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterLinearAutomation} from "./ParameterAutomation.js";
 
-function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc) {
-    PluginParameter.call(this, owner, name, "Number");
+function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName) {
+    PluginParameter.call(this, owner, name, "Number", visibleName);
     var audioParameter, automation;
     var _value = defaultValue,
         _stepSize;

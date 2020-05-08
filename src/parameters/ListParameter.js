@@ -2,8 +2,8 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterStepAutomation} from "./ParameterAutomation.js";
 
-function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc) {
-    PluginParameter.call(this, owner, name, "Button");
+function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName) {
+    PluginParameter.call(this, owner, name, "Button", visibleName);
     var audioParameter, automation;
     var onclick = function () {};
     var _index = listOfValues.indexOf(defaultValue);

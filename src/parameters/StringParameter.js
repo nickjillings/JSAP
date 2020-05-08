@@ -1,8 +1,8 @@
 /* jshint esversion: 6 */
 import {PluginParameter} from "./PluginParameter.js";
 
-function StringParameter(owner, name, defaultValue, maxLength, toStringFunc) {
-    PluginParameter.call(this, owner, name, "String");
+function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName) {
+    PluginParameter.call(this, owner, name, "String", visibleName);
     var _value = defaultValue;
     var audioParameter;
 
