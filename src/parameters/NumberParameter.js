@@ -63,7 +63,7 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFu
                         var t = owner.factory.getCurrentProgramTime();
                         return automation.getCurrentTimeValue(t);
                     }
-                    return this.translate(_value);
+                    return this.translate(audioParameter.value);
                 }
                 return _value;
             },
