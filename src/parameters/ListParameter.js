@@ -2,8 +2,8 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterStepAutomation} from "./ParameterAutomation.js";
 
-function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName) {
-    PluginParameter.call(this, owner, name, "Button", visibleName);
+function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed) {
+    PluginParameter.call(this, owner, name, "Button", visibleName, exposed);
     var audioParameter, automation;
     var onclick = function () {};
     var _index = listOfValues.indexOf(defaultValue);
@@ -81,7 +81,7 @@ function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, vi
             "value": function (ap) {
                 if (typeof ap == "object" && ap.value != undefined) {
                     audioParameter = ap;
-                    audioParameter.value = this.update(_value);
+                    audioParameter.value = this.update(listOfValues[_index]);
                     if (ap.setValueAtTime) {
                         automation = new ParameterStepAutomation(this, audioParameter, 0, listValues.length, toStringFunc);
                         Object.defineProperties(this, {
@@ -131,6 +131,31 @@ function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, vi
                 return typeof automation == "object";
             }
         },
+        "addOptionToList": {
+            "value": function(t) {
+                var type = typeof t;
+                if (type != "string" && type != "number") {
+                    throw "ListParameter::addOptionToList Argument 1 must be of type string or number";
+                }
+                if (listOfValues.includes(t)) {
+                    throw "ListParameter::addOptionToList Argument 1 contains a value already in the list options";
+                }
+                listOfValues.push(t);
+                return listOfValues;
+            }
+        },
+        "deleteOptionFromList": {
+            "value": function(t) {
+                var index = listOfValues.indexOf(t);
+                var _value = listOfValues[_index];
+                if (index == -1) {
+                    throw "ListParameter::deleteOptionFromList item \""+t+"\" does not exist in this list";
+                }
+                listOfValues.splice(index, 1);
+                _index = _index % listOfValues.length;
+                return listOfValues;
+            }
+        },
         "toString": {
             "value": function(v) {
                 if (v == undefined) {
@@ -141,6 +166,20 @@ function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, vi
                 } else {
                     return String(v);
                 }
+            }
+        },
+        "getParameterObject": {
+            "value": function() {
+                return {
+                    value: this.value,
+                    options: listOfValues,
+                    defaultValue: defaultValue,
+                    minimum: 0,
+                    maximum: listOfValues.length,
+                    visibleName: name,
+                    type: "ListParameter",
+                    name: name
+                };
             }
         }
     });

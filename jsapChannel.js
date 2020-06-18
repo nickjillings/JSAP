@@ -37,7 +37,6 @@ var BasePluginEditorChannel = function() {
 
     window.onmessage = function(e) {
         if (e.source != hostWindow) {
-            console.error ("Message did not come from our dear plugin hoster!", e);
             return;
         }
         if (e.data.sender_id == unique_id) {

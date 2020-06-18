@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-function PluginParameter(owner, name, dataType, visibleName) {
+function PluginParameter(owner, name, dataType, visibleName, exposed) {
     var update, translate, trigger;
     var eventTarget = new EventTarget();
     update = translate = function (v) {
@@ -8,6 +8,13 @@ function PluginParameter(owner, name, dataType, visibleName) {
     trigger = function () {};
     if (typeof visibleName != "string" || visibleName.length == 0) {
         visibleName = name;
+    }
+    if (exposed === undefined) {
+        exposed = true;
+    }
+    if (typeof exposed != "boolean") {
+        console.warn("exposed parameter is not of type boolean, assuming exposed = true");
+        exposed = true;
     }
     Object.defineProperties(this, {
         "addEventListener": {
@@ -37,6 +44,9 @@ function PluginParameter(owner, name, dataType, visibleName) {
         },
         "visibleName": {
             "value": visibleName
+        },
+        "exposed": {
+            "value": exposed
         },
         "update": {
             "get": function () {

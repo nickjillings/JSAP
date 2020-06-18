@@ -1,10 +1,46 @@
 /* jshint esversion: 6 */
 import {PluginParameter} from "./PluginParameter.js";
 
-function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed) {
+function URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed) {
     PluginParameter.call(this, owner, name, "String", visibleName, exposed);
     var _value = defaultValue;
-    var audioParameter;
+    var resourceObject;
+
+    function getResource(type) {
+        if (resourceObject != undefined) {
+            return resourceObject;
+        } else {
+            resourceObject = new Promise(function(resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", _value);
+                xhr.responseType = type;
+                xhr.onload = function(e) {
+                    if (xhr.status == 200) {
+                        resolve(e.target.response);
+                    } else {
+                        reject({
+                            code: xhr.status,
+                            message: e.target.responseText
+                        });
+                    }
+
+                };
+                xhr.onerror = function(e) {
+                    reject({
+                        code: xhr.status,
+                        message: "error"
+                    });
+                };
+                xhr.ontimeout = function(e) {
+                    reject({
+                        code: xhr.status,
+                        message: "timeout"
+                    });
+                };
+                xhr.send();
+            });
+        }
+    }
 
     function setValue(v, updateInterfaces) {
         if (maxLength) {
@@ -12,10 +48,11 @@ function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, vis
                 throw ("String longer than " + maxLength + " characters");
             }
         }
-        if (this.boundAudioParam) {
-            this.boundAudioParam.value = this.update(v);
+        if (!v.startsWith("http://") && !v.startsWith("https://")) {
+            throw("URL must start with 'http://' or 'https://'");
         }
         if (_value !== v) {
+            resourceObject = undefined;
             _value = v;
             this.triggerParameterSet(updateInterfaces);
         }
@@ -24,7 +61,7 @@ function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, vis
 
     Object.defineProperties(this, {
         "type": {
-            "value": "String"
+            "value": "URL"
         },
         "destroy": {
             "value": function () {
@@ -53,21 +90,8 @@ function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, vis
                 return setValue.call(this, v, updateInterfaces);
             }
         },
-        "bindToAudioParam": {
-            "value": function (ap) {
-                if (typeof ap == "object" && ap.value != undefined) {
-                    audioParameter = ap;
-                    audioParameter.value = this.update(_value);
-                } else {
-                    throw("Argument 1 is not a valid AudioParameter object");
-                }
-            }
-        },
-        "boundAudioParam": {
-            "configurable": true,
-            "get": function () {
-                return audioParameter;
-            }
+        "getResource":{
+            "value": getResource
         },
         "toString": {
             "value": function(v) {
@@ -88,14 +112,14 @@ function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, vis
                     defaultValue: defaultValue,
                     maxLength: maxLength,
                     visibleName: name,
-                    type: "StringParameter",
+                    type: "URLParameter",
                     name: name
                 };
             }
         }
     });
 }
-StringParameter.prototype = Object.create(PluginParameter.prototype);
-StringParameter.prototype.constructor = StringParameter;
+URLParameter.prototype = Object.create(PluginParameter.prototype);
+URLParameter.prototype.constructor = URLParameter;
 
-export {StringParameter};
+export {URLParameter};

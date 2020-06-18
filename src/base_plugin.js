@@ -590,14 +590,7 @@ var PluginInterfaceMessageHub = function(owner) {
             return this.includes(name);
         }, sources).forEach(function(name) {
             var param = owner.parameters.getParameterByName(name);
-            O[name] = {
-                value: param.value,
-                maximum: param.maximum,
-                minimum: param.minimum,
-                defaultValue: param.defaultValue,
-                type: param.constructor.name,
-                name: name
-            };
+            O[name] = param.getParameterObject();
             if (param.automation) {
                 O[name].automated = param.automation.enabled;
             }

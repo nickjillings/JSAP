@@ -16,6 +16,7 @@
 import LinkedStore from './LinkedStore';
 import {BasePlugin} from './base_plugin';
 import {SynthesiserBasePlugin} from './synth_base';
+import {PluginAssetsList} from './Factory/PluginAssetsList';
 
 function PluginFactory(audio_context, rootURL) {
     var subFactories = [],
@@ -26,6 +27,8 @@ function PluginFactory(audio_context, rootURL) {
     audioStartProgramTime,
     audioStartContextTime,
     audioStarted = false;
+
+    this.pluginAssetsList = new PluginAssetsList(this);
 
     /*
         this.loadResource. Load a resource into the global namespace

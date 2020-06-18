@@ -2,8 +2,8 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ParameterLinearAutomation} from "./ParameterAutomation.js";
 
-function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName) {
-    PluginParameter.call(this, owner, name, "Number", visibleName);
+function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName, exposed) {
+    PluginParameter.call(this, owner, name, "Number", visibleName, exposed);
     var audioParameter, automation;
     var _value = defaultValue,
         _stepSize;
@@ -151,6 +151,19 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFu
                 } else {
                     return String(v);
                 }
+            }
+        },
+        "getParameterObject": {
+            "value": function() {
+                return {
+                    value: this.value,
+                    defaultValue: defaultValue,
+                    minimum: minimum,
+                    maximum: maximum,
+                    visibleName: name,
+                    type: "NumberParameter",
+                    name: name
+                };
             }
         }
     });
