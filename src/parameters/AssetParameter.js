@@ -6,11 +6,13 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
     PluginParameter.call(this, owner, name, "String", visibleName, exposed);
     var assetUrl = new URLParameter(this, name+" url", defaultValue);
     var onerrorCallback, onloadCallback;
-    var audioBuffer;
+    var audioBuffer, audioBufferPromise;
 
     function loadAsset() {
         audioBuffer = undefined;
-        assetUrl.getResource("arraybuffer").then(owner.context.decodeAudioData).then(function(buffer) {
+        audioBufferPromise = assetUrl.getResource("arraybuffer").then(function(ab) {
+            return owner.context.decodeAudioData(ab);
+        }).then(function(buffer) {
             audioBuffer = buffer;
             if (onloadCallback) {
                 onloadCallback(buffer);
@@ -20,7 +22,10 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
                 onerrorCallback(e);
             }
         });
+        return audioBufferPromise;
     }
+
+    loadAsset();
 
     Object.defineProperties(this, {
         "onload": {
@@ -78,6 +83,15 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
         "setValue": {
             "value": function(v, updateInterfaces) {
                 return assetUrl.setValue(v, updateInterfaces);
+            }
+        },
+        "getResource": {
+            "value": function() {
+                if (audioBufferPromise) {
+                    return audioBufferPromise;
+                } else {
+                    return loadAsset();
+                }
             }
         },
         "buffer": {

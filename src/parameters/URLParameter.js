@@ -7,9 +7,7 @@ function URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibl
     var resourceObject;
 
     function getResource(type) {
-        if (resourceObject != undefined) {
-            return resourceObject;
-        } else {
+        if (resourceObject == undefined) {
             resourceObject = new Promise(function(resolve, reject) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("GET", _value);
@@ -20,7 +18,7 @@ function URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibl
                     } else {
                         reject({
                             code: xhr.status,
-                            message: e.target.responseText
+                            message: e.target
                         });
                     }
 
@@ -40,6 +38,7 @@ function URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibl
                 xhr.send();
             });
         }
+        return resourceObject;
     }
 
     function setValue(v, updateInterfaces) {
