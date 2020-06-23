@@ -25,6 +25,11 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
         return audioBufferPromise;
     }
 
+    function setValue(v, updateInterfaces) {
+        assetUrl.setValue(v, updateInterfaces);
+        this.trigger();
+    }
+
     loadAsset();
 
     Object.defineProperties(this, {
@@ -71,8 +76,8 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
                 return assetUrl.value;
             },
             "set": function (v) {
-                var tv = v;
-                assetUrl.value = v;
+                var tv = assetUrl.value;
+                setValue.call(this, v, true);
                 if (assetUrl.value != tv) {
                     // asset has changed url.
                     loadAsset();
@@ -82,7 +87,7 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
         },
         "setValue": {
             "value": function(v, updateInterfaces) {
-                return assetUrl.setValue(v, updateInterfaces);
+                return setValue.call(this, v, updateInterfaces);
             }
         },
         "getResource": {

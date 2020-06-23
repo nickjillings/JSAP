@@ -47,9 +47,6 @@ function URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibl
                 throw ("String longer than " + maxLength + " characters");
             }
         }
-        if (!v.startsWith("http://") && !v.startsWith("https://")) {
-            throw("URL must start with 'http://' or 'https://'");
-        }
         if (_value !== v) {
             resourceObject = undefined;
             _value = v;

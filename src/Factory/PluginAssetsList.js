@@ -4,24 +4,23 @@
 function PluginAsset(name, url, resourceType) {
     this.name = name;
     this.url = url;
-    this.resourceType = resourceType;
 }
 
-function PluginAssetsList(factoryContext) {
+function PluginAssetsList(factoryContext, name, resourceType) {
     var assetObjects = [];
     function findAssetByUrl(url) {
         return assetObjects.find(function(asset) {
             return asset.url == url;
         });
     }
-    this.addAssetUrlToList = function(name, url, resourceType) {
+    this.addAssetUrlToList = function(name, url) {
         if (typeof url != "string") {
             throw "addAssetUrlToList Argument-1 must be a type of string";
         }
         if (findAssetByUrl(url)) {
             throw "URL \""+url+"\" already in this list";
         }
-        assetObjects.push(new PluginAsset(name, url, resourceType));
+        assetObjects.push(new PluginAsset(name, url));
         return assetObjects;
     };
     this.removeAssetFromList = function(asset) {
@@ -42,6 +41,7 @@ function PluginAssetsList(factoryContext) {
         return this.removeAssetFromList(asset);
     };
     this.assetObjects = assetObjects;
+    this.resourceType = resourceType;
 }
 
 export {PluginAssetsList};
