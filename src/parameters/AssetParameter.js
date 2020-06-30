@@ -1,36 +1,48 @@
 /* jshint esversion: 6 */
 import {PluginParameter} from "./PluginParameter.js";
-import {URLParameter} from "./URLParameter.js";
+import {ListParameter} from "./ListParameter.js";
 
-function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
+function AssetParameter(owner, resourceType, name, visibleName, exposed) {
     PluginParameter.call(this, owner, name, "String", visibleName, exposed);
-    var assetUrl = new URLParameter(this, name+" url", defaultValue);
-    var onerrorCallback, onloadCallback;
-    var audioBuffer, audioBufferPromise;
+    var resourceOptions = owner.factory.pluginAssets.assetPacks.filter(function(pack) {
+        return pack.resourceType == resourceType;
+    }).map(function(pack) {return pack.assetObjects;}).flat();
+    var assetList = new ListParameter(owner, name+" list", resourceOptions[0], resourceOptions, function(v){return v.url;}, name+" list", false);
+    var audioBuffer, onloadCallback, onerrorCallback;
 
     function loadAsset() {
-        audioBuffer = undefined;
-        audioBufferPromise = assetUrl.getResource("arraybuffer").then(function(ab) {
-            return owner.context.decodeAudioData(ab);
-        }).then(function(buffer) {
+        assetList.value.fetch()
+        .then(function(buffer) {
             audioBuffer = buffer;
-            if (onloadCallback) {
+            if (typeof onloadCallback == "function") {
                 onloadCallback(buffer);
             }
         }, function(e){
-            if (onerrorCallback) {
+            if (typeof onerrorCallback == "function") {
                 onerrorCallback(e);
             }
         });
-        return audioBufferPromise;
     }
 
     function setValue(v, updateInterfaces) {
-        assetUrl.setValue(v, updateInterfaces);
+        if (typeof v == "object" && v.hasOwnProperty("url")) {
+            v = v.url;
+        }
+        var tv = assetList.value.url;
+        var item = assetList.listValues.find(function(l) {
+            return l.url == v;
+        });
+        if (item) {
+            assetList.value = item;
+        }
+        if (assetList.value.url != tv) {
+            // asset has changed url.
+            loadAsset();
+            this.triggerParameterSet(updateInterfaces);
+        }
         this.trigger();
+        return assetList.value;
     }
-
-    loadAsset();
 
     Object.defineProperties(this, {
         "onload": {
@@ -42,6 +54,9 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
                     throw("AssetParameter::onload requires a function with one argument to be set");
                 } else {
                     onloadCallback = f;
+                    if (audioBuffer) {
+                        onloadCallback(audioBuffer);
+                    }
                     return onloadCallback;
                 }
             }
@@ -64,25 +79,17 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
         },
         "destroy": {
             "value": function () {
-                assetUrl.destroy();
-                owner = name = defaultValue = assetUrl = undefined;
+                assetList.destroy();
+                owner = name = defaultValue = assetList = undefined;
             }
-        },
-        "defaultValue": {
-            "value": defaultValue
         },
         "value": {
             "get": function () {
-                return assetUrl.value;
+                return assetList.value.url;
             },
             "set": function (v) {
-                var tv = assetUrl.value;
                 setValue.call(this, v, true);
-                if (assetUrl.value != tv) {
-                    // asset has changed url.
-                    loadAsset();
-                }
-                return assetUrl.value;
+                return assetList.value.url;
             }
         },
         "setValue": {
@@ -104,15 +111,15 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
         },
         "toString": {
             "value": function(v) {
-                return assetUrl.toString(v);
+                return assetList.toString(v);
             }
         },
         "getParameterObject": {
             "value": function() {
                 return {
-                    value: assetUrl.value,
+                    value: assetList.value.toJSON(),
+                    options: assetList.listValues.map(function(v){return v.toJSON();}),
                     loaded: (audioBuffer !== undefined),
-                    defaultValue: defaultValue,
                     visibleName: name,
                     type: "AssetParameter",
                     name: name
@@ -120,6 +127,8 @@ function AssetParameter(owner, name, defaultValue, visibleName, exposed) {
             }
         }
     });
+
+    loadAsset();
 }
 AssetParameter.prototype = Object.create(PluginParameter.prototype);
 AssetParameter.prototype.constructor = AssetParameter;

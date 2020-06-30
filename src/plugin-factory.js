@@ -151,7 +151,7 @@ function PluginFactory(audio_context, rootURL) {
         });
     }
 
-    function copyFactory(newcontext) {
+    function copyFactory(factory, newcontext) {
         return new Promise(function(resolve, reject) {
             if (newcontext.sampleRate === undefined) {
                 //Maybe not a real AudioContext
@@ -169,6 +169,7 @@ function PluginFactory(audio_context, rootURL) {
                 return BFactory;
             });
         }).then(function(newFactory) {
+            newFactory.pluginAssets.importFromAssetLists(factory.pluginAssets);
             return newFactory;
         });
     }
@@ -1847,7 +1848,7 @@ function PluginFactory(audio_context, rootURL) {
         },
         "createFactoryCopy": {
             "value": function (context) {
-                return copyFactory(context);
+                return copyFactory(this, context);
             }
         },
         "subFactories": {

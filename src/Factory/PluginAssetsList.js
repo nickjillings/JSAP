@@ -1,10 +1,7 @@
 /*eslint-env browser */
 /* jshint esversion:6 */
 
-function PluginAsset(name, url, resourceType) {
-    this.name = name;
-    this.url = url;
-}
+import {PluginAsset} from "./PluginAsset.js";
 
 function PluginAssetsList(factoryContext, name, resourceType) {
     var assetObjects = [];
@@ -13,14 +10,14 @@ function PluginAssetsList(factoryContext, name, resourceType) {
             return asset.url == url;
         });
     }
-    this.addAssetUrlToList = function(name, url) {
+    this.addAssetUrlToList = function(name, url, assetObject) {
         if (typeof url != "string") {
             throw "addAssetUrlToList Argument-1 must be a type of string";
         }
         if (findAssetByUrl(url)) {
             throw "URL \""+url+"\" already in this list";
         }
-        assetObjects.push(new PluginAsset(name, url));
+        assetObjects.push(new PluginAsset(factoryContext, name, url, assetObject));
         return assetObjects;
     };
     this.removeAssetFromList = function(asset) {
@@ -41,6 +38,7 @@ function PluginAssetsList(factoryContext, name, resourceType) {
         return this.removeAssetFromList(asset);
     };
     this.assetObjects = assetObjects;
+    this.name = name;
     this.resourceType = resourceType;
 }
 

@@ -37,11 +37,7 @@ function ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, vi
             "value": defaultValue
         },
         "listValues": {
-            "get": function() {
-                return listOfValues.map(function(v) {
-                    return v;
-                });
-            }
+            "value": listOfValues
         },
         "value": {
             "get": function () {

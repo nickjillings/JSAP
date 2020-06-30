@@ -167,14 +167,14 @@ var ParameterManager = function (owner, pluginExternalInterface) {
             }
         },
         'createAssetParameter': {
-            "value": function (name, defaultValue, visibleName, exposed) {
+            "value": function (resourceType, name, defaultValue, visibleName, exposed) {
                 if (typeof name !== "string") {
                     throw ("Invlid constructor");
                 }
                 if (findParameterIndex(name) !== -1) {
                     throw ("Parameter with name '" + name + "' already exists");
                 }
-                var param = new AssetParameter(owner, name, defaultValue, visibleName, exposed);
+                var param = new AssetParameter(owner, resourceType, name, defaultValue, visibleName, exposed);
                 addParameter(param, this);
                 return param;
             }

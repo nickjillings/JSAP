@@ -38,6 +38,21 @@ function PluginAssetManager(factoryContext) {
         return this.removeAssetFromList(asset);
     };
     this.assetPacks = assetPackList;
+    this.importFromAssetLists = function(oldContext) {
+        oldContext.assetPacks.forEach(function(originalAssetPack) {
+            var newContextPack = this.addPackToList(originalAssetPack.name, originalAssetPack.resourceType);
+            originalAssetPack.assetObjects.forEach(function(originalAsset) {
+                var assetObject;
+                if (originalAsset.assetObject !== undefined) {
+                    assetObject = factoryContext.context.createBuffer(originalAsset.assetObject.numberOfChannels, originalAsset.assetObject.length, originalAsset.assetObject.sampleRate);
+                    for (var i = 0; i < assetObject.numberOfChannels; i++) {
+                        assetObject.copyToChannel(originalAsset.assetObject.getChannelData(i), i, 0);
+                    }
+                }
+                this.addAssetUrlToList(originalAsset.name, originalAsset.url, assetObject);
+            }, newContextPack);
+        }, this);
+    };
 }
 
 export {PluginAssetManager};
