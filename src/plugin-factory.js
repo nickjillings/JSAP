@@ -14,8 +14,8 @@
 })();
 
 import LinkedStore from './LinkedStore';
-import {BasePlugin} from './base_plugin';
-import {SynthesiserBasePlugin} from './synth_base';
+import {BasePlugin} from './BasePlugin';
+import {SynthesiserBasePlugin} from './SynthesiserBasePlugin';
 import {PluginAssetManager} from './Factory/PluginAssetManager';
 
 function PluginFactory(audio_context, rootURL) {

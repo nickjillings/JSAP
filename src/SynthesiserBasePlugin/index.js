@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-import {BasePlugin} from "./base_plugin";
+import {BasePlugin} from "../BasePlugin/index";
 
 var SynthesiserBasePlugin = function(factory, owner)
 {
