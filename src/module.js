@@ -1,4 +1,4 @@
-import {BasePlugin, SynthesiserBasePlugin, PluginFactory} from "./plugin-factory";
+import {BasePlugin, SynthesiserBasePlugin, PluginFactory} from "./index";
 
 (function(root, factory) {
     console.log("Load JSAP...");
