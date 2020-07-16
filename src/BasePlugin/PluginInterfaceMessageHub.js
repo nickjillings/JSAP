@@ -116,11 +116,11 @@ var PluginInterfaceMessageHub = function(owner) {
 
     Object.defineProperties(this, {
         "sendState": {
-            "value": function(level, term, value) {
+            "value": function(level, term) {
                 if (level != "session" && level != "track" && level != "user" && level != "plugin") {
                     throw("Invalid state level "+level);
                 }
-                broadcastStateChange(level, term, value);
+                broadcastStateChange(level, term);
             }
         },
         "updateInterfaces": {

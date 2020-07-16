@@ -114,6 +114,11 @@ function AssetParameter(owner, resourceType, name, visibleName, exposed) {
                 return assetList.toString(v);
             }
         },
+        "options": {
+            "get": function() {
+                return assetList.listValues;
+            }
+        },
         "getParameterObject": {
             "value": function() {
                 return {
