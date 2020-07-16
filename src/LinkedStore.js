@@ -1,9 +1,11 @@
 /*globals document */
 /*eslint-env browser */
+/* jshint esversion: 6 */
 
 var LinkedStore = function (storeName) {
     // Store for the semantic terms, each store holds its own data tree
     // Terms are added as key/value paris to a root node
+    var et = new EventTarget();
     var root = {};
 
     function objectToXML(obj, root, doc) {
@@ -60,6 +62,16 @@ var LinkedStore = function (storeName) {
     }
 
     Object.defineProperties(this, {
+        "addEventListener": {
+            "value": function(a,b,c) {
+                return et.addEventListener(a,b,c);
+            }
+        },
+        "removeEventListener": {
+            "value": function(a,b,c) {
+                return et.removeEventListener(a,b,c);
+            }
+        },
         'name': {
             'get': function () {
                 return storeName;
@@ -78,6 +90,7 @@ var LinkedStore = function (storeName) {
                     throw ("term must be a string");
                 }
                 root[term] = value;
+                et.dispatchEvent(new CustomEvent("altered", {detail:{term: term, value: value}}));
             }
         },
         'addTerms': {
@@ -135,4 +148,4 @@ var LinkedStore = function (storeName) {
     });
 };
 
-export default {LinkedStore};
+export default LinkedStore;

@@ -19,8 +19,7 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
     pluginChainStart.disconnect();
     pluginChainStart.connect(chainStop);
 
-    this.TrackData = new LinkedStore.LinkedStore("Track");
-    this.PluginData = new LinkedStore.LinkedStore("Plugin");
+    this.TrackData = new LinkedStore("Track");
 
     this.featureSender = chainStartFeature;
 
@@ -140,7 +139,6 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
             plugin_object.removeEventListener("alterdelay", self);
             plugin_object.node.stop.call(plugin_object.node);
             plugin_object.node.onunloaded.call(plugin_object.node);
-            plugin_object.node.deconstruct.call(plugin_object.node);
             plugin_list.splice(index, 1);
             isolate();
             rebuild();

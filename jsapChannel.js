@@ -34,6 +34,7 @@ var BasePluginEditorChannel = function() {
 
     var onparameterListeners = [];
     var onlisteners = [];
+    var statelisteners = [];
 
     window.onmessage = function(e) {
         if (e.source != hostWindow) {
@@ -46,6 +47,9 @@ var BasePluginEditorChannel = function() {
         switch(e.data.message) {
             case "updateParameters":
                 customEvent = new CustomEvent("parametersChanged", {detail: e.data});
+                break;
+            case "updateState":
+                customEvent = new CustomEvent("updateState", {detail: e.data});
                 break;
             default:
                 return;
@@ -67,6 +71,14 @@ var BasePluginEditorChannel = function() {
                 });
             });
         }
+    });
+
+    window.addEventListener("updateState", function(e) {
+        statelisteners.filter(function(listener) {
+            return (listener.level == e.detail.level) && (listener.term == e.detail.term);
+        }).forEach(function(listener) {
+            listener.callback(e.detail.value);
+        });
     });
 
     Object.defineProperties(this, {
@@ -142,6 +154,39 @@ var BasePluginEditorChannel = function() {
                     });
                 }
                 return onlisteners.length;
+            }
+        },
+        "listenForState": {
+            "value": function(callback, level, term, triggerRequest) {
+                if (callback === undefined || typeof callback != "function") {
+                    throw("Callback must be a defined function");
+                }
+                if (level != "session" && level != "track" && level != "user" && level != "plugin") {
+                    throw "Invalid state level given: "+String(level);
+                }
+                statelisteners.push({
+                    level: level,
+                    term: term,
+                    callback: callback
+                });
+                if (triggerRequest !== false) {
+                    this.requestState(level, term);
+                }
+                return statelisteners.length;
+            }
+        },
+        "requestState": {
+            "value": function (level, term) {
+                var message = "request" + level.charAt(0).toUpperCase() + level.slice(1) + "State";
+                if (typeof name == "string") {
+                    postMessage({
+                        message: message,
+                        term: term
+                    });
+                } else {
+                    throw("Name not set");
+                }
+
             }
         }
     });

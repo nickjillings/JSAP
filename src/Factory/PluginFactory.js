@@ -395,6 +395,7 @@ function PluginFactory(audio_context, rootURL) {
         var index = pluginsList.indexOf(plugin);
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
+            p[0].delete();
             p[0].node.externalInterface.closeWindows();
         }
     };
@@ -440,7 +441,7 @@ function PluginFactory(audio_context, rootURL) {
     };
 
     this.createStore = function (storeName) {
-        var node = new LinkedStore.LinkedStore(storeName);
+        var node = new LinkedStore(storeName);
         stores.push(node);
         return node;
     };
@@ -456,8 +457,8 @@ function PluginFactory(audio_context, rootURL) {
     };
 
     // Build the default Stores
-    this.SessionData = new LinkedStore.LinkedStore("Session");
-    this.UserData = new LinkedStore.LinkedStore("User");
+    this.SessionData = new LinkedStore("Session");
+    this.UserData = new LinkedStore("User");
 
     this.FeatureMap = new FeatureMap();
 

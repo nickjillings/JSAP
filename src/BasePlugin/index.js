@@ -6,6 +6,8 @@ import {ParameterManager} from "./parameterManager.js";
 import {PluginInterfaceMessageHub} from "./PluginInterfaceMessageHub.js";
 import {PluginFeatureInterface} from "./PluginFeatureInterface";
 import {PluginUserInterface} from "./PluginUserInterface";
+import LinkedStore from "../LinkedStore";
+import LinkedStoreInterface from "./LinkedStoreInterface";
 
 if (typeof AudioNode === "function" && window.importScripts === undefined) {
     AudioNode.prototype.getInputs = function () {
@@ -31,6 +33,23 @@ var BasePlugin = function(factory, owner) {
     this.parameters.addEventListener("parameterset", function(e) {
         eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));
     });
+
+    this.PluginData = new LinkedStore("Plugin");
+
+    this.sessionDataInterface = new LinkedStoreInterface(this, factory.SessionData);
+    this.userDataInterface = new LinkedStoreInterface(this, factory.UserData);
+    this.trackDataInterface = new LinkedStoreInterface(this, owner.TrackData);
+    this.pluginDataInterface = new LinkedStoreInterface(this, this.PluginData);
+
+    this.delete = function() {
+        this.sessionDataInterface.destroy();
+        this.userDataInterface.destroy();
+        this.trackDataInterface.destroy();
+        this.pluginDataInterface.destroy();
+        if (this.deconstruct && typeof this.deconstruct == "function") {
+            this.deconstruct();
+        }
+    };
 
     function deleteIO(node, list) {
         var i = list.findIndex(function (e) {

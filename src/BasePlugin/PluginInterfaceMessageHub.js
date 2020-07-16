@@ -40,6 +40,18 @@ var PluginInterfaceMessageHub = function(owner) {
         });
     }
 
+    function broadcastStateChange(level, term, value) {
+        var msg = {
+            message: "updateState",
+            level: level,
+            term: term,
+            value: value
+        };
+        windowMessageList.forEach(function(w) {
+            w.postMessage(msg, location.origin);
+        });
+    }
+
     function setParameterMessage(e) {
         var updateObjects = [];
         var parameters = JSON.parse(e.message.parameters);
@@ -84,12 +96,33 @@ var PluginInterfaceMessageHub = function(owner) {
                     sendParameterUpdates(e.source);
                 }
                 break;
+            case "requestSessionState":
+                broadcastStateChange("session", e.data.term, owner.sessionDataInterface.requestTerm(e.data.term));
+                break;
+            case "requestTrackState":
+                broadcastStateChange("track", e.data.term, owner.trackDataInterface.requestTerm(e.data.term));
+                break;
+            case "requestUserState":
+                broadcastStateChange("user", e.data.term, owner.userDataInterface.requestTerm(e.data.term));
+                break;
+            case "requestPluginState":
+                broadcastStateChange("plugin", e.data.term, owner.pluginDataInterface.requestTerm(e.data.term));
+                break;
+
             default:
                 throw("Unknown message type \""+e.data.message+"\"");
         }
     });
 
     Object.defineProperties(this, {
+        "sendState": {
+            "value": function(level, term, value) {
+                if (level != "session" && level != "track" && level != "user" && level != "plugin") {
+                    throw("Invalid state level "+level);
+                }
+                broadcastStateChange(level, term, value);
+            }
+        },
         "updateInterfaces": {
             "value": function(automationOnly) {
                 if (automationOnly === undefined) {
