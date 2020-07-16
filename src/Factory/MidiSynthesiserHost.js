@@ -1,5 +1,7 @@
 /* jshint esversion: 6 */
 
+import LinkedStore from '../LinkedStore';
+
 export default function MidiSynthesiserHost(factory) {
     var self = this;
     function buildNewSynthesiserObject(prototypeObject) {
@@ -24,6 +26,8 @@ export default function MidiSynthesiserHost(factory) {
             });
         });
     }
+
+    this.TrackData = new LinkedStore("Track");
 
     var midiSynthSlot;
     var connections = [];

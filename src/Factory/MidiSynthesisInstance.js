@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 
 export default function MidiSynthesisInstance(synthNode) {
-    var _out = plugin_node.context.createGain();
+    var _out = synthNode.context.createGain();
     synthNode.getOutputs()[0].connect(_out);
 
     this.destroy = function () {
