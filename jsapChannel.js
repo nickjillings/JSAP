@@ -82,6 +82,11 @@ var BasePluginEditorChannel = function() {
     });
 
     Object.defineProperties(this, {
+        "pluginInstance": {
+            "get": function() {
+                return window.pluginInstance;
+            }
+        },
         "setParameterByName": {
             "value": function(name, value) {
                 if (typeof name != "string") {
@@ -187,6 +192,17 @@ var BasePluginEditorChannel = function() {
                     throw("Name not set");
                 }
 
+            }
+        },
+        "sendCustomEvent": {
+            "value": function(type, payload) {
+                postMessage({
+                    message: "customMessage",
+                    detail: {
+                        type: type,
+                        payload: payload
+                    }
+                });
             }
         }
     });

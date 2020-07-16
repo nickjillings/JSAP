@@ -68,6 +68,7 @@ var PluginInterfaceMessageHub = function(owner) {
     var windowMessageList = [];
     var listener;
     var state = 0;
+    var eventTarget = new EventTarget();
     window.addEventListener("message",function(e) {
         if (!windowMessageList.includes(e.source)) {
             return;
@@ -108,23 +109,34 @@ var PluginInterfaceMessageHub = function(owner) {
             case "requestPluginState":
                 broadcastStateChange("plugin", e.data.term, owner.pluginDataInterface.requestTerm(e.data.term));
                 break;
-
+            case "customMessage":
+                break;
             default:
                 throw("Unknown message type \""+e.data.message+"\"");
         }
     });
 
     Object.defineProperties(this, {
+        "addEventListener": {
+            "value": function(a,b,c) {
+                return eventTarget.addEventListener(a,b,c);
+            }
+        },
+        "removeEventListener": {
+            "value": function(a,b,c) {
+                return eventTarget.removeEventListener(a,b,c);
+            }
+        },
         "sendState": {
             "value": function(level, term) {
                 if (level == "session") {
-                    broadcastStateChange("session", e.data.term, owner.sessionDataInterface.requestTerm(e.data.term));
+                    broadcastStateChange("session", term, owner.sessionDataInterface.requestTerm(term));
                 } else if (level == "track") {
-                    broadcastStateChange("track", e.data.term, owner.trackDataInterface.requestTerm(e.data.term));
+                    broadcastStateChange("track", term, owner.trackDataInterface.requestTerm(term));
                 } else if (level == "user") {
-                    broadcastStateChange("user", e.data.term, owner.userDataInterface.requestTerm(e.data.term));
+                    broadcastStateChange("user", term, owner.userDataInterface.requestTerm(term));
                 } else if (level == "plugin") {
-                    broadcastStateChange("plugin", e.data.term, owner.pluginDataInterface.requestTerm(e.data.term));
+                    broadcastStateChange("plugin", term, owner.pluginDataInterface.requestTerm(term));
                 } else {
                     throw "Invalid state level option";
                 }
@@ -170,6 +182,7 @@ var PluginInterfaceMessageHub = function(owner) {
                     windowMessageList.splice(windowMessageList.indexOf(w), 1);
                 }
                 windowMessageList.push(w);
+                w.pluginInstance = owner;
                 sendParameterUpdates(w);
                 return true;
             }
