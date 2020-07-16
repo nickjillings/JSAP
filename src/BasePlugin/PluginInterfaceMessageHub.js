@@ -117,10 +117,17 @@ var PluginInterfaceMessageHub = function(owner) {
     Object.defineProperties(this, {
         "sendState": {
             "value": function(level, term) {
-                if (level != "session" && level != "track" && level != "user" && level != "plugin") {
-                    throw("Invalid state level "+level);
+                if (level == "session") {
+                    broadcastStateChange("session", e.data.term, owner.sessionDataInterface.requestTerm(e.data.term));
+                } else if (level == "track") {
+                    broadcastStateChange("track", e.data.term, owner.trackDataInterface.requestTerm(e.data.term));
+                } else if (level == "user") {
+                    broadcastStateChange("user", e.data.term, owner.userDataInterface.requestTerm(e.data.term));
+                } else if (level == "plugin") {
+                    broadcastStateChange("plugin", e.data.term, owner.pluginDataInterface.requestTerm(e.data.term));
+                } else {
+                    throw "Invalid state level option";
                 }
-                broadcastStateChange(level, term);
             }
         },
         "updateInterfaces": {
