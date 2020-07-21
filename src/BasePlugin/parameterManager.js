@@ -7,24 +7,30 @@ import {ListParameter} from "./parameters/ListParameter.js";
 import {URLParameter} from "./parameters/URLParameter.js";
 import {AssetParameter} from "./parameters/AssetParameter.js";
 
-var ParameterManager = function (owner, pluginExternalInterface) {
+var ParameterManager = function (owner, pluginExternalInterface, name, exposed) {
     var parameterList = [];
     var eventTarget = new EventTarget();
-
-    function findParameter(name) {
-        return parameterList.filter(function(p) {
-            return p.exposed;
-        }).find(function (e) {
-            return e.name.toLowerCase() === name.toLowerCase();
-        });
+    if (name == undefined) {
+        name = "default";
+    }
+    if (exposed == undefined || name == "default") {
+        exposed = true;
     }
 
-    function findParameterIndex(name) {
-        return parameterList.filter(function(p) {
-            return p.exposed;
-        }).findIndex(function (e) {
-            return e.name.toLowerCase() === name.toLowerCase();
-        });
+    function findParameter(self, name) {
+        return name.split(".").reduce(function(base, name) {
+            return base[name];
+        }, self);
+    }
+
+    function isParameterNameAvailable(self, name) {
+        if (!/^\w+( \w+)*$/.test(name)) {
+            throw "Invalid string for name";
+        }
+        if (self.hasOwnProperty(name)) {
+            throw "Name is reserved or already defined";
+        }
+        return true;
     }
 
     function buildParameterObject() {
@@ -38,11 +44,17 @@ var ParameterManager = function (owner, pluginExternalInterface) {
     }
 
     function addParameter(param, self) {
+        if (param.name.includes(".")) {
+            throw("Name cannot include a period");
+        }
         var exists = parameterList.findIndex(function (e) {
             return e === param;
         }, param);
         if (exists === -1) {
             param.addEventListener("parameterset", self);
+            Object.defineProperty(self, param.name, {
+                value: param
+            });
             parameterList.push(param);
         }
         return param;
@@ -78,12 +90,12 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName, exposed);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName, exposed);
-                addParameter(param, this);
-                return param;
+
             }
         },
         'createStringParameter': {
@@ -94,12 +106,11 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new StringParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new StringParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
-                addParameter(param, this);
-                return param;
             }
         },
         'createButtonParameter': {
@@ -107,12 +118,11 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (typeof name !== "string") {
                     throw ("Invalid constructor");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new ButtonParameter(owner, name);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new ButtonParameter(owner, name);
-                addParameter(param, this);
-                return param;
             }
         },
         'createSwitchParameter': {
@@ -123,12 +133,12 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc, visibleName, exposed);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc, visibleName, exposed);
-                addParameter(param, this);
-                return param;
+
             }
         },
         'createListParameter': {
@@ -142,12 +152,11 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (listOfValues.includes(defaultValue) === false) {
                     throw ("Invlid constructor - default value missing");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed);
-                addParameter(param, this);
-                return param;
             }
         },
         'createURLParameter': {
@@ -158,12 +167,11 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
-                addParameter(param, this);
-                return param;
             }
         },
         'createAssetParameter': {
@@ -171,12 +179,20 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 if (typeof name !== "string") {
                     throw ("Invlid constructor");
                 }
-                if (findParameterIndex(name) !== -1) {
-                    throw ("Parameter with name '" + name + "' already exists");
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new AssetParameter(owner, resourceType, name, defaultValue, visibleName, exposed);
+                    addParameter(param, this);
+                    return param;
                 }
-                var param = new AssetParameter(owner, resourceType, name, defaultValue, visibleName, exposed);
-                addParameter(param, this);
-                return param;
+            }
+        },
+        'createParameterManager': {
+            "value": function(name) {
+                if (isParameterNameAvailable(this, name)) {
+                    var param = new ParameterManager(owner, pluginExternalInterface, name);
+                    addParameter(param, this);
+                    return param;
+                }
             }
         },
         'createParameter': {
@@ -192,7 +208,7 @@ var ParameterManager = function (owner, pluginExternalInterface) {
         },
         'getParameterByName': {
             'value': function (name) {
-                return findParameter(name);
+                return findParameter(this, name);
             }
         },
         'getParameterObject': {
@@ -205,13 +221,19 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 return parameterList.filter(function(p) {
                     return p.exposed;
                 }).map(function(p) {
-                    return p.name;
-                });
+                    if (p.constructor == this.constructor) {
+                        return p.getParameterNames().map(function(p) {
+                            return this.name + "." + p;
+                        }, p).flat();
+                    } else {
+                        return p.name;
+                    }
+                }, this).flat();
             }
         },
         'setParameterByName': {
             'value': function (n, v, updateInterfaces) {
-                var parameter = findParameter(n);
+                var parameter = findParameter(this, n);
                 if (!parameter) {
                     return;
                 }
@@ -260,12 +282,40 @@ var ParameterManager = function (owner, pluginExternalInterface) {
                 }
             }
         },
+        'toJSON': {
+            "value": function () {
+                return parameterList.filter(function(p) {
+                    return p.exposed;
+                }).reduce(function (obj, e) {
+                    if (e.hasOwnProperty("toJSON")) {
+                        obj[e.name] = e.toJSON();
+                    } else if (e.hasOwnProperty("getParameterObject")) {
+                        obj[e.name] = e.getParameterObject();
+                    }else if (e.hasOwnProperty("toString")) {
+                        obj[e.name] = e.toString();
+                    } else if (e.hasOwnProperty("value")) {
+                        obj[e.name] = e.value;
+                    }
+                    return obj;
+                }, {});
+            }
+        },
         'parameters': {
             'get': function () {
                 return buildParameterObject();
             },
             'set': function () {
                 throw ("Cannot set, use .setParameterBy...()");
+            }
+        },
+        "exposed": {
+            "get": function () {
+                return exposed;
+            }
+        },
+        "name": {
+            "get": function () {
+                return name;
             }
         }
     });
