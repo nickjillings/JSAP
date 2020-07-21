@@ -27,14 +27,6 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
         }
     };
 
-    this.loadAssets = function() {
-        if (pack && pack.assetObjects) {
-            return fetchAllAssets(this);
-        } else {
-            return Promise.reject("Pack not defined");
-        }
-    };
-
     this.allAssetsLoaded = function () {
         return pack.assetObjects.every(asset => asset.assetObject !== undefined);
     };
@@ -55,7 +47,7 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
         "pack": {
             "get": function () {return pack;}
         },
-        "waitForAssets": {
+        "loadAssets": {
             "value": function (assetsList) {
                 if (assetsList == undefined) {
                     assetsList = pack.assetObject;

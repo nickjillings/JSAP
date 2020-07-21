@@ -20,6 +20,9 @@ export default function AssetPackSelectorInterface(plugin, factory, parameterNam
                 return (listParameter.value = pack);
             }
         },
+        "selectedPack": {
+            "get": function () {return listParameter.value;}
+        },
         "loadAssets": {
             "value": packSelector.loadAssets
         },
