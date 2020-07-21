@@ -1,7 +1,8 @@
 /*eslint-env browser */
 /* jshint esversion:6 */
 
-import {PluginAssetsList} from "./PluginAssetsList.js";
+import {PluginAssetsList} from "./PluginAssetsList";
+import AssetPackSelector from "./AssetPackSelector";
 
 function findPackByName(assetPackList, name) {
     return assetPackList.find(function(l) {
@@ -38,6 +39,9 @@ export default function PluginAssetManager(factoryContext) {
         return this.removeAssetFromList(asset);
     };
     this.assetPacks = assetPackList;
+    this.createAssetPackSelector = function(plugin, pack) {
+        return new AssetPackSelector(plugin, this, pack);
+    };
     this.importFromAssetLists = function(oldContext) {
         oldContext.assetPacks.forEach(function(originalAssetPack) {
             var newContextPack = this.addPackToList(originalAssetPack.name, originalAssetPack.resourceType);

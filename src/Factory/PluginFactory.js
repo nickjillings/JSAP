@@ -5,7 +5,7 @@
 /* jshint esversion:6 */
 
 import LinkedStore from '../LinkedStore';
-import PluginAssetManager from './PluginAssetManager';
+import PluginAssetManager from './PluginAssets/PluginAssetManager';
 import PluginPrototype from "./PluginPrototype";
 import FeatureMap from "./FeatureMap/index";
 import AudioPluginChainManager from "./AudioPluginChainManager/";
