@@ -55,6 +55,9 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
                 if (assetsList == undefined) {
                     assetsList = pack.assetObject;
                 }
+                if (!Array.isArray(assetsList) || assetsList.length == 0) {
+                    throw "Must pass an array of assets";
+                }
                 var allInPack = assetsList.every(function(asset) {
                     pack.assetObject.includes(asset);
                 });
