@@ -6,7 +6,7 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
         return Promise.all(assetsList.map(asset => asset.fetch()))
         .then(function() {
             if (typeof onload == "function") {
-                onload.call(self);
+                onload.call(self, assetsList);
             }
         }, function() {
             if (typeof onerror == "function") {
@@ -19,9 +19,9 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
         return fetchAssets(self, pack.assetObjects);
     }
 
-    this.selectPack = function(pack) {
-        if (assetPackManager.assetPacks.includes(pack)) {
-            pack = pack;
+    this.selectPack = function(_pack) {
+        if (assetPackManager.assetPacks.includes(_pack)) {
+            pack = _pack;
         } else {
             throw("Pack not in factory asset packs");
         }

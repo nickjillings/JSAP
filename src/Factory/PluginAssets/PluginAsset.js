@@ -3,6 +3,7 @@
 
 function PluginAsset(factoryContext, name, url, assetObject) {
 
+    var self = this;
     function fetchAsset() {
         p = fetch(url).then(function(r) {
             return r.arrayBuffer();
@@ -11,7 +12,7 @@ function PluginAsset(factoryContext, name, url, assetObject) {
         }).then(function(ab) {
             assetObject = ab;
             p = undefined;
-            return assetObject;
+            return self;
         });
     }
 
