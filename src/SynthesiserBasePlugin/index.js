@@ -6,8 +6,6 @@ var SynthesiserBasePlugin = function(factory, owner)
     var hasWarnedScheduleNotSet = false;
     var hasWarnedCancelNotSet = false;
     var editorType = "roll";
-    var minimumActiveNote = 0;
-    var maximumActiveNote = 127;
     BasePlugin.call(this, factory, owner);
 
     Object.defineProperties(this, {
@@ -52,34 +50,56 @@ var SynthesiserBasePlugin = function(factory, owner)
                 return editorType;
             }
         },
-        "getMaximumActiveNote": {
-            "value": function () {
-                return maximumActiveNote;
-            }
-        },
-        "getMinimumActiveNote": {
-            "value": function () {
-                return minimumActiveNote;
-            }
-        },
-        "setMaximumActiveNote": {
+        "isNoteActive": {
             "value": function(n) {
-                if (n <= minimumActiveNote) {
-                    throw "Cannot set equal-to or below minimum active note";
+                if (typeof n == "number" && n >= 0 && n < 128) {
+                    return true;
+                } else {
+                    return false;
                 }
-                maximumActiveNote = n;
-                return maximumActiveNote;
+            },
+            "writable": true
+        },
+        "getActiveNoteProperties": {
+            "value": function() {
+                var obj =[];
+                for (var n=0; n<128; n++) {
+                    obj.push({
+                        code: n,
+                        name: this.midiNoteToName(n)
+                    });
+                }
+                return obj;
+            },
+            "writable": true
+        },
+        'midiNoteToFrequency': {
+            'value': function (m) {
+                return Math.pow(2.0, (m-69)/12)*440;
             }
         },
-        "setMinimumActiveNote": {
-            "value": function(n) {
-                if (n >= maximumActiveNote) {
-                    throw "Cannot set equal-to or above maximum active note";
-                }
-                minimumActiveNote = n;
-                return minimumActiveNote;
+        'frequencyToMidiNote': {
+            'value': function (f) {
+                return Math.round(12.0*Math.log2(f/440))+69;
             }
-        }
+        },
+        'midiNoteToName': {
+            'value': function (m) {
+                var notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
+                var root = m-21;
+                var octave = Math.floor(root/12);
+                var note = Math.floor((root+36)%12);
+                return notes[note] + String(octave);
+            }
+        },
+        'noteNameToMIDI': {
+            'value': function(n) {
+                var notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
+                var octave = Number(n.slice(n.length-1));
+                var note = notes.indexOf(n.slice(0,n.length-1));
+                return octave*12 + note + 21;
+            }
+        },
     });
 };
 SynthesiserBasePlugin.prototype = Object.create(BasePlugin.prototype);
