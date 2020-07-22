@@ -1,11 +1,11 @@
 /* jshint esversion: 6 */
 
 export default function AssetPackSelectorInterface(plugin, factory, parameterName, visibleName, exposed) {
-    var availablePacks = factory.pluginAssets.assetPacks;
-    var packSelector = factory.pluginAssets.createAssetPackSelector(plugin, availablePacks[0]);
-    var listParameter = plugin.parameters.createListParameter(parameterName, availablePacks[0], availablePacks, function(v) {return v.name;}, visibleName, exposed);
+    var packSelector = factory.pluginAssets.createAssetPackSelector(plugin, factory.pluginAssets.assetPacks[0]);
+    var listParameter = plugin.parameters.createListParameter(parameterName, factory.pluginAssets.assetPacks[0].name, factory.pluginAssets.assetPacks.map(p=>p.name), undefined, visibleName, exposed);
     listParameter.trigger = function() {
-        packSelector.selectPack(listParameter.value);
+        var pack = factory.pluginAssets.assetPacks.find(p => listParameter.value == p.name);
+        packSelector.selectPack(pack);
     };
 
     Object.defineProperties(this, {

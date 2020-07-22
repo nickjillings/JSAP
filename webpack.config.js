@@ -8,5 +8,6 @@ module.exports = {
         library: "JSAP"
     },
     devtool: 'inline-source-map',
-    mode: "development"
+    mode: "development",
+    watch: true
 };
