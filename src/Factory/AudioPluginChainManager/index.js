@@ -114,6 +114,7 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
 
     this.createPlugin = function (prototypeObject) {
         return buildNewPlugin(prototypeObject).catch(function(e){
+            console.log(e);
             throw("Plugin did not get created! Aborting");
         }).then(function(node) {
             cutChain();
@@ -223,6 +224,7 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
         }
         return buildNewPlugin(plugin_object.prototypeObject)
         .catch(function(e){
+            console.log(e);
             throw("Plugin did not get created! Aborting");
         }).then(function(node) {
             node.node.parameters.setParametersByObject(plugin_object.node.parameters.getParameterObject());

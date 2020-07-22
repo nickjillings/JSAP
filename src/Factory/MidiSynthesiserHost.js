@@ -150,6 +150,7 @@ export default function MidiSynthesiserHost(factory) {
                     }
                 }).then(function(prototypeObject) {
                     return buildNewSynthesiserObject.call(self, prototypeObject).catch(function(e){
+                        console.log(e);
                         throw("Plugin did not get created! Aborting");
                     });
                 }).then(function(node) {

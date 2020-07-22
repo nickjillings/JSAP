@@ -20,8 +20,8 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
     }
 
     this.selectPack = function(pack) {
-        if (assetPackManager.includes(assetPacks)) {
-            pack = assetPacks;
+        if (assetPackManager.assetPacks.includes(pack)) {
+            pack = pack;
         } else {
             throw("Pack not in factory asset packs");
         }
@@ -53,13 +53,13 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
                     throw("Pack not defined");
                 }
                 if (assetsList == undefined) {
-                    assetsList = pack.assetObject;
+                    assetsList = pack.assetObjects;
                 }
                 if (!Array.isArray(assetsList) || assetsList.length == 0) {
                     throw "Must pass an array of assets";
                 }
                 var allInPack = assetsList.every(function(asset) {
-                    pack.assetObject.includes(asset);
+                    return pack.assetObjects.some(ao => ao.name == asset.name);
                 });
                 if (!allInPack) {
                     return Promise.reject("Not all given assets are in this pack");
