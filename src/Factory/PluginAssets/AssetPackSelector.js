@@ -49,6 +49,9 @@ function AssetPackSelector(plugin, assetPackManager, pack) {
         },
         "loadAssets": {
             "value": function (assetsList) {
+                if (pack === undefined || pack.assetObjects == undefined) {
+                    throw("Pack not defined");
+                }
                 if (assetsList == undefined) {
                     assetsList = pack.assetObject;
                 }

@@ -13,7 +13,7 @@ export default function AssetPackSelectorInterface(plugin, factory, parameterNam
             "value": listParameter
         },
         "availablePacks": {
-            "value": availablePacks
+            "get": function () {return factory.pluginAssets.assetPacks;}
         },
         "selectPack": {
             "value": function(pack) {
@@ -34,6 +34,10 @@ export default function AssetPackSelectorInterface(plugin, factory, parameterNam
         },
         "waitForAssets": {
             "value": packSelector.waitForAssets
+        },
+        'value': {
+            "get": function () {return listParameter.value;},
+            "set": function(s) {return (listParameter.value = s);}
         },
         "onload": {
             "get": function() {return packSelector.onload;},
