@@ -51,7 +51,6 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
             return e === param;
         }, param);
         if (exists === -1) {
-            param.addEventListener("parameterset", self);
             Object.defineProperty(self, param.name, {
                 value: param
             });
@@ -93,6 +92,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
 
@@ -109,6 +109,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new StringParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
             }
@@ -121,6 +122,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new ButtonParameter(owner, name);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
             }
@@ -136,6 +138,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
 
@@ -155,6 +158,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
             }
@@ -170,6 +174,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
             }
@@ -182,6 +187,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (isParameterNameAvailable(this, name)) {
                     var param = new AssetParameter(owner, resourceType, name, defaultValue, visibleName, exposed);
                     addParameter(param, this);
+                    param.addEventListener("parameterset", this);
                     return param;
                 }
             }

@@ -11,6 +11,7 @@ var PluginInterfaceMessageHub = function(owner) {
         }, sources).forEach(function(name) {
             var param = owner.parameters.getParameterByName(name);
             O[name] = param.getParameterObject();
+            O[name].name = name;
             if (param.automation) {
                 O[name].automated = param.automation.enabled;
             }
@@ -80,7 +81,7 @@ var PluginInterfaceMessageHub = function(owner) {
                     parameterObject = owner.parameters.getParameterByName(e.data.parameter.name);
                     if (parameterObject) {
                         parameterObject.setValue(e.data.parameter.value, false);
-                        broadcastParameterUpdates(e.data.sender_id, [parameterObject.name]);
+                        broadcastParameterUpdates(e.data.sender_id, [e.data.parameter.name]);
                     }
                 }
                 break;
