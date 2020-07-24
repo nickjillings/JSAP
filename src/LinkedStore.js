@@ -84,7 +84,7 @@ var LinkedStore = function (storeName) {
                 }
             }
         },
-        'addTerm': {
+        'setTerm': {
             'value': function (term, value) {
                 if (typeof term !== "string" && term.length === 0) {
                     throw ("term must be a string");
@@ -93,22 +93,22 @@ var LinkedStore = function (storeName) {
                 et.dispatchEvent(new CustomEvent("altered", {detail:{term: term, value: value}}));
             }
         },
-        'addTerms': {
+        'setTerms': {
             'value': function (termsObject) {
                 if (typeof termsObject !== "object") {
-                    throw ("addTerms takes an object of term/value pairs");
+                    throw ("setTerms takes an object of term/value pairs");
                 }
                 var term;
                 for (term in termsObject) {
                     if (termsObject.hasOwnProperty(term)) {
-                        this.addTerm(term, termsObject[term]);
+                        this.setTerm(term, termsObject[term]);
                     }
                 }
             }
         },
         'deleteTerm': {
             'value': function (term) {
-                this.addTerm(term, undefined);
+                this.setTerm(term, undefined);
             }
         },
         'getTerm': {
