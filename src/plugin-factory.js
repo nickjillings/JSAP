@@ -18,6 +18,8 @@ import {BasePlugin} from './base_plugin';
 import {SynthesiserBasePlugin} from './synth_base';
 import {PluginAssetManager} from './Factory/PluginAssetManager';
 
+var global = global || window;
+
 function PluginFactory(audio_context, rootURL) {
     var subFactories = [],
     synthesiserHosts = [],
@@ -63,6 +65,12 @@ function PluginFactory(audio_context, rootURL) {
                 return factory.loadPluginScript(resourceObject);
             }
         });
+    };
+    this.injectPrototype = function(prototypeExecutable) {
+        if (typeof prototypeExecutable != "function") {
+            throw("Invalid executable function");
+        }
+        return this.addPrototype(prototypeExecutable);
     };
     this.loadResource = function (resourceObject) {
         return new Promise(function(resolve, reject) {

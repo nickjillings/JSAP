@@ -7,7 +7,7 @@
     between the plugin processor (BasePlugin) and the GUI on top.
 */
 
-var BasePluginEditorChannel = function() {
+export default function BasePluginEditorChannel() {
     function postMessage(object) {
         if (object === undefined || object.message === undefined) {
             throw("Malformed message object");
@@ -145,4 +145,4 @@ var BasePluginEditorChannel = function() {
             }
         }
     });
-};
+}
