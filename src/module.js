@@ -1,5 +1,5 @@
 import {BasePlugin, SynthesiserBasePlugin, PluginFactory} from "./plugin-factory";
-import BasePluginEditorChannel from "./jsapChannel";
+import BasePluginEditorChannel from "./BasePluginEditorChannel";
 export {BasePluginEditorChannel, BasePlugin, SynthesiserBasePlugin, PluginFactory};
 // (function(root, factory) {
 //     console.log("Load JSAP...");
