@@ -7,7 +7,9 @@
     between the plugin processor (BasePlugin) and the GUI on top.
 */
 
-var BasePluginEditorChannel = function() {
+import EditorParameterManager from "./ParameterListeners/index";
+
+export default function BasePluginEditorChannel() {
     function postMessage(object) {
         if (object === undefined || object.message === undefined) {
             throw("Malformed message object");
@@ -59,9 +61,6 @@ var BasePluginEditorChannel = function() {
 
     window.addEventListener("parametersChanged", function(e) {
         if (e.detail.parameters) {
-            onlisteners.forEach(function(callback) {
-                callback(e.detail.parameters);
-            });
             Object.keys(e.detail.parameters).forEach(function(name) {
                 var listeners = onparameterListeners.filter(function(l) {
                     return l.name == name || l.name === undefined;
@@ -69,6 +68,9 @@ var BasePluginEditorChannel = function() {
                 listeners.forEach(function(l) {
                     l.callback(e.detail.parameters[name]);
                 });
+            });
+            onlisteners.forEach(function(callback) {
+                callback(e.detail.parameters);
             });
         }
     });
@@ -80,6 +82,8 @@ var BasePluginEditorChannel = function() {
             listener.callback(e.detail.value);
         });
     });
+
+    this.parameterListenerManager = new EditorParameterManager(this);
 
     Object.defineProperties(this, {
         "pluginInstance": {
@@ -206,4 +210,4 @@ var BasePluginEditorChannel = function() {
             }
         }
     });
-};
+}

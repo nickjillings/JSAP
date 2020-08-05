@@ -10,7 +10,7 @@ function findPackByName(assetPackList, name) {
     });
 }
 
-export default function PluginAssetManager(factoryContext) {
+function PluginAssetManager(factoryContext) {
     var assetPackList = [];
     this.addPackToList = function(name, resourceType) {
         if (typeof name != "string") {
@@ -58,3 +58,5 @@ export default function PluginAssetManager(factoryContext) {
         }, this);
     };
 }
+
+export default PluginAssetManager;

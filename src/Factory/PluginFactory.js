@@ -204,6 +204,13 @@ function PluginFactory(audio_context, rootURL) {
         }
     };
 
+    this.injectPrototype = function(prototypeExecutable) {
+        if (typeof prototypeExecutable != "function") {
+            throw("Invalid executable function");
+        }
+        return this.addPrototype(prototypeExecutable);
+    };
+
     this.addPrototype = function (plugin_proto) {
         var factory = this;
         return new Promise(function(resolve, reject) {
