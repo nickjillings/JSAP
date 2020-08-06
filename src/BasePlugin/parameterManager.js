@@ -18,14 +18,17 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
     }
 
     function findParameter(self, name) {
+        name = name.replace("/", "_");
         return name.split(".").reduce(function(base, name) {
             return base[name];
         }, self);
     }
 
     function isParameterNameAvailable(self, name) {
-        if (!/^\w+( \w+)*$/.test(name)) {
-            throw "Invalid string for name";
+        name = name.replace("/", "_");
+        if (!/^\w+( \w+)*(-\w+)*(_\w+)*$/.test(name)) {
+            console.warn("Invalid string for name", name, "Will not expose as dot notations");
+            return true;
         }
         if (self.hasOwnProperty(name)) {
             throw "Name is reserved or already defined";
