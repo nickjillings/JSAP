@@ -20,11 +20,12 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
     function findParameter(self, name) {
         name = name.replace("/", "_");
         return name.split(".").reduce(function(base, name) {
-            return base[name];
+            return base[name] || base[name.toLowerCase()];
         }, self);
     }
 
     function isParameterNameAvailable(self, name) {
+        name = name.toLowerCase();
         name = name.replace("/", "_");
         if (!/^\w+( \w+)*(-\w+)*(_\w+)*$/.test(name)) {
             console.warn("Invalid string for name", name, "Will not expose as dot notations");
