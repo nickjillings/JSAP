@@ -18,10 +18,18 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
     }
 
     function findParameter(self, name) {
-        name = name.replace("/", "_");
-        return name.split(".").reduce(function(base, name) {
-            return base[name] || base[name.toLowerCase()];
-        }, self);
+        name = name.replace("/", "_").split(".").reverse();
+        var base = parameterList;
+        var lowerCaseParameterNames = parameterList.map(i => i.name.toLowerCase());
+        var param = parameterList[lowerCaseParameterNames.indexOf(name.pop().toLowerCase())];
+        if (param.hasOwnProperty("getParameterByName")) {
+            return param.getParameterByName(name.reverse().join("."));
+        } else {
+            return param;
+        }
+        // return name.split(".").reduce(function(base, name) {
+        //     return base[name] || base[name.toLowerCase()];
+        // }, self);
     }
 
     function isParameterNameAvailable(self, name) {
