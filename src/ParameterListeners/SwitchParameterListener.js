@@ -17,10 +17,10 @@ function SwitchParameterListener(owner, channel, parameterName, visibleName, def
             "value": defaultValue
         },
         "maximum": {
-            "value": maximum
+            "value": maxState
         },
         "minimum": {
-            "value": minimum
+            "value": minState
         },
         "value": {
             "get": function () {return value;},
