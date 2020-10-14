@@ -16,12 +16,6 @@ function ListParameterListener(owner, channel, parameterName, visibleName, defau
         "defaultValue": {
             "value": defaultValue
         },
-        "maximum": {
-            "value": maximum
-        },
-        "minimum": {
-            "value": minimum
-        },
         "value": {
             "get": function () {return value;},
             "set": function(v) {
