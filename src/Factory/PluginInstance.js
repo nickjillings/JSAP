@@ -17,6 +17,7 @@ export default function PluginInstance(plugin_node) {
         if (plugin_node.processingDelayAsSamples != 0) {
             ev.dispatchEvent(new Event("alterdelay"));
         }
+        ev.dispatchEvent(new Event("bypassed"));
     }
 
     function bypassDisable() {
@@ -26,6 +27,7 @@ export default function PluginInstance(plugin_node) {
         if (plugin_node.processingDelayAsSamples != 0) {
             ev.dispatchEvent(new Event("alterdelay"));
         }
+        ev.dispatchEvent(new Event("bypassed"));
     }
 
     this.bypass = function (state) {
