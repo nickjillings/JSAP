@@ -4,6 +4,7 @@ import LinkedStore from '../LinkedStore';
 
 export default function MidiSynthesiserHost(factory) {
     var self = this;
+    var ev = new EventTarget();
     function buildNewSynthesiserObject(prototypeObject) {
         if (midiSynthSlot) {
             factory.deletePlugin(midiSynthSlot.id);
@@ -32,6 +33,16 @@ export default function MidiSynthesiserHost(factory) {
     var midiSynthSlot;
     var connections = [];
     Object.defineProperties(this, {
+        "addEventListener": {
+            "value": function(a,b,c) {
+                return ev.addEventListener(a,b,c);
+            }
+        },
+        "removeEventListener": {
+            "value": function(a,b,c) {
+                return ev.removeEventListener(a,b,c);
+            }
+        },        
         "connect": {
             "value": function(destinationNode, output, input) {
                 if (destinationNode === undefined) {
@@ -159,6 +170,7 @@ export default function MidiSynthesiserHost(factory) {
                     connections.forEach(function(conn) {
                         midiSynthSlot.node.connect(conn.destinationNode, conn.output, conn.input);
                     });
+                    ev.dispatchEvent(new Event("loaded"));
                     return midiSynthSlot;
                 });
             }
