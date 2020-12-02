@@ -1,7 +1,7 @@
 /*eslint-env browser */
 /* jshint esversion:6 */
 
-function PluginAsset(factoryContext, name, url, assetObject) {
+function PluginAsset(factoryContext, id, name, url, image_url, pack, assetObject) {
 
     var self = this;
     function fetchAsset() {
@@ -19,11 +19,20 @@ function PluginAsset(factoryContext, name, url, assetObject) {
     var p;
 
     Object.defineProperties(this, {
+        "id": {
+            "value": id
+        },
         "name": {
             "value": name
         },
         "url": {
             "value": url
+        },
+        "image_url": {
+            "value": image_url
+        },
+        "pack": {
+            "value": pack
         },
         "assetObject": {
             "get": function() {return assetObject;}
@@ -40,7 +49,7 @@ function PluginAsset(factoryContext, name, url, assetObject) {
         },
         "toJSON": {
             "value": function() {
-                return {name: name, url: url};
+                return {id: id, name: name, url: url};
             }
         },
         "toString": {

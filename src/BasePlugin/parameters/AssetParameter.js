@@ -2,16 +2,12 @@
 import {PluginParameter} from "./PluginParameter.js";
 import {ListParameter} from "./ListParameter.js";
 
-function AssetParameter(owner, resourceType, name, visibleName, exposed) {
+function AssetParameter(owner, name, visibleName, exposed) {
     PluginParameter.call(this, owner, name, "String", visibleName, exposed);
-    var resourceOptions = owner.factory.pluginAssets.assetPacks.filter(function(pack) {
-        return pack.resourceType == resourceType;
-    }).map(function(pack) {return pack.assetObjects;}).flat();
-    var assetList = new ListParameter(owner, name+" list", resourceOptions[0], resourceOptions, function(v){return v.url;}, name+" list", false);
-    var audioBuffer, onloadCallback, onerrorCallback;
+    var selectedAsset, audioBuffer, onloadCallback, onerrorCallback;
 
     function loadAsset() {
-        assetList.value.fetch()
+        selectedAsset.fetch()
         .then(function(buffer) {
             audioBuffer = buffer;
             if (typeof onloadCallback == "function") {
@@ -25,23 +21,24 @@ function AssetParameter(owner, resourceType, name, visibleName, exposed) {
     }
 
     function setValue(v, updateInterfaces) {
-        if (typeof v == "object" && v.hasOwnProperty("url")) {
-            v = v.url;
+        if (typeof v !== "object") {
+            v = owner.factory.pluginAssets.findAssetById(v);
+            if (v === undefined) {
+                v = owner.factory.pluginAssets.findAssetByUrl(v);
+            }
         }
-        var tv = assetList.value.url;
-        var item = assetList.listValues.find(function(l) {
-            return l.url == v;
-        });
-        if (item) {
-            assetList.value = item;
+        if (v === undefined) {
+            console.warn("No asset given, ", v);
+            return selectedAsset;
         }
-        if (assetList.value.url != tv) {
+        if (selectedAsset === undefined || selectedAsset.id != v.id) {
             // asset has changed url.
+            selectedAsset = v;
             loadAsset();
             this.triggerParameterSet(updateInterfaces);
         }
         this.trigger();
-        return assetList.value;
+        return selectedAsset;
     }
 
     Object.defineProperties(this, {
@@ -79,17 +76,20 @@ function AssetParameter(owner, resourceType, name, visibleName, exposed) {
         },
         "destroy": {
             "value": function () {
-                assetList.destroy();
-                owner = name = defaultValue = assetList = undefined;
+                owner = name = defaultValue = selectedAsset = undefined;
             }
         },
         "value": {
             "get": function () {
-                return assetList.value.url;
+                if (selectedAsset) {
+                    return selectedAsset.id;
+                } else {
+                    return undefined;
+                }
             },
             "set": function (v) {
                 setValue.call(this, v, true);
-                return assetList.value.url;
+                return aselectedAsset.id;
             }
         },
         "setValue": {
@@ -111,19 +111,13 @@ function AssetParameter(owner, resourceType, name, visibleName, exposed) {
         },
         "toString": {
             "value": function(v) {
-                return assetList.toString(v);
-            }
-        },
-        "options": {
-            "get": function() {
-                return assetList.listValues;
+                return selectedAsset.toString();
             }
         },
         "getParameterObject": {
             "value": function() {
                 return {
-                    value: assetList.value.toJSON(),
-                    options: assetList.listValues.map(function(v){return v.toJSON();}),
+                    value: selectedAsset ? selectedAsset.toJSON() : undefined,
                     loaded: (audioBuffer !== undefined),
                     visibleName: name,
                     type: "AssetParameter",
@@ -132,8 +126,6 @@ function AssetParameter(owner, resourceType, name, visibleName, exposed) {
             }
         }
     });
-
-    loadAsset();
 }
 AssetParameter.prototype = Object.create(PluginParameter.prototype);
 AssetParameter.prototype.constructor = AssetParameter;

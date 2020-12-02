@@ -3,26 +3,26 @@
 
 import {PluginAsset} from "./PluginAsset.js";
 
-function PluginAssetsList(factoryContext, name, resourceType) {
+function PluginAssetsList(factoryContext, id, name, image_url, resourceType) {
     var assetObjects = [];
     function findAssetByUrl(url) {
         return assetObjects.find(function(asset) {
             return asset.url == url;
         });
     }
-    this.addAssetUrlToList = function(name, url, assetObject) {
+    this.addAssetUrlToList = function(id, name, url, image_url, assetObject) {
         if (typeof url != "string") {
-            throw "addAssetUrlToList Argument-1 must be a type of string";
+            throw "addAssetUrlToList Argument-2 must be a type of string";
         }
         if (findAssetByUrl(url)) {
             throw "URL \""+url+"\" already in this list";
         }
-        assetObjects.push(new PluginAsset(factoryContext, name, url, assetObject));
+        assetObjects.push(new PluginAsset(factoryContext, id, name, url, image_url, this, assetObject));
         return assetObjects;
     };
     this.removeAssetFromList = function(asset) {
-        var index = assetObjects.findIndex(function(asset) {
-            return asset.url == url;
+        var index = assetObjects.findIndex(function(listObjects) {
+            return asset.url == listObjects.url;
         });
         if (index == -1) {
             throw "Asset not in this list";
@@ -40,6 +40,8 @@ function PluginAssetsList(factoryContext, name, resourceType) {
     this.assetObjects = assetObjects;
     this.name = name;
     this.resourceType = resourceType;
+    this.id = id;
+    this.image_url = image_url;
 }
 
 export {PluginAssetsList};

@@ -8,7 +8,6 @@ import {PluginFeatureInterface} from "./PluginFeatureInterface";
 import {PluginUserInterface} from "./PluginUserInterface";
 import LinkedStore from "../LinkedStore";
 import LinkedStoreInterface from "./LinkedStoreInterface";
-import AssetPackSelectorInterface from "./AssetPackSelectorInterface";
 
 if (typeof AudioNode === "function" && window.importScripts === undefined) {
     AudioNode.prototype.getInputs = function () {
@@ -34,9 +33,6 @@ var BasePlugin = function(factory, owner) {
     this.parameters.addEventListener("parameterset", function(e) {
         eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));
     });
-    this.addAssetPackInterface = function(parameterName, visibleName, exposed) {
-        return new AssetPackSelectorInterface(this, factory, parameterName, visibleName, exposed);
-    };
 
     this.PluginData = new LinkedStore("Plugin");
 

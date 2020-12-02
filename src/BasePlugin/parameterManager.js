@@ -32,9 +32,14 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
         // }, self);
     }
 
-    function isParameterNameAvailable(self, name) {
+    function formatParameterName(name) {
         name = name.toLowerCase();
         name = name.replace("/", "_");
+        return name;
+    }
+
+    function isParameterNameAvailable(self, name) {
+        name = formatParameterName(name);
         if (!/^\w+( \w+)*(-\w+)*(_\w+)*$/.test(name)) {
             console.warn("Invalid string for name", name, "Will not expose as dot notations");
             return true;
@@ -101,6 +106,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
                     var param = new NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
@@ -118,6 +124,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
                     var param = new StringParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
@@ -131,6 +138,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (typeof name !== "string") {
                     throw ("Invalid constructor");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
                     var param = new ButtonParameter(owner, name);
                     addParameter(param, this);
@@ -147,6 +155,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
                     var param = new SwitchParameter(owner, name, defaultValue, minState, maxState, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
@@ -167,6 +176,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (listOfValues.includes(defaultValue) === false) {
                     throw ("Invlid constructor - default value missing");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
                     var param = new ListParameter(owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
@@ -183,6 +193,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (typeof toStringFunc != "function" && toStringFunc !== undefined) {
                     throw ("toStringFunc must be a function or undefined");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
                     var param = new URLParameter(owner, name, defaultValue, maxLength, toStringFunc, visibleName, exposed);
                     addParameter(param, this);
@@ -192,12 +203,13 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
             }
         },
         'createAssetParameter': {
-            "value": function (resourceType, name, defaultValue, visibleName, exposed) {
+            "value": function (name, visibleName, exposed) {
                 if (typeof name !== "string") {
                     throw ("Invlid constructor");
                 }
+                name = formatParameterName(name);
                 if (isParameterNameAvailable(this, name)) {
-                    var param = new AssetParameter(owner, resourceType, name, defaultValue, visibleName, exposed);
+                    var param = new AssetParameter(owner, name, visibleName, exposed);
                     addParameter(param, this);
                     param.addEventListener("parameterset", this);
                     return param;

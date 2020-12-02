@@ -12,14 +12,14 @@ function findPackByName(assetPackList, name) {
 
 function PluginAssetManager(factoryContext) {
     var assetPackList = [];
-    this.addPackToList = function(name, resourceType) {
+    this.addPackToList = function(id, name, image_url, resourceType) {
         if (typeof name != "string") {
             throw "addAssetUrlToList Argument-1 must be a type of string";
         }
         if (findPackByName(assetPackList, name)) {
             throw "Pack with name \""+name+"\" already in this list";
         }
-        var assetPack = new PluginAssetsList(factoryContext, name, resourceType);
+        var assetPack = new PluginAssetsList(factoryContext, id, name, image_url, resourceType);
         assetPackList.push(assetPack);
         return assetPack;
     };
@@ -38,10 +38,6 @@ function PluginAssetManager(factoryContext) {
         var asset = findPackByName(assetPackList, name);
         return this.removeAssetFromList(asset);
     };
-    this.assetPacks = assetPackList;
-    this.createAssetPackSelector = function(plugin, pack) {
-        return new AssetPackSelector(plugin, this, pack);
-    };
     this.importFromAssetLists = function(oldContext) {
         oldContext.assetPacks.forEach(function(originalAssetPack) {
             var newContextPack = this.addPackToList(originalAssetPack.name, originalAssetPack.resourceType);
@@ -57,6 +53,34 @@ function PluginAssetManager(factoryContext) {
             }, newContextPack);
         }, this);
     };
+
+    this.getAllAssets = function () {
+        return assetPackList.map(function(l) { return l.assetObjects;} ).flat();
+    }
+
+    this.getAllAssetsByResourceType = function(resourceType) {
+        if (typeof resourceType == "string" && resourceType.length > 0) {
+            return assetPackList.filter(function(list) {
+                return list.resourceType == resourceType;
+            }).map(function(l) { return l.assetObjects;} ).flat();
+        } else {
+            return this.getAllAssets();
+        }
+    }
+
+    this.findAssetByUrl = function(url) {
+        return this.getAllAssets().find(function(asset) {
+            return asset.url === url;
+        });
+    }
+
+    this.findAssetById = function(id) {
+        return this.getAllAssets().find(function(asset) {
+            return asset.id === id;
+        });
+    }
+    
+    this.assetPacks = assetPackList;
 }
 
 export default PluginAssetManager;
