@@ -49,7 +49,8 @@ function PluginAssetManager(factoryContext) {
                         assetObject.copyToChannel(originalAsset.assetObject.getChannelData(i), i, 0);
                     }
                 }
-                this.addAssetUrlToList(originalAsset.name, originalAsset.url, assetObject);
+                //id, name, url, image_url, assetObject
+                this.addAssetUrlToList(originalAsset.id, originalAsset.name, originalAsset.url, originalAsset.image_url, assetObject);
             }, newContextPack);
         }, this);
     };
