@@ -63,7 +63,7 @@ export default function BasePluginEditorChannel() {
         if (e.detail.parameters) {
             Object.keys(e.detail.parameters).forEach(function(name) {
                 var listeners = onparameterListeners.filter(function(l) {
-                    return l.name == name || l.name === undefined;
+                    return l.name.toLowerCase() == name.toLowerCase() || l.name === undefined;
                 });
                 listeners.forEach(function(l) {
                     l.callback(e.detail.parameters[name]);
