@@ -26,7 +26,11 @@ function NumberParameter(owner, name, defaultValue, minimum, maximum, toStringFu
         v = this.update(v);
         if (audioParameter) {
             if (automation) {
-                audioParameter.setValueAtTime(v, owner.factory.context.currentTime);
+                if(owner.factory.context.state == 'suspended') {
+                    audioParameter.value = v;
+                } else {
+                    audioParameter.setValueAtTime(v, owner.factory.context.currentTime);
+                }                
             } else {
                 audioParameter.value = v;
             }
