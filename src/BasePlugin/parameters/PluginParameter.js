@@ -46,7 +46,8 @@ function PluginParameter(owner, name, dataType, visibleName, exposed) {
             "value": visibleName
         },
         "exposed": {
-            "value": exposed
+            "get": function() {return exposed;},
+            "set": function(e) {return exposed = (e === true);}
         },
         "update": {
             "get": function () {
