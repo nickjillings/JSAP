@@ -8,6 +8,8 @@ var SynthesiserBasePlugin = function(factory, owner)
     var editorType = "roll";
     BasePlugin.call(this, factory, owner);
 
+    this.stop = () => {this.cancelAllEvents();};
+
     Object.defineProperties(this, {
         "addInput": {
             "value": function() {
