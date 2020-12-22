@@ -46,6 +46,8 @@ var BasePlugin = function(factory, owner) {
         this.userDataInterface.destroy();
         this.trackDataInterface.destroy();
         this.pluginDataInterface.destroy();
+        this.stop();
+        this.onunloaded();
         if (this.deconstruct && typeof this.deconstruct == "function") {
             this.deconstruct();
         }
