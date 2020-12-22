@@ -142,6 +142,24 @@ export default function MidiSynthesiserHost(factory) {
                 }
             }
         },
+        "start": {
+            "value": function () {
+                if (midiSynthSlot) {
+                    midiSynthSlot.node.start();
+                } else {
+                    throw("MIDI Synthesiser not loaded");
+                }
+            }
+        },
+        "stop": {
+            "value": function () {
+                if (midiSynthSlot) {
+                    midiSynthSlot.node.stop();
+                } else {
+                    throw("MIDI Synthesiser not loaded");
+                }
+            }
+        },
         "midiSynthesiser": {
             "get": function () {
                 return midiSynthSlot;
