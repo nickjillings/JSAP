@@ -31,7 +31,7 @@ var SynthesiserBasePlugin = function(factory, owner)
             "writable": true
         },
         "cancelAllEvents": {
-            "value": function() {
+            "value": function(contextTime) {
                 if (!hasWarnedCancelNotSet) {
                     console.warning("WARNING - .cancelAllEvents is not overridden");
                     hasWarnedCancelNotSet = true;

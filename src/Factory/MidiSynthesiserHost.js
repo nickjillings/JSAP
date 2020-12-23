@@ -7,7 +7,7 @@ export default function MidiSynthesiserHost(factory) {
     var ev = new EventTarget();
     function buildNewSynthesiserObject(prototypeObject) {
         if (midiSynthSlot) {
-            midiSynthSlot.node.cancelAllEvents();
+            midiSynthSlot.node.cancelAllEvents(factory.context.currentTime);
             midiSynthSlot.node.disconnect();
             factory.deletePlugin(midiSynthSlot.id);
             midiSynthSlot = undefined;
