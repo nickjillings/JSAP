@@ -241,6 +241,13 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
 
     };
 
+    this.duplicateAudioPluginChainManager = function(sourceAudioPluginChainManager) {
+        var promises = sourceAudioPluginChainManager.getPlugins().map((plugin_object) => {
+            return this.copyPlugin(plugin_object);
+        });
+        return Promise.all(promises);
+    }
+
     function recursiveProcessing(base, list) {
         var l = list.length,
             i, entry;
