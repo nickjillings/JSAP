@@ -242,10 +242,11 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
     };
 
     this.duplicateAudioPluginChainManager = function(sourceAudioPluginChainManager) {
-        var promises = sourceAudioPluginChainManager.getPlugins().map((plugin_object) => {
-            return this.copyPlugin(plugin_object);
+        var promise = Promise.resolve(null);
+        sourceAudioPluginChainManager.getPlugins().forEach((plugin_object) => {
+            promise = promise.then(() => this.copyPlugin(plugin_object));
         });
-        return Promise.all(promises);
+        return promise;
     }
 
     function recursiveProcessing(base, list) {
