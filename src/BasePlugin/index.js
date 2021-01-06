@@ -53,6 +53,11 @@ var BasePlugin = function(factory, owner) {
         }
     };
 
+    this.destroy = function () {
+        console.warn("DEPRECATED - Use .delete() instead");
+        this.delete();
+    }
+
     function deleteIO(node, list) {
         var i = list.findIndex(function (e) {
             return e === this;

@@ -70,52 +70,7 @@ var PluginInterfaceMessageHub = function(owner) {
     var listener;
     var state = 0;
     var eventTarget = new EventTarget();
-    window.addEventListener("message",function(e) {
-        if (!windowMessageList.includes(e.source)) {
-            return;
-        }
-        switch(e.data.message) {
-            case "setParameterByName":
-            var parameterObject;
-                if (e.data.parameter.name) {
-                    parameterObject = owner.parameters.getParameterByName(e.data.parameter.name);
-                    if (parameterObject) {
-                        parameterObject.setValue(e.data.parameter.value, false);
-                        broadcastParameterUpdates(e.data.sender_id, [e.data.parameter.name]);
-                    }
-                }
-                break;
-            case "setParametersByObject":
-                if (e.data.parameter) {
-                    var updateObjects = setParameterMessage(e);
-                    broadcastParameterUpdates(e.data.sender_id, updateObjects);
-                }
-                break;
-            case "requestParameters":
-                if (typeof e.data.name == "string") {
-                    sendParameterUpdates(e.source, e.data.name);
-                } else {
-                    sendParameterUpdates(e.source);
-                }
-                break;
-            case "requestSessionState":
-                broadcastStateChange("session", e.data.term, owner.sessionDataInterface.requestTerm(e.data.term));
-                break;
-            case "requestTrackState":
-                broadcastStateChange("track", e.data.term, owner.trackDataInterface.requestTerm(e.data.term));
-                break;
-            case "requestUserState":
-                broadcastStateChange("user", e.data.term, owner.userDataInterface.requestTerm(e.data.term));
-                break;
-            case "requestPluginState":
-                broadcastStateChange("plugin", e.data.term, owner.pluginDataInterface.requestTerm(e.data.term));
-                break;
-            case "customMessage":
-                break;
-            default:
-                throw("Unknown message type \""+e.data.message+"\"");
-        }
-    });
+    window.addEventListener("message", this);
 
     Object.defineProperties(this, {
         "addEventListener": {
@@ -126,6 +81,54 @@ var PluginInterfaceMessageHub = function(owner) {
         "removeEventListener": {
             "value": function(a,b,c) {
                 return eventTarget.removeEventListener(a,b,c);
+            }
+        },
+        "handleEvent": {
+            "value": function(e) {
+                if (!windowMessageList.includes(e.source)) {
+                    return;
+                }
+                switch(e.data.message) {
+                    case "setParameterByName":
+                    var parameterObject;
+                        if (e.data.parameter.name) {
+                            parameterObject = owner.parameters.getParameterByName(e.data.parameter.name);
+                            if (parameterObject) {
+                                parameterObject.setValue(e.data.parameter.value, false);
+                                broadcastParameterUpdates(e.data.sender_id, [e.data.parameter.name]);
+                            }
+                        }
+                        break;
+                    case "setParametersByObject":
+                        if (e.data.parameter) {
+                            var updateObjects = setParameterMessage(e);
+                            broadcastParameterUpdates(e.data.sender_id, updateObjects);
+                        }
+                        break;
+                    case "requestParameters":
+                        if (typeof e.data.name == "string") {
+                            sendParameterUpdates(e.source, e.data.name);
+                        } else {
+                            sendParameterUpdates(e.source);
+                        }
+                        break;
+                    case "requestSessionState":
+                        broadcastStateChange("session", e.data.term, owner.sessionDataInterface.requestTerm(e.data.term));
+                        break;
+                    case "requestTrackState":
+                        broadcastStateChange("track", e.data.term, owner.trackDataInterface.requestTerm(e.data.term));
+                        break;
+                    case "requestUserState":
+                        broadcastStateChange("user", e.data.term, owner.userDataInterface.requestTerm(e.data.term));
+                        break;
+                    case "requestPluginState":
+                        broadcastStateChange("plugin", e.data.term, owner.pluginDataInterface.requestTerm(e.data.term));
+                        break;
+                    case "customMessage":
+                        break;
+                    default:
+                        throw("Unknown message type \""+e.data.message+"\"");
+                }
             }
         },
         "sendState": {
@@ -172,6 +175,7 @@ var PluginInterfaceMessageHub = function(owner) {
                         var w = windowMessageList.pop();
                         w.close();
                     }
+                    window.removeEventListener("message", this);
                 } else {
                     throw("Cannel already closed");
                 }

@@ -402,7 +402,7 @@ function PluginFactory(audio_context, rootURL) {
         var index = pluginsList.indexOf(plugin);
         if (index >= 0) {
             var p = pluginsList.splice(index, 1);
-            p[0].delete();
+            p[0].node.delete();
             p[0].node.externalInterface.closeWindows();
         }
     };

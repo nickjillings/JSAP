@@ -9,7 +9,7 @@ export default function MidiSynthesiserHost(factory) {
         if (midiSynthSlot) {
             midiSynthSlot.node.cancelAllEvents(factory.context.currentTime);
             midiSynthSlot.node.disconnect();
-            factory.deletePlugin(midiSynthSlot.id);
+            factory.deletePlugin(midiSynthSlot);
             midiSynthSlot = undefined;
         }
         return new Promise(function(resolve, reject) {
