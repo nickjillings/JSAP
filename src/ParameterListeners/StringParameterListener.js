@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-function StringParameterListener(owner, channel, parameterName, visibleName, defaultValue) {
+function StringParameterListener(owner, channel, parameterName, visibleName, defaultValue, maximumLength) {
     function onupdate(e) {
         value = e.value;
     }
@@ -17,10 +17,10 @@ function StringParameterListener(owner, channel, parameterName, visibleName, def
             "value": defaultValue
         },
         "maximum": {
-            "value": maximum
+            "value": maximumLength
         },
         "minimum": {
-            "value": minimum
+            "value": 0
         },
         "value": {
             "get": function () {return value;},
