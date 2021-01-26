@@ -22,7 +22,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
         var base = parameterList;
         var lowerCaseParameterNames = parameterList.map(i => i.name.toLowerCase());
         var param = parameterList[lowerCaseParameterNames.indexOf(name.pop().toLowerCase())];
-        if (param.hasOwnProperty("getParameterByName")) {
+        if (param.hasOwnProperty("getParameterByName") && name.length > 0) {
             return param.getParameterByName(name.reverse().join("."));
         } else {
             return param;
@@ -302,7 +302,14 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 for (key in object) {
                     if (object.hasOwnProperty(key)) {
                         if (typeof object[key] == "object") {
-                            this.setParameterByName(key, object[key].value, updateInterfaces);
+                            let parameter = findParameter(this, key);
+                            if (parameter.hasOwnProperty("setParameterByName")) {
+                                // Nested Parameter store
+                                parameter.setParametersByObject(object[key], updateInterfaces);
+                            }
+                            else if (object[key].hasOwnProperty("value")) {
+                                this.setParameterByName(key, object[key].value, updateInterfaces);
+                            }
                         } else if (typeof object[key] == "number" || typeof object[key] == "string") {
                             this.setParameterByName(key, object[key], updateInterfaces);
                         } else {
