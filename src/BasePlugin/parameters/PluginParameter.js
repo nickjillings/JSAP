@@ -30,7 +30,7 @@ function PluginParameter(owner, name, dataType, visibleName, exposed) {
         "triggerParameterSet": {
             "value": function(updateInterfaces) {
                 var opts = {detail: {
-                    parameter: this,
+                    parameter: this.getParameterObject(),
                     updateInterfaces: updateInterfaces
                 }};
                 eventTarget.dispatchEvent(new CustomEvent("parameterset", opts));

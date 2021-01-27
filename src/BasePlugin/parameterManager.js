@@ -93,6 +93,9 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                 if (detail.updateInterfaces === true) {
                     pluginExternalInterface.updateInterfaces();
                 }
+                if (name !== "default") {
+                    detail.parameter.name = name+"."+detail.parameter.name;
+                }
                 if (e.type == "parameterset" && detail !== undefined) {
                     eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: detail}));
                 }
