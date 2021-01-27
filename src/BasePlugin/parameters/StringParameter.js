@@ -7,6 +7,9 @@ function StringParameter(owner, name, defaultValue, maxLength, toStringFunc, vis
     var audioParameter;
 
     function setValue(v, updateInterfaces) {
+        if (typeof v !== "string") {
+            v = JSON.stringify(v);
+        }
         if (maxLength) {
             if (v.length > maxLength) {
                 throw ("String longer than " + maxLength + " characters");

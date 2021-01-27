@@ -89,12 +89,12 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
         },
         "handleEvent": {
             "value": function(e) {
-                var detail = e.detail;
-                if (detail.updateInterfaces !== false) {
+                let detail = e.detail;
+                if (detail.updateInterfaces === true) {
                     pluginExternalInterface.updateInterfaces();
                 }
-                if (e.type == "parameterset") {
-                    eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: detail.parameter}));
+                if (e.type == "parameterset" && detail !== undefined) {
+                    eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: detail}));
                 }
             }
         },
@@ -220,6 +220,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
             "value": function(name) {
                 if (isParameterNameAvailable(this, name)) {
                     var param = new ParameterManager(owner, pluginExternalInterface, name);
+                    param.addEventListener("parameterset", this);
                     addParameter(param, this);
                     return param;
                 }
@@ -309,6 +310,8 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                             }
                             else if (object[key].hasOwnProperty("value")) {
                                 this.setParameterByName(key, object[key].value, updateInterfaces);
+                            } else {
+                                this.setParameterByName(key, object[key], updateInterfaces);
                             }
                         } else if (typeof object[key] == "number" || typeof object[key] == "string") {
                             this.setParameterByName(key, object[key], updateInterfaces);
