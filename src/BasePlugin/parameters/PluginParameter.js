@@ -29,6 +29,9 @@ function PluginParameter(owner, name, dataType, visibleName, exposed) {
         },
         "triggerParameterSet": {
             "value": function(updateInterfaces) {
+                if (updateInterfaces === undefined) {
+                    updateInterfaces = true;
+                }
                 var opts = {detail: {
                     parameter: this.getParameterObject(),
                     updateInterfaces: updateInterfaces
