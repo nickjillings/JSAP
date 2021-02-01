@@ -40,7 +40,7 @@ function PluginAssetManager(factoryContext) {
     };
     this.importFromAssetLists = function(oldContext) {
         oldContext.assetPacks.forEach(function(originalAssetPack) {
-            var newContextPack = this.addPackToList(originalAssetPack.name, originalAssetPack.resourceType);
+            var newContextPack = this.addPackToList(originalAssetPack.id, originalAssetPack.name, originalAssetPack.image_url, originalAssetPack.resourceType);
             originalAssetPack.assetObjects.forEach(function(originalAsset) {
                 var assetObject;
                 if (originalAsset.assetObject !== undefined) {
