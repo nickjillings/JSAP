@@ -55,7 +55,7 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
         parameterList.filter(function(p) {
             return p.exposed;
         }).forEach(function (e) {
-            obj[e.name] = e;
+            obj[e.name] = e.getParameterObject();
         });
         return obj;
     }
