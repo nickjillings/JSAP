@@ -231,6 +231,12 @@ var BasePlugin = function(factory, owner) {
             "value": function(key, value) {
                 return eventTarget.addEventListener(key, value);
             }
+        },
+        "isReadyPromise": {
+            "value": function () {
+                return Promise.resolve(true);
+            },
+            "writable": true
         }
     });
 };
