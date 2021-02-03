@@ -91,7 +91,7 @@ function AssetParameter(owner, name, visibleName, exposed) {
             },
             "set": function (v) {
                 setValue.call(this, v, true);
-                return aselectedAsset.id;
+                return selectedAsset.id;
             }
         },
         "setValue": {
