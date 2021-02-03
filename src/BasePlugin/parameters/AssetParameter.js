@@ -4,10 +4,10 @@ import {ListParameter} from "./ListParameter.js";
 
 function AssetParameter(owner, name, visibleName, exposed) {
     PluginParameter.call(this, owner, name, "String", visibleName, exposed);
-    var selectedAsset, audioBuffer, onloadCallback, onerrorCallback;
+    var selectedAsset, audioBuffer, onloadCallback, onerrorCallback, loadAssetPromise;
 
     function loadAsset() {
-        selectedAsset.fetch()
+        loadAssetPromise = selectedAsset.fetch()
         .then(function(buffer) {
             audioBuffer = buffer;
             if (typeof onloadCallback == "function") {
@@ -72,6 +72,10 @@ function AssetParameter(owner, name, visibleName, exposed) {
                     return onerrorCallback;
                 }
             }
+        },
+        "isReadyPromise": {
+            "get": function () {return loadAssetPromise;},
+            "set": function() {throw("Cannot set readonly property isReadyPromise");}
         },
         "type": {
             "value": "Asset"
