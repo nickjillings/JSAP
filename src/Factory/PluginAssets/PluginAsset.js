@@ -47,6 +47,24 @@ function PluginAsset(factoryContext, id, name, url, image_url, pack, assetObject
                 return p;
             }
         },
+        "fetched": {
+            "get": function() {
+                if (assetObject !== undefined || p !== undefined) {
+                    return true;
+                }
+                return false;
+            }
+        },
+        "then": {
+            "value": function (onResolve, onReject) {
+                if (assetObject !== undefined) {
+                    return Promise.resolve(assetObject).then(onResolve, onReject);
+                } else if (p === undefined) {
+                    return Promise.reject().then(onResolve, onReject);
+                }
+                return p.then(promiseLike);
+            }
+        },
         "toJSON": {
             "value": function() {
                 return {id: id, name: name, url: url};
