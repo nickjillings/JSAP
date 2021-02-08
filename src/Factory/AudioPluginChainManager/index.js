@@ -154,7 +154,7 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
             return;
         }
         this.removePlugin(plugin_object);
-        this.parent.deletePlugin(plugin_object.id);
+        this.parent.deletePlugin(plugin_object);
         updateDelayCompensation();
     };
 

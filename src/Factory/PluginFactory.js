@@ -401,6 +401,12 @@ function PluginFactory(audio_context, rootURL) {
     this.deletePlugin = function (plugin) {
         var index = pluginsList.indexOf(plugin);
         if (index >= 0) {
+            // Also check it isn't rogue attached to a plugin chain
+            this.subFactories.forEach(function(subFactory) {
+                if (subFactory.getPlugins().includes(plugin)) {
+                    subFactory.removePlugin(plugin);
+                }
+            });
             var p = pluginsList.splice(index, 1);
             p[0].node.delete();
             p[0].node.externalInterface.closeWindows();
