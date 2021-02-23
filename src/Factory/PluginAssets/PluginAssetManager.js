@@ -70,8 +70,10 @@ function PluginAssetManager(factoryContext) {
     }
 
     this.findAssetByUrl = function(url) {
+        var fullUrl = new URL(url, window.location.origin);
         return this.getAllAssets().find(function(asset) {
-            return asset.url === url;
+            var assetFullUrl = new URL(asset.url, window.location.origin);
+            return (fullUrl.hostname === assetFullUrl.hostname && fullUrl.pathname === assetFullUrl.pathname);
         });
     }
 
