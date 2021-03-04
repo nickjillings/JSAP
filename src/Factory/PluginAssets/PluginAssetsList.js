@@ -3,7 +3,7 @@
 
 import {PluginAsset} from "./PluginAsset.js";
 
-function PluginAssetsList(factoryContext, id, name, image_url, resourceType) {
+function PluginAssetsList(pluginAssetManager, id, name, image_url, resourceType) {
     var assetObjects = [];
     function findAssetByUrl(url) {
         return assetObjects.find(function(asset) {
@@ -17,7 +17,7 @@ function PluginAssetsList(factoryContext, id, name, image_url, resourceType) {
         if (findAssetByUrl(url)) {
             throw "URL \""+url+"\" already in this list";
         }
-        assetObjects.push(new PluginAsset(factoryContext, id, name, url, image_url, this, assetObject));
+        assetObjects.push(new PluginAsset(pluginAssetManager, id, name, url, image_url, this, assetObject));
         return assetObjects;
     };
     this.removeAssetFromList = function(asset) {

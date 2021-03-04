@@ -3,6 +3,7 @@
 
 import {PluginAssetsList} from "./PluginAssetsList";
 import AssetPackSelector from "./AssetPackSelector";
+import {fetchAssetAsArrayBuffer} from "./defaultAssetFetch";
 
 function findPackByName(assetPackList, name) {
     return assetPackList.find(function(l) {
@@ -11,6 +12,7 @@ function findPackByName(assetPackList, name) {
 }
 
 function PluginAssetManager(factoryContext) {
+    let assetFetchFunction = fetchAssetAsArrayBuffer;
     var assetPackList = [];
     this.addPackToList = function(id, name, image_url, resourceType) {
         if (typeof name != "string") {
@@ -19,7 +21,7 @@ function PluginAssetManager(factoryContext) {
         if (findPackByName(assetPackList, name)) {
             throw "Pack with name \""+name+"\" already in this list";
         }
-        var assetPack = new PluginAssetsList(factoryContext, id, name, image_url, resourceType);
+        var assetPack = new PluginAssetsList(this, id, name, image_url, resourceType);
         assetPackList.push(assetPack);
         return assetPack;
     };
@@ -54,6 +56,18 @@ function PluginAssetManager(factoryContext) {
             }, newContextPack);
         }, this);
     };
+
+    this.setDefaultAssetFetchFunction = function (func) {
+        if (typeof func === "function") {
+            assetFetchFunction = func;
+        }
+    }
+
+    this.fetchAssetFunction = function (assetObject) {
+        return assetFetchFunction(assetObject).then(function(ab) {
+            return factoryContext.context.decodeAudioData(ab);
+        });
+    }
 
     this.getAllAssets = function () {
         return assetPackList.map(function(l) { return l.assetObjects;} ).flat();

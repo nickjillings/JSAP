@@ -1,15 +1,12 @@
 /*eslint-env browser */
 /* jshint esversion:6 */
 
-function PluginAsset(factoryContext, id, name, url, image_url, pack, assetObject) {
+function PluginAsset(pluginAssetManager, id, name, url, image_url, pack, assetObject) {
 
     var self = this;
     function fetchAsset() {
-        p = fetch(url).then(function(r) {
-            return r.arrayBuffer();
-        }).then(function(ab) {
-            return factoryContext.context.decodeAudioData(ab);
-        }).then(function(ab) {
+        p = pluginAssetManager.fetchAssetFunction(self)
+        .then(function(ab) {
             assetObject = ab;
             p = undefined;
             return self;
