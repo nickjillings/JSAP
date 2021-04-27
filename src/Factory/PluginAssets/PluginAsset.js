@@ -4,6 +4,7 @@
 function PluginAsset(pluginAssetManager, id, name, url, image_url, pack, assetObject) {
 
     var self = this;
+    const assetURL = new URL(url, window.location.origin);
     function fetchAsset() {
         p = pluginAssetManager.fetchAssetFunction(self)
         .then(function(ab) {
@@ -23,7 +24,7 @@ function PluginAsset(pluginAssetManager, id, name, url, image_url, pack, assetOb
             "value": name
         },
         "url": {
-            "value": url
+            "value": assetURL.href
         },
         "image_url": {
             "value": image_url
@@ -64,7 +65,7 @@ function PluginAsset(pluginAssetManager, id, name, url, image_url, pack, assetOb
         },
         "toJSON": {
             "value": function() {
-                return {id: id, name: name, url: url};
+                return {asset: assetURL.pathname};
             }
         },
         "toString": {

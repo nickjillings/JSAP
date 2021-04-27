@@ -27,7 +27,11 @@ function AssetParameter(owner, name, visibleName, exposed) {
                 v = owner.factory.pluginAssets.findAssetByUrl(v);
             }
         } else {
-            v = owner.factory.pluginAssets.findAssetById(v.id)
+            if (v.hasOwnProperty('asset')) {
+                v = owner.factory.pluginAssets.findAssetByUrl(v.asset);
+            } else if (v.hasOwnProperty('id')){
+                v = owner.factory.pluginAssets.findAssetById(v.id)
+            }
         }
         if (v === undefined) {
             console.warn("No asset given, ", v);
