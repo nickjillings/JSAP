@@ -80,13 +80,18 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
     };
 
     this.destroy = function (reconnect) {
-        var i;
-        for (i = 0; i < plugin_list.length; i++) {
-            this.destroyPlugin(plugin_list[i]);
-        }
-        pluginChainStart.disconnect();
-        if (reconnect === true) {
-            pluginChainStart.connect(pluginChainStop);
+        if (state === 1) {
+            var i;
+            for (i = 0; i < plugin_list.length; i++) {
+                this.destroyPlugin(plugin_list[i]);
+            }
+            pluginChainStart.disconnect();
+            if (reconnect === true) {
+                pluginChainStart.connect(pluginChainStop);
+            }
+            chainStartFeature.destroy();
+            chainStartFeature = undefined;
+            state = 0;
         }
     };
 

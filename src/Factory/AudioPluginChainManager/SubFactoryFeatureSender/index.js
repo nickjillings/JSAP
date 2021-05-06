@@ -50,6 +50,10 @@ export default function SubFactoryFeatureSender(owner, FactoryFeatureMap) {
         });
     };
 
+    this.destroy = function() {
+        FactoryFeatureMap.deleteSourceMap(this);
+    }
+
     // Send to Factory
     FactoryFeatureMap.createSourceMap(this, undefined);
 }

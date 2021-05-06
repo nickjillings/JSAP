@@ -96,6 +96,11 @@ function PluginAssetManager(factoryContext) {
             return asset.id === id;
         });
     }
+
+    this.destroy = function () {
+        assetFetchFunction = undefined;
+        assetPackList = [];
+    }
     
     this.assetPacks = assetPackList;
 }

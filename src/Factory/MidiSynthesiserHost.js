@@ -5,13 +5,16 @@ import LinkedStore from '../LinkedStore';
 export default function MidiSynthesiserHost(factory) {
     var self = this;
     var ev = new EventTarget();
-    function buildNewSynthesiserObject(prototypeObject) {
+    function unloadSynthesiserSlot() {
         if (midiSynthSlot) {
             midiSynthSlot.node.cancelAllEvents(factory.context.currentTime);
             midiSynthSlot.node.disconnect();
             factory.deletePlugin(midiSynthSlot);
             midiSynthSlot = undefined;
         }
+    }
+    function buildNewSynthesiserObject(prototypeObject) {
+        unloadSynthesiserSlot();
         return new Promise(function(resolve, reject) {
             if (prototypeObject.hasMidiInput == false || prototypeObject.hasMidiOutput == true) {
                 reject ("Prototype is not a MidiSynthesis type. hasMidiInput must be true and hasMidiOutput must be false");
@@ -196,5 +199,12 @@ export default function MidiSynthesiserHost(factory) {
                 });
             }
         },
+        "destroy": {
+            "value": function() {
+                unloadSynthesiserSlot();
+                connections = undefined;
+                this.TrackData = undefined;
+            }
+        }
     });
 }

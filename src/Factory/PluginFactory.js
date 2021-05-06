@@ -103,6 +103,24 @@ function PluginFactory(audio_context, rootURL) {
 
     this.pluginAssets = new PluginAssetManager(this);
 
+    this.destroyFactory = function () {
+        triggerAudioStop();
+        for (const subFactory of Array.from(subFactories)) {
+            this.destroyAudioPluginChainManager(subFactory);
+        }
+        for (const synthesiserHost of Array.from(synthesiserHosts)) {
+            this.destroyMidiSynthesiserHost(synthesiserHost);
+        }
+        for (const plugin of Array.from(pluginsList)) {
+            this.deletePlugin(plugin);
+        }
+        for (const prototype of Array.from(plugin_prototypes)) {
+            this.deletePrototype(prototype);
+        }
+
+        this.pluginAssets.destroy();
+    }
+
     /*
         this.loadResource. Load a resource into the global namespace
 
@@ -259,6 +277,14 @@ function PluginFactory(audio_context, rootURL) {
         });
     };
 
+    this.deletePrototype = function(plugin_proto) {
+        const index = plugin_prototypes.indexOf(plugin_proto);
+        if (index === -1) {
+            return;
+        }
+        plugin_prototypes.splice(index, 1);
+    }
+
     this.getPrototypes = function () {
         return plugin_prototypes;
     };
@@ -408,7 +434,7 @@ function PluginFactory(audio_context, rootURL) {
                 }
             });
             var p = pluginsList.splice(index, 1);
-            p[0].node.delete();
+            p[0].node.destroy();
             p[0].node.externalInterface.closeWindows();
         }
     };
