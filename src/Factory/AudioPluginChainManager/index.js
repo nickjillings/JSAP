@@ -44,11 +44,15 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
     }
 
     function cutChain() {
-        if (plugin_list.length > 0) {
-            pluginChainStart.disconnect(plugin_list[0].input);
-            plugin_list[plugin_list.length - 1].output.disconnect(pluginChainStop);
-        } else {
-            pluginChainStart.disconnect(pluginChainStop);
+        try {
+            if (plugin_list.length > 0) {
+                pluginChainStart.disconnect(plugin_list[0].input);
+                plugin_list[plugin_list.length - 1].output.disconnect(pluginChainStop);
+            } else {
+                pluginChainStart.disconnect(pluginChainStop);
+            }    
+        } catch {
+            console.warn('could not disconnect plugin chain!');
         }
         return true;
     }
