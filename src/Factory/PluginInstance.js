@@ -13,6 +13,7 @@ export default function PluginInstance(plugin_node) {
     function bypassEnable() {
         _in.disconnect();
         _in.connect(_out);
+        plugin_node.getOutputs()[0].disconnect(_out);
         _bypassed = true;
         if (plugin_node.processingDelayAsSamples != 0) {
             ev.dispatchEvent(new Event("alterdelay"));
@@ -23,6 +24,7 @@ export default function PluginInstance(plugin_node) {
     function bypassDisable() {
         _in.disconnect();
         _in.connect(plugin_node.getInputs()[0]);
+        plugin_node.getOutputs()[0].connect(_out);
         _bypassed = false;
         if (plugin_node.processingDelayAsSamples != 0) {
             ev.dispatchEvent(new Event("alterdelay"));
