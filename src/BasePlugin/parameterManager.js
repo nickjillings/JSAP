@@ -271,7 +271,8 @@ var ParameterManager = function (owner, pluginExternalInterface, name, exposed) 
                     return;
                 }
                 if (parameter.exposed === false) {
-                    throw "Cannot set hidden parameter";
+                    console.warn("Cannot set hidden parameter");
+                    return;
                 }
                 parameter.setValue(v, updateInterfaces);
             }
