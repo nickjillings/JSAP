@@ -5,13 +5,34 @@ function PluginAsset(pluginAssetManager, id, name, url, image_url, pack, assetOb
 
     var self = this;
     const assetURL = new URL(url, window.location.origin);
+    const usedBy = new Set();
+    let assetCleanupId;
+
     function fetchAsset() {
+        abortScheduleForCleanup();
         p = pluginAssetManager.fetchAssetFunction(self)
         .then(function(ab) {
             assetObject = ab;
             p = undefined;
             return self;
         });
+    }
+
+    function abortScheduleForCleanup() {
+        if (assetCleanupId !== undefined) {
+            window.clearTimeout(assetCleanupId);
+            assetCleanupId = undefined;
+        }
+    }
+
+    function scheduleForCleanup() {
+        if (assetCleanupId !== undefined) {
+            return;
+        }
+        assetCleanupId = window.setTimeout(() => {
+            assetObject === undefined;
+            assetCleanupId = undefined;
+        }, 10000);
     }
 
     var p;
@@ -71,6 +92,20 @@ function PluginAsset(pluginAssetManager, id, name, url, image_url, pack, assetOb
         "toString": {
             "value": function() {
                 return JSON.stringify(this.toJSON());
+            }
+        },
+        "registerToPlugin": {
+            "value": function(plugin) {
+                abortScheduleForCleanup();
+                usedBy.add(plugin);
+            }
+        },
+        "deregisterFromPlugin": {
+            "value": function(plugin) {
+                usedBy.delete(plugin);
+                if (usedBy.size === 0) {
+                    scheduleForCleanup();
+                }
             }
         }
     });

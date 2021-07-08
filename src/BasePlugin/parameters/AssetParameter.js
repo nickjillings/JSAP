@@ -10,6 +10,7 @@ function AssetParameter(owner, name, visibleName, exposed) {
         loadAssetPromise = selectedAsset.fetch()
         .then(function(buffer) {
             audioBuffer = buffer;
+            selectedAsset.registerToPlugin(owner);
             if (typeof onloadCallback == "function") {
                 onloadCallback(buffer);
             }
@@ -39,6 +40,9 @@ function AssetParameter(owner, name, visibleName, exposed) {
         }
         if (selectedAsset === undefined || selectedAsset.id != v.id) {
             // asset has changed url.
+            if (selectedAsset !== undefined) {
+                selectedAsset.deregisterFromPlugin(owner);
+            }
             selectedAsset = v;
             loadAsset();
             this.triggerParameterSet(updateInterfaces);
