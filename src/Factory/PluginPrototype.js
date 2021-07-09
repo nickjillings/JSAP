@@ -4,6 +4,7 @@ import MidiSynthesisInstance from "./MidiSynthesisInstance";
 
 export default function PluginPrototype(proto, factory) {
     var self = this;
+    this.factory = factory;
     Object.defineProperties(this, {
         'name': {
             value: proto.prototype.name

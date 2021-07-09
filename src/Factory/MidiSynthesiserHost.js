@@ -5,6 +5,8 @@ import LinkedStore from '../LinkedStore';
 export default function MidiSynthesiserHost(factory) {
     var self = this;
     var ev = new EventTarget();
+    this.SessionData = factory.SessionData;
+    this.UserData = factory.UserData;
     function unloadSynthesiserSlot() {
         if (midiSynthSlot) {
             midiSynthSlot.node.cancelAllEvents(factory.context.currentTime);

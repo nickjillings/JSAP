@@ -19,6 +19,9 @@ function AudioPluginChainManager(PluginFactory, chainStart, chainStop) {
     pluginChainStart.disconnect();
     pluginChainStart.connect(chainStop);
 
+    this.SessionData = PluginFactory.SessionData;
+    this.UserData = PluginFactory.UserData;
+
     this.TrackData = new LinkedStore("Track");
 
     this.featureSender = chainStartFeature;
