@@ -8,6 +8,7 @@ import {PluginFeatureInterface} from "./PluginFeatureInterface";
 import {PluginUserInterface} from "./PluginUserInterface";
 import LinkedStore from "../LinkedStore";
 import LinkedStoreInterface from "./LinkedStoreInterface";
+import { of } from "rxjs";
 
 if (typeof AudioNode === "function" && window.importScripts === undefined) {
     AudioNode.prototype.getInputs = function () {
@@ -235,6 +236,16 @@ var BasePlugin = function(factory, owner) {
         "isReadyPromise": {
             "value": function () {
                 return Promise.resolve(true);
+            },
+            "writable": true
+        },
+        "loadingProgress$": {
+            "value": () => {
+                return of({
+                    numberOfAssets: 0,
+                    loaded: true,
+                    numberOfAssetsLoaded: 0
+                })
             },
             "writable": true
         }
