@@ -12,7 +12,7 @@ import { PluginFactory } from "../Factory/PluginFactory";
 import { IPluginPrototype } from "../Factory/PluginPrototype";
 import { IPluginHost } from "../Factory/IPluginHost";
 import { IPluginInstance } from "../Factory/IPluginInstance";
-
+import { of } from "rxjs";
 // if (typeof AudioNode === "function" && window.importScripts === undefined) {
 //     AudioNode.prototype.getInputs = function () {
 //         return [this];
@@ -145,6 +145,13 @@ export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPlugin
     }
     public isReadyPromise() {
         return Promise.resolve(true);
+    }
+    public loadingProgress$() {
+        return of({
+            numberOfAssets: 0,
+            loaded: true,
+            numberOfAssetsLoaded: 0
+        })
     }
     get owner() {return this.pluginOwner;}
     get numInputs() {return this.inputList.length;}

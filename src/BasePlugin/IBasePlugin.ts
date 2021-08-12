@@ -8,6 +8,13 @@ import { ParameterManager, ParameterManagerSettableObject } from "./ParameterMan
 import { INestedPluginParameterObject, IPluginBaseParameter } from "./parameters/IPluginParameter";
 import { PluginFeatureInterface } from "./PluginFeatureInterface/index";
 import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
+import { Observable } from "rxjs";
+
+interface IBasePluginAssetLoadingProgress {
+    numberOfAssets: number,
+    loaded: boolean,
+    numberOfAssetsLoaded: number
+}
 
 export interface IBasePlugin {
     readonly owner: IPluginHost
@@ -61,4 +68,5 @@ export interface IBasePlugin {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
     isReadyPromise(): Promise<boolean>
     initialise?(): Promise<void>;
+    loadingProgress$(): Observable<IBasePluginAssetLoadingProgress>
 }
