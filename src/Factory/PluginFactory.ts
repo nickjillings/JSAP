@@ -4,14 +4,18 @@
 /*eslint-env browser */
 /* jshint esversion:6 */
 
-import LinkedStore from '../LinkedStore';
-import PluginAssetManager from './PluginAssets/PluginAssetManager';
-import PluginPrototype from "./PluginPrototype";
-import FeatureMap from "./FeatureMap/index";
-import AudioPluginChainManager from "./AudioPluginChainManager/index";
-import MidiSynthesiserHost from "./MidiSynthesiserHost";
-import PluginUserInterfaceMessageHub from "./PluginUserInterfaceMessageHub";
-import { BasePlugin } from '../BasePlugin/index';
+import { LinkedStore } from '../LinkedStore';
+import { PluginAssetManager } from './PluginAssets/PluginAssetManager';
+import { IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype } from "./PluginPrototype";
+import { FeatureMap } from "./FeatureMap/index";
+import { AudioPluginChainManager } from "./AudioPluginChainManager/index";
+import { MidiSynthesiserHost } from "./MidiSynthesiserHost";
+import { PluginUserInterfaceMessageHub } from "./PluginUserInterfaceMessageHub";
+import { IPluginInstance } from './IPluginInstance';
+import { IPluginHost } from './IPluginHost';
+import { IBasePlugin } from '../BasePlugin/IBasePlugin';
+import { isPluginInstance } from './PluginInstance';
+import { isMidiSynthesisInstance } from './MidiSynthesisInstance';
 
 interface JSAPResourceObject {
     url: string
@@ -20,141 +24,23 @@ interface JSAPResourceObject {
     returnObject: string
 }
 
-class PluginFactory {
-    private plugin_prototypes: PluginPrototype[] = [];
-    private subFactories: AudioPluginChainManager[] = []
+export class PluginFactory {
+    private plugin_prototypes: IPluginPrototype<IPluginInstance<IPluginHost>,IPluginHost>[] = [];
+    private audioPluginChainManagers: AudioPluginChainManager[] = []
     private synthesiserHosts: MidiSynthesiserHost[] = []
-    private pluginsList: PluginInstance[] = []
+    private pluginsList: IPluginInstance<IPluginHost>[] = []
     private audioStartProgramTime: number 
     private audioStartContextTime: number
     private audioStarted = false
-    private pluginUserInterfaceMessageHubIntance = new PluginUserInterfaceMessageHub(this);
+    private PluginGUI = new PluginUserInterfaceMessageHub(this);
     private stores: LinkedStore[] = []
-
+    public SessionData = new LinkedStore("Session");
+    public UserData = new LinkedStore("User");
+    public FeatureMap = new FeatureMap(this);
     public pluginAssets = new PluginAssetManager(this);
-    constructor(public context: AudioContext, private rootURL?: string) {
-
-        this.deletePlugin = function (plugin) {
-            var index = pluginsList.indexOf(plugin);
-            if (index >= 0) {
-                // Also check it isn't rogue attached to a plugin chain
-                this.subFactories.forEach(function (subFactory) {
-                    if (subFactory.getPlugins().includes(plugin)) {
-                        subFactory.removePlugin(plugin);
-                    }
-                });
-                var p = pluginsList.splice(index, 1);
-                p[0].node.destroy();
-                p[0].node.externalInterface.closeWindows();
-            }
-        };
-
-        this.getCurrentProgramTime = function () {
-            if (audioStarted) {
-                return audio_context.currentTime - audioStartContextTime + audioStartProgramTime;
-            } else {
-                return audioStartProgramTime;
-            }
-        };
-
-        this.setCurrentProgramTime = function (time) {
-            if (audioStarted) {
-                throw ("Must stop playback to set the current program time");
-            }
-            if (typeof time == "number" && time >= 0) {
-                audioStartProgramTime = time;
-                this.PluginGUI.pollAllPlugins();
-            }
-        };
-
-        this.audioStart = function (program_time, context_time) {
-            if (context_time === undefined) {
-                context_time = audio_context.currentTime;
-            }
-            if (program_time === undefined) {
-                program_time = 0;
-                console.warn("Assuming start time at 0");
-            }
-            if (!audioStarted) {
-                this.setCurrentProgramTime(program_time);
-                audioStartContextTime = context_time;
-                triggerAudioStart(program_time, context_time);
-                audioStarted = true;
-            }
-        };
-        this.audioStop = function () {
-            if (audioStarted) {
-                triggerAudioStop();
-                audioStarted = false;
-            }
-        };
-
-        this.createStore = function (storeName) {
-            var node = new LinkedStore(storeName);
-            stores.push(node);
-            return node;
-        };
-
-        this.getStores = function () {
-            return stores;
-        };
-
-        this.findStore = function (storeName) {
-            return stores.find(function (a) {
-                return a.name === storeName;
-            });
-        };
-
-        // Build the default Stores
-        this.SessionData = new LinkedStore("Session");
-        this.UserData = new LinkedStore("User");
-
-        this.FeatureMap = new FeatureMap();
-
-        Object.defineProperty(this.FeatureMap, "factory", {
-            'value': this
-        });
-
-        Object.defineProperties(this, {
-            "context": {
-                "value": audio_context
-            },
-            "hasAudioStarted": {
-                "get": function () {
-                    return audioStarted;
-                }
-            },
-            "pluginRootURL": {
-                "get": function () {
-                    return rootURL;
-                },
-                "set": function (t) {
-                    if (typeof t === "string") {
-                        rootURL = t;
-                        return rootURL;
-                    }
-                    throw ("Cannot set root URL without a string");
-                }
-            },
-            "createFactoryCopy": {
-                "value": function (context) {
-                    return copyFactory(this, context);
-                }
-            },
-            "subFactories": {
-                "get": function () {
-                    return subFactories;
-                }
-            },
-            "PluginGUI": {
-                "value": pluginUserInterfaceMessageHubIntance
-            }
-        });
-    }
-
+    constructor(public context: AudioContext, private rootURL?: string) { }
     private async copyFactory(factory: PluginFactory, newcontext: AudioContext): Promise<PluginFactory> {
         const BFactory = new PluginFactory(newcontext, this.rootURL);
-        const promises = [];
         for (const proto of this.plugin_prototypes) {
             await BFactory.addPrototype(proto.proto);
         }
@@ -198,7 +84,7 @@ class PluginFactory {
 
     public destroyFactory() {
         this.triggerAudioStop();
-        for (const subFactory of Array.from(this.subFactories)) {
+        for (const subFactory of Array.from(this.audioPluginChainManagers)) {
             this.destroyAudioPluginChainManager(subFactory);
         }
         for (const synthesiserHost of Array.from(this.synthesiserHosts)) {
@@ -239,7 +125,7 @@ class PluginFactory {
         };
     };
 
-    public async loadResource(resourceObject: JSAPResourceObject): Promise<BasePlugin> {
+    public async loadResource(resourceObject: JSAPResourceObject): Promise<IPluginPrototypeConstructor> {
         if (typeof resourceObject !== "object") {
             throw new Error("Error");
         }
@@ -265,11 +151,7 @@ class PluginFactory {
                 if (typeof resourceObject.returnObject === "string") {
                     if (window.hasOwnProperty(resourceObject.returnObject)) {
                         return(window[resourceObject.returnObject]);
-                    } else {
-                        return(false);
                     }
-                } else {
-                    return(true);
                 }
                 break;
             default:
@@ -287,14 +169,14 @@ class PluginFactory {
         }
     };
 
-    public injectPrototype(prototypeExecutable: BasePlugin) {
+    public injectPrototype(prototypeExecutable: IBasePlugin) {
         if (typeof prototypeExecutable != "function") {
             throw ("Invalid executable function");
         }
         return this.addPrototype(prototypeExecutable);
     };
 
-    public addPrototype(plugin_proto: BasePlugin): PluginPrototype {
+    public addPrototype(plugin_proto: IPluginPrototypeConstructor): PluginPrototype {
         if (typeof plugin_proto !== "function") {
             throw new Error("The Prototype must be a function!");
         }
@@ -332,7 +214,7 @@ class PluginFactory {
         return newPluginPrototpye;
     };
 
-    public deletePrototype(plugin_proto: PluginPrototype) {
+    public deletePrototype(plugin_proto: IPluginPrototype<IPluginInstance<IPluginHost>,IPluginHost>) {
         const index = this.plugin_prototypes.indexOf(plugin_proto);
         if (index === -1) {
             return;
@@ -369,12 +251,12 @@ class PluginFactory {
     public getAllPluginsObject() {
         const obj = {
             'factory': this,
-            'subFactories': []
+            'audioPluginChainManagers': []
         };
-        for (let i = 0; i < this.subFactories.length; i++) {
-            obj.subFactories.push({
-                'subFactory': this.subFactories[i],
-                'plugins': this.subFactories[i].getPlugins()
+        for (let i = 0; i < this.audioPluginChainManagers.length; i++) {
+            obj.audioPluginChainManagers.push({
+                'subFactory': this.audioPluginChainManagers[i],
+                'plugins': this.audioPluginChainManagers[i].getPlugins()
             });
         }
         return obj;
@@ -382,11 +264,11 @@ class PluginFactory {
 
     public createAudioPluginChainManager(chainStart: AudioNode, chainStop: AudioNode): AudioPluginChainManager {
         const node = new AudioPluginChainManager(this, chainStart, chainStop);
-        this.subFactories.push(node);
+        this.audioPluginChainManagers.push(node);
         return node;
     };
 
-    public async duplicateAudioPluginChainManager(sourceChainManager:AudioPluginChainManager, chainStart: AudioNode, chainStop: AudioNode): AudioPluginChainManager {
+    public async duplicateAudioPluginChainManager(sourceChainManager:AudioPluginChainManager, chainStart: AudioNode, chainStop: AudioNode): Promise<AudioPluginChainManager> {
         const node = this.createAudioPluginChainManager(chainStart, chainStop);
         for (const plugin_object of sourceChainManager.getPlugins()) {
             const newPlugin = await node.createPlugin(plugin_object.prototypeObject)
@@ -396,14 +278,14 @@ class PluginFactory {
     };
 
     public destroyAudioPluginChainManager = function (SubFactory: AudioPluginChainManager) {
-        var index = this.subFactories.findIndex(function (element) {
+        var index = this.audioPluginChainManagers.findIndex(function (element) {
             if (element === this) {
                 return true;
             }
             return false;
         }, SubFactory);
         if (index >= 0) {
-            this.subFactories.splice(index, 1);
+            this.audioPluginChainManagers.splice(index, 1);
             SubFactory.destroy();
         }
     };
@@ -430,11 +312,9 @@ class PluginFactory {
         }
     };
 
-    public registerPluginInstance(instance) {
-        if (this.pluginsList.find(function (p) {
-            return p === this;
-        }, instance)) {
-            throw ("Plugin Instance not unique");
+    public registerPluginInstance(instance: IPluginInstance<IPluginHost>) {
+        if (this.pluginsList.find(p=>p === instance)) {
+            throw new Error ("Plugin Instance not unique");
         }
         this.pluginsList.push(instance);
         if (this.audioStarted) {
@@ -444,6 +324,90 @@ class PluginFactory {
         }
         return true;
     };
-}
 
-export default PluginFactory;
+    public deletePlugin(plugin: IPluginInstance<IPluginHost>) {
+        const index = this.pluginsList.indexOf(plugin);
+        if (index >= 0) {
+            // Also check it isn't rogue attached to a plugin chain
+            if (isPluginInstance(plugin)) {
+                this.audioPluginChainManagers.forEach((subFactory) => {
+                    if (subFactory.getPlugins().includes(plugin)) {
+                        subFactory.removePlugin(plugin);
+                    }
+                });
+            } else if (isMidiSynthesisInstance(plugin)) {
+                this.synthesiserHosts.forEach(host => {
+                    if (host.midiSynthesiser === plugin) {
+                        host.unloadSynthesiserSlot();
+                    }
+                })
+            }
+            this.pluginsList.splice(index, 1);
+            plugin.node.delete();
+            plugin.node.externalInterface.closeWindows();
+        }
+    }
+    public getCurrentProgramTime() {
+        if (this.audioStarted) {
+            return this.context.currentTime - this.audioStartContextTime + this.audioStartProgramTime;
+        } else {
+            return this.audioStartProgramTime;
+        }
+    }
+
+    public setCurrentProgramTime(time: number) {
+        if (this.audioStarted) {
+            throw new Error ("Must stop playback to set the current program time");
+        }
+        if (typeof time == "number" && time >= 0) {
+            this.audioStartProgramTime = time;
+            this.PluginGUI.pollAllPlugins();
+        }
+    }
+    public audioStart(program_time: number, context_time: number) {
+        if (context_time === undefined) {
+            context_time = this.context.currentTime;
+        }
+        if (program_time === undefined) {
+            program_time = 0;
+            console.warn("Assuming start time at 0");
+        }
+        if (!this.audioStarted) {
+            this.setCurrentProgramTime(program_time);
+            this.audioStartContextTime = context_time;
+            this.triggerAudioStart(program_time, context_time);
+            this.audioStarted = true;
+        }
+    }
+    public audioStop() {
+        if (this.audioStarted) {
+            this.triggerAudioStop();
+            this.audioStarted = false;
+        }
+    }
+    public createStore(storeName: string) {
+        let node = this.findStore(storeName);
+        if (node === undefined){ 
+            node = new LinkedStore(storeName);
+            this.stores.push(node);
+        }
+        return node;
+    };
+
+    public getStores() {
+        return this.stores;
+    };
+
+    public findStore(storeName: string) {
+        return this.stores.find(a => a.name === storeName);
+    };
+
+    public createFactoryCopy(context: AudioContext) {
+        return this.copyFactory(this, context);
+    }
+
+    get hasAudioStarted() {return this.audioStarted;}
+    get pluginRootURL() {return this.rootURL;}
+    set pluginRootURL(t:string) {this.rootURL = t;}
+    get subFactories() {return this.audioPluginChainManagers;}
+}

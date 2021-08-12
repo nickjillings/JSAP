@@ -2,7 +2,7 @@
     "name": "JSAP",
     "description": "JSAP",
     "author": "Nick Jillings",
-    "version": "0.0.1",
+    "version": "2.0.0",
     "main": "jsap.js",
     "devDependencies": {
         "mocha": "^9.0.2",
@@ -15,6 +15,7 @@
         "test": "mocha"
     },
     "dependencies": {
+        "js-xtract": "^1.2.0",
         "source-map-loader": "^3.0.0",
         "ts-loader": "^9.2.3",
         "typescript": "^4.3.5"

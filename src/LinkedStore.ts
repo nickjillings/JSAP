@@ -1,8 +1,10 @@
-type LinkedStoreValues = number | string | Map<string, LinkedStoreValues>;
+export type LinkedStoreValues = number | string | Map<string, LinkedStoreValues>;
+
+export interface LinkedStoreAltered {term: string, value: LinkedStoreValues}
 
 // Store for the semantic terms, each store holds its own data tree
 // Terms are added as key/value paris to a root node
-class LinkedStore {
+export class LinkedStore {
     private et = new EventTarget();
     private root: Map<string, LinkedStoreValues>
     constructor(private storeName: string) {
@@ -77,7 +79,7 @@ class LinkedStore {
             throw ("term must be a string");
         }
         this.root.set(term, value);
-        this.et.dispatchEvent(new CustomEvent("altered", {detail:{term: term, value: value}}));
+        this.et.dispatchEvent(new CustomEvent<LinkedStoreAltered>("altered", {detail:{term: term, value: value}}));
     }
 
     public setTerms(termsObject: Map<string, LinkedStoreValues>) {
@@ -136,5 +138,3 @@ class LinkedStore {
         this.storeName = newName;
     }
 }
-
-export default LinkedStore;

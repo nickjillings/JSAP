@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-    entry: "./src/module.js",
+    entry: "./src/index.ts",
     output: {
         filename: "./JSAP.js",
         path: path.resolve(__dirname, ''),
