@@ -9,6 +9,7 @@ import { IBasePlugin } from "./IBasePlugin";
 import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
 import { INestedPluginParameterObject, IPluginBaseParameter } from "./parameters/IPluginParameter";
 import { PluginParameterSetDetail } from "./parameters/PluginParameter";
+export { NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter };
 export interface ParameterManagerSettableObject {
     [key: string]: ParameterManagerSettableObject | number | string;
     value?: any;

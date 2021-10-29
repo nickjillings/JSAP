@@ -1,6 +1,7 @@
 import { PluginAssetsList } from "./PluginAssetsList";
 import { PluginFactory } from "../PluginFactory";
 import { PluginAsset } from "./PluginAsset";
+export { PluginAssetsList, PluginAsset };
 export declare class PluginAssetManager {
     private readonly factoryContext;
     private assetFetchFunction;

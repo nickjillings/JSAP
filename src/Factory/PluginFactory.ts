@@ -5,7 +5,7 @@
 /* jshint esversion:6 */
 
 import { LinkedStore } from '../LinkedStore';
-import { PluginAssetManager } from './PluginAssets/PluginAssetManager';
+import { PluginAsset, PluginAssetManager, PluginAssetsList } from './PluginAssets/PluginAssetManager';
 import { IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype, SynthesiserPrototype } from "./PluginPrototype";
 import { FeatureMap } from "./FeatureMap/index";
 import { AudioPluginChainManager } from "./AudioPluginChainManager/index";
@@ -16,6 +16,8 @@ import { IPluginHost } from './IPluginHost';
 import { IBasePlugin } from '../BasePlugin/IBasePlugin';
 import { isPluginInstance, PluginInstance } from './PluginInstance';
 import { isMidiSynthesisInstance } from './MidiSynthesisInstance';
+
+export { PluginAssetsList, PluginAsset, IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype, SynthesiserPrototype, FeatureMap, AudioPluginChainManager, MidiSynthesiserHost, PluginUserInterfaceMessageHub, IPluginInstance, IPluginHost, isPluginInstance, PluginInstance, isMidiSynthesisInstance };
 
 interface JSAPResourceObject {
     url: string

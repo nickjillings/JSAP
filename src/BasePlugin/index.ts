@@ -2,23 +2,25 @@
 /*globals AudioNode, Worker, console, window, document, Promise, XMLHttpRequest */
 /*eslint-env browser */
 /*jshint esversion: 6 */
-import {ParameterManager, ParameterManagerSettableObject} from "./ParameterManager";
+import {ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter } from "./ParameterManager";
 import {PluginInterfaceMessageHub} from "./PluginInterfaceMessageHub";
 import {PluginFeatureInterface} from "./PluginFeatureInterface/index";
 import {LinkedStore} from "../LinkedStore";
 import {LinkedStoreInterface} from "./LinkedStoreInterface";
-import { IBasePlugin } from "./IBasePlugin.js";
+import { IBasePlugin, IBasePluginAssetLoadingProgress } from "./IBasePlugin.js";
 import { PluginFactory } from "../Factory/PluginFactory";
 import { IPluginPrototype } from "../Factory/PluginPrototype";
 import { IPluginHost } from "../Factory/IPluginHost";
 import { IPluginInstance } from "../Factory/IPluginInstance";
-import { of } from "rxjs";
+import { Observable, of } from "rxjs";
 import { INestedPluginParameterObject } from "./parameters/IPluginParameter";
 // if (typeof AudioNode === "function" && window.importScripts === undefined) {
 //     AudioNode.prototype.getInputs = function () {
 //         return [this];
 //     };
 // }
+
+export { IBasePlugin, LinkedStoreInterface, INestedPluginParameterObject, ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter, IBasePluginAssetLoadingProgress }
 
 export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPluginHost> implements IBasePlugin {
     private inputList: AudioNode[] = [];
@@ -147,7 +149,7 @@ export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPlugin
     public isReadyPromise() {
         return Promise.resolve(true);
     }
-    public loadingProgress$() {
+    public loadingProgress$(): Observable<IBasePluginAssetLoadingProgress> {
         return of({
             numberOfAssets: 0,
             loaded: true,

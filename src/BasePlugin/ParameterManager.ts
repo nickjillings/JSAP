@@ -12,6 +12,7 @@ import { INestedPluginParameterObject, IPluginBaseParameter, isPluginParameter, 
 import { PluginParameterSetDetail } from "./parameters/PluginParameter";
 import { IPluginHost } from "../Factory/IPluginHost";
 
+export { NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter }
 
 export interface ParameterManagerSettableObject {
     [key: string]: ParameterManagerSettableObject | number | string

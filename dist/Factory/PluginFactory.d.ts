@@ -1,13 +1,16 @@
 import { LinkedStore } from '../LinkedStore';
-import { PluginAssetManager } from './PluginAssets/PluginAssetManager';
-import { IPluginPrototype, IPluginPrototypeConstructor } from "./PluginPrototype";
+import { PluginAsset, PluginAssetManager, PluginAssetsList } from './PluginAssets/PluginAssetManager';
+import { IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype, SynthesiserPrototype } from "./PluginPrototype";
 import { FeatureMap } from "./FeatureMap/index";
 import { AudioPluginChainManager } from "./AudioPluginChainManager/index";
 import { MidiSynthesiserHost } from "./MidiSynthesiserHost";
+import { PluginUserInterfaceMessageHub } from "./PluginUserInterfaceMessageHub";
 import { IPluginInstance } from './IPluginInstance';
 import { IPluginHost } from './IPluginHost';
 import { IBasePlugin } from '../BasePlugin/IBasePlugin';
-import { PluginInstance } from './PluginInstance';
+import { isPluginInstance, PluginInstance } from './PluginInstance';
+import { isMidiSynthesisInstance } from './MidiSynthesisInstance';
+export { PluginAssetsList, PluginAsset, IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype, SynthesiserPrototype, FeatureMap, AudioPluginChainManager, MidiSynthesiserHost, PluginUserInterfaceMessageHub, IPluginInstance, IPluginHost, isPluginInstance, PluginInstance, isMidiSynthesisInstance };
 interface JSAPResourceObject {
     url: string;
     test: () => boolean;
@@ -75,4 +78,3 @@ export declare class PluginFactory {
     set pluginRootURL(t: string);
     get subFactories(): AudioPluginChainManager[];
 }
-export {};

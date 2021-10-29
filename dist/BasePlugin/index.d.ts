@@ -1,14 +1,16 @@
-import { ParameterManager } from "./ParameterManager";
+import { ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter } from "./ParameterManager";
 import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
 import { PluginFeatureInterface } from "./PluginFeatureInterface/index";
 import { LinkedStore } from "../LinkedStore";
 import { LinkedStoreInterface } from "./LinkedStoreInterface";
-import { IBasePlugin } from "./IBasePlugin.js";
+import { IBasePlugin, IBasePluginAssetLoadingProgress } from "./IBasePlugin.js";
 import { PluginFactory } from "../Factory/PluginFactory";
 import { IPluginPrototype } from "../Factory/PluginPrototype";
 import { IPluginHost } from "../Factory/IPluginHost";
 import { IPluginInstance } from "../Factory/IPluginInstance";
+import { Observable } from "rxjs";
 import { INestedPluginParameterObject } from "./parameters/IPluginParameter";
+export { IBasePlugin, LinkedStoreInterface, INestedPluginParameterObject, ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter, IBasePluginAssetLoadingProgress };
 export declare abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPluginHost> implements IBasePlugin {
     readonly factory: PluginFactory;
     private pluginOwner;
@@ -60,11 +62,7 @@ export declare abstract class BasePlugin<T extends IPluginInstance<I>, I extends
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     isReadyPromise(): Promise<boolean>;
-    loadingProgress$(): import("rxjs").Observable<{
-        numberOfAssets: number;
-        loaded: boolean;
-        numberOfAssetsLoaded: number;
-    }>;
+    loadingProgress$(): Observable<IBasePluginAssetLoadingProgress>;
     get owner(): I;
     get numInputs(): number;
     get numOutputs(): number;

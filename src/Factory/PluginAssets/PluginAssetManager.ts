@@ -6,6 +6,8 @@ import {fetchAssetAsArrayBuffer} from "./defaultAssetFetch";
 import { PluginFactory } from "../PluginFactory";
 import { PluginAsset } from "./PluginAsset";
 
+export { PluginAssetsList, PluginAsset };
+
 function findPackByName(assetPackList, name) {
     return assetPackList.find(function(l) {
         return l.name == name;
