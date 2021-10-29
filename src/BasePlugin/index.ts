@@ -13,6 +13,7 @@ import { IPluginPrototype } from "../Factory/PluginPrototype";
 import { IPluginHost } from "../Factory/IPluginHost";
 import { IPluginInstance } from "../Factory/IPluginInstance";
 import { of } from "rxjs";
+import { INestedPluginParameterObject } from "./parameters/IPluginParameter";
 // if (typeof AudioNode === "function" && window.importScripts === undefined) {
 //     AudioNode.prototype.getInputs = function () {
 //         return [this];
@@ -24,35 +25,35 @@ export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPlugin
     private outputList: AudioNode[] = [];
     private delaySamples = 0;
     private eventTarget = new EventTarget();
-    public readonly externalInterface = new PluginInterfaceMessageHub(this);
+    public readonly externalInterface: PluginInterfaceMessageHub = new PluginInterfaceMessageHub(this);
     public readonly context = this.factory.context
-    public readonly featureMap = new PluginFeatureInterface(this);
-    public readonly parameters = new ParameterManager(this, this.externalInterface);
-    public readonly PluginData = new LinkedStore("Plugin");
-    public readonly sessionDataInterface = new LinkedStoreInterface(this, this.factory.SessionData);
-    public readonly userDataInterface = new LinkedStoreInterface(this, this.factory.UserData);
-    public readonly trackDataInterface = new LinkedStoreInterface(this, this.TrackData);
-    public readonly pluginDataInterface = new LinkedStoreInterface(this, this.PluginData);
-    public readonly SessionData = this.factory.SessionData;
-    public readonly UserData = this.factory.UserData;
-    public readonly name = this.prototypeObject.name;
-    public readonly uniqueID = this.prototypeObject.uniqueID;
-    public readonly version = this.prototypeObject.version;
+    public readonly featureMap: PluginFeatureInterface = new PluginFeatureInterface(this);
+    public readonly parameters: ParameterManager = new ParameterManager(this, this.externalInterface);
+    public readonly PluginData: LinkedStore = new LinkedStore("Plugin");
+    public readonly sessionDataInterface: LinkedStoreInterface = new LinkedStoreInterface(this, this.factory.SessionData);
+    public readonly userDataInterface: LinkedStoreInterface = new LinkedStoreInterface(this, this.factory.UserData);
+    public readonly trackDataInterface: LinkedStoreInterface = new LinkedStoreInterface(this, this.TrackData);
+    public readonly pluginDataInterface: LinkedStoreInterface = new LinkedStoreInterface(this, this.PluginData);
+    public readonly SessionData: LinkedStore = this.factory.SessionData;
+    public readonly UserData: LinkedStore = this.factory.UserData;
+    public readonly name: string = this.prototypeObject.name;
+    public readonly uniqueID: string = this.prototypeObject.uniqueID;
+    public readonly version: string = this.prototypeObject.version;
     constructor (public readonly factory: PluginFactory, private pluginOwner: I, public readonly prototypeObject: IPluginPrototype<T, I>) {
-        this.parameters.addEventListener("parameterset", function(e:CustomEvent) {
+        this.parameters.addEventListener("parameterset", (e:CustomEvent) => {
             this.eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));
         });
     }
     start(): void {}
-    stop(): void {}
+    stop(ct?: number): void {}
     onloaded(): void {}
     onunloaded(): void {}
     deconstruct(): void {}
     initialise?: () => Promise<void>;
     private deleteIO(node: AudioNode, list: AudioNode[]) {
-        var i = list.findIndex(function (e) {
-            return e === this;
-        }, node);
+        var i = list.findIndex((e) => {
+            return e === node;
+        });
         if (i === -1) {
             return false;
         }
@@ -136,7 +137,7 @@ export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPlugin
     public getParameterByName(name: string) {return this.parameters.getParameterByName(name);}
     public getParameterObject() {return this.parameters.getParameterObject();}
     public setParameterByName(name: string, value: any, updateInterfaces=true) {return this.parameters.setParameterByName(name, value, updateInterfaces);}
-    public setParametersByObject(object: ParameterManagerSettableObject, updateInterfaces?:boolean) {return this.parameters.setParametersByObject(object, updateInterfaces);}
+    public setParametersByObject(object: INestedPluginParameterObject, updateInterfaces?:boolean) {return this.parameters.setParametersByObject(object, updateInterfaces);}
     public addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) {
         return this.eventTarget.addEventListener(type, listener, options);
     }

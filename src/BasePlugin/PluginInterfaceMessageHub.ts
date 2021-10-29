@@ -155,9 +155,9 @@ export class PluginInterfaceMessageHub {
         }
         if (automationOnly) {
             const parameterNames = this.owner.parameters.getParameterNames();
-            const sources = parameterNames.filter(function(name) {
-                var param = this.owner.parameters.getParameterByName(name);
-                return (param.automatable && param.enabled === true);
+            const sources = parameterNames.filter((name) => {
+                const param = this.owner.parameters.getParameterByName(name);
+                return (isAutomatedPluginParameter(param) && param.enabled === true);
             });
             if (sources.length > 0)
             {

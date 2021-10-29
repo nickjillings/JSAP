@@ -10,7 +10,7 @@ import { PluginFeatureInterface } from "./PluginFeatureInterface/index";
 import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
 import { Observable } from "rxjs";
 
-interface IBasePluginAssetLoadingProgress {
+export interface IBasePluginAssetLoadingProgress {
     numberOfAssets: number,
     loaded: boolean,
     numberOfAssetsLoaded: number
@@ -63,7 +63,7 @@ export interface IBasePlugin {
     getParameterByName(name: string): IPluginBaseParameter
     getParameterObject(): INestedPluginParameterObject
     setParameterByName(name: string, value: any, updateInterfaces?: boolean): void
-    setParametersByObject(object: ParameterManagerSettableObject, updateInterfaces?:boolean): void
+    setParametersByObject(object: INestedPluginParameterObject, updateInterfaces?:boolean): void
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
     isReadyPromise(): Promise<boolean>

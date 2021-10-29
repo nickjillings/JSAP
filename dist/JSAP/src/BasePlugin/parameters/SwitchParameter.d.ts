@@ -1,0 +1,40 @@
+import { PluginParameter } from "./PluginParameter";
+import { ParameterStepAutomation } from "./ParameterAutomation";
+import { IAutomatedPluginParameter } from "./IPluginParameter";
+import { IBasePlugin } from "../IBasePlugin";
+export declare class SwitchParameter extends PluginParameter<number> implements IAutomatedPluginParameter<number> {
+    readonly defaultValue: number;
+    readonly minState: number;
+    readonly maxState: number;
+    toStringFunc?: (item: number) => string;
+    readonly type = "Switch";
+    private _value;
+    private audioParameter;
+    private automation;
+    constructor(owner: IBasePlugin, name: string, defaultValue: number, minState: number, maxState: number, toStringFunc?: (item: number) => string, visibleName?: string, exposed?: boolean);
+    setValue(v: number, updateInterfaces?: boolean): number;
+    destroy(): void;
+    increment(): number;
+    decrement(): number;
+    bindToAudioParam(ap: any): void;
+    toString(): any;
+    getParameterObject(): {
+        value: number;
+        defaultValue: number;
+        minimum: number;
+        maximum: number;
+        visibleName: string;
+        type: string;
+        name: string;
+    };
+    get value(): number;
+    set value(v: number);
+    get boundAudioParam(): AudioParam;
+    get automatable(): boolean;
+    get automationPoints(): ParameterStepAutomation<number>;
+    get enabled(): boolean;
+    set enabled(t: boolean);
+    getValueAtTimePoint(time: number): any;
+    start(time: number, contextTime: number): void;
+    stop(time: number): void;
+}

@@ -1,0 +1,41 @@
+import { PluginParameter } from "./PluginParameter";
+import { ParameterLinearAutomation } from "./ParameterAutomation";
+import { IAutomatedPluginParameter } from "./IPluginParameter";
+import { IBasePlugin } from "../IBasePlugin";
+export declare class NumberParameter extends PluginParameter<number> implements IAutomatedPluginParameter<number> {
+    readonly defaultValue: number;
+    readonly minimum?: number;
+    readonly maximum?: number;
+    toStringFunc?: (item: number) => string;
+    readonly type = "Number";
+    private audioParameter;
+    private automation;
+    private _value;
+    private _stepSize;
+    constructor(owner: IBasePlugin, name: string, defaultValue: number, minimum?: number, maximum?: number, toStringFunc?: (item: number) => string, visibleName?: string, exposed?: boolean);
+    setValue(v: number, updateInterfaces?: boolean): number;
+    destroy(): void;
+    getValueAtTimePoint(time: number): any;
+    start(time: number, contextTime: number): void;
+    stop(time: number): void;
+    bindToAudioParam(ap: AudioParam): void;
+    toString(): string;
+    getParameterObject(): {
+        value: number;
+        defaultValue: number;
+        minimum: number;
+        maximum: number;
+        visibleName: string;
+        type: string;
+        name: string;
+    };
+    get value(): number;
+    set value(v: number);
+    get stepSize(): number;
+    set stepSize(n: number);
+    get boundAudioParam(): AudioParam;
+    get automatable(): boolean;
+    get automationPoints(): ParameterLinearAutomation;
+    get enabled(): boolean;
+    set enabled(t: boolean);
+}

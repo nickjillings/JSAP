@@ -6,7 +6,7 @@
 
 import { LinkedStore } from '../LinkedStore';
 import { PluginAssetManager } from './PluginAssets/PluginAssetManager';
-import { IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype } from "./PluginPrototype";
+import { IPluginPrototype, IPluginPrototypeConstructor, PluginPrototype, SynthesiserPrototype } from "./PluginPrototype";
 import { FeatureMap } from "./FeatureMap/index";
 import { AudioPluginChainManager } from "./AudioPluginChainManager/index";
 import { MidiSynthesiserHost } from "./MidiSynthesiserHost";
@@ -14,7 +14,7 @@ import { PluginUserInterfaceMessageHub } from "./PluginUserInterfaceMessageHub";
 import { IPluginInstance } from './IPluginInstance';
 import { IPluginHost } from './IPluginHost';
 import { IBasePlugin } from '../BasePlugin/IBasePlugin';
-import { isPluginInstance } from './PluginInstance';
+import { isPluginInstance, PluginInstance } from './PluginInstance';
 import { isMidiSynthesisInstance } from './MidiSynthesisInstance';
 
 interface JSAPResourceObject {
@@ -42,7 +42,7 @@ export class PluginFactory {
     private async copyFactory(factory: PluginFactory, newcontext: AudioContext): Promise<PluginFactory> {
         const BFactory = new PluginFactory(newcontext, this.rootURL);
         for (const proto of this.plugin_prototypes) {
-            await BFactory.addPrototype(proto.proto);
+            await BFactory.addPrototype(proto.proto, proto.name, proto.version, proto.uniqueID);
         }
         BFactory.pluginAssets.importFromAssetLists(this.pluginAssets);
         return BFactory;
@@ -70,14 +70,14 @@ export class PluginFactory {
     }
 
     private triggerAudioStart(program_time, context_time) {
-        this.pluginsList.forEach(function (n) {
+        this.pluginsList.forEach((n) => {
             this.pluginAudioStart(n.node, program_time, context_time);
         });
 
     }
 
     private triggerAudioStop() {
-        this.pluginsList.forEach(function (n) {
+        this.pluginsList.forEach((n) => {
             this.pluginAudioStop(n.node);
         });
     }
@@ -103,15 +103,9 @@ export class PluginFactory {
     public async loadPrototypeModule(resourceObject: JSAPResourceObject, mustModule=false) {
         let module;
         try {
-            if (typeof global.define === "function" && global.define.amd) {
-                module = global.require(resourceObject.url);
-            } else if (typeof global.module == "object" && global.module.exports) {
-                module = (global.require(resourceObject.url));
-            } else {
-                throw new Error ("Cannot load using require");
-            }
+            module = global.require(resourceObject.url);
             if (typeof module === "function") {
-                return this.addPrototype(module);
+                return this.addPrototype(module, module.prototype.name, module.prototype.version, module.prototype.uniqueID);
             } else {
                 throw new Error ("Is not a module plugin");
             }
@@ -165,35 +159,26 @@ export class PluginFactory {
                 throw new Error("resourceObject.returnObject must be the name of the prototype function");
             }
             const plugin = await this.loadResource(resourceObject);
-            return await this.addPrototype(plugin);
+            return await this.addPrototype(plugin, plugin.prototype.name, plugin.prototype.version, plugin.prototype.uniqueID);
         }
     };
 
-    public injectPrototype(prototypeExecutable: IBasePlugin) {
+    public injectPrototype(prototypeExecutable: IBasePlugin, name: string, version: string, uniqueID: string) {
         if (typeof prototypeExecutable != "function") {
             throw ("Invalid executable function");
         }
-        return this.addPrototype(prototypeExecutable);
+        return this.addPrototype(prototypeExecutable, name, version, uniqueID);
     };
 
-    public addPrototype(plugin_proto: IPluginPrototypeConstructor): PluginPrototype {
+    public addPrototype(plugin_proto: IPluginPrototypeConstructor, name: string, version: string, uniqueID: string, hasMidiInput=false, hasMidiOutput=false): IPluginPrototype<IPluginInstance<IPluginHost>,IPluginHost> {
         if (typeof plugin_proto !== "function") {
             throw new Error("The Prototype must be a function!");
         }
-        else if (typeof plugin_proto.prototype.name !== "string" || plugin_proto.prototype.name.length === 0) {
-            throw new Error("Malformed plugin. Name not defined");
-        }
-        else if (typeof plugin_proto.prototype.version !== "string" || plugin_proto.prototype.version.length === 0) {
-            throw new Error("Malformed plugin. Version not defined");
-        }
-        else if (typeof plugin_proto.prototype.uniqueID !== "string" || plugin_proto.prototype.uniqueID.length === 0) {
-            throw new Error("Malformed plugin. uniqueID not defined");
-        }
         const testObj = {
-            'proto': plugin_proto,
-            'name': plugin_proto.prototype.name,
-            'version': plugin_proto.prototype.version,
-            'uniqueID': plugin_proto.prototype.uniqueID
+            proto: plugin_proto,
+            name,
+            version,
+            uniqueID
         };
         const obj = this.plugin_prototypes.find((e) => {
             let match = 0;
@@ -209,9 +194,16 @@ export class PluginFactory {
         if (obj) {
             throw new Error("The plugin must be unique!");
         }
-        const newPluginPrototpye = new PluginPrototype(plugin_proto, this);
-        this.plugin_prototypes.push(newPluginPrototpye);
-        return newPluginPrototpye;
+        if (hasMidiInput === false && hasMidiOutput === false) {
+            const newPluginPrototpye = new PluginPrototype(plugin_proto, this, name, version, uniqueID);
+            this.plugin_prototypes.push(newPluginPrototpye);
+            return newPluginPrototpye;
+        } else if (hasMidiInput === true && hasMidiOutput === false) {
+            const newPluginPrototpye = new SynthesiserPrototype(plugin_proto, this, name, version, uniqueID);
+            this.plugin_prototypes.push(newPluginPrototpye);
+            return newPluginPrototpye;
+        }
+        
     };
 
     public deletePrototype(plugin_proto: IPluginPrototype<IPluginInstance<IPluginHost>,IPluginHost>) {
@@ -248,17 +240,20 @@ export class PluginFactory {
         return this.pluginsList;
     };
 
-    public getAllPluginsObject() {
+    public getAllPluginsObject():{
+        factory: PluginFactory,
+        audioPluginChainManagers: {
+            subFactory: AudioPluginChainManager,
+            plugins: PluginInstance[]
+        }[]
+    } {
         const obj = {
-            'factory': this,
-            'audioPluginChainManagers': []
+            factory: this,
+            audioPluginChainManagers: this.audioPluginChainManagers.map(subFactory => {return {
+                subFactory: subFactory,
+                plugins: subFactory.getPlugins()
+            }})
         };
-        for (let i = 0; i < this.audioPluginChainManagers.length; i++) {
-            obj.audioPluginChainManagers.push({
-                'subFactory': this.audioPluginChainManagers[i],
-                'plugins': this.audioPluginChainManagers[i].getPlugins()
-            });
-        }
         return obj;
     };
 
@@ -277,13 +272,13 @@ export class PluginFactory {
         return node;
     };
 
-    public destroyAudioPluginChainManager = function (SubFactory: AudioPluginChainManager) {
-        var index = this.audioPluginChainManagers.findIndex(function (element) {
-            if (element === this) {
+    public destroyAudioPluginChainManager(SubFactory: AudioPluginChainManager) {
+        var index = this.audioPluginChainManagers.findIndex((element) => {
+            if (element === SubFactory) {
                 return true;
             }
             return false;
-        }, SubFactory);
+        });
         if (index >= 0) {
             this.audioPluginChainManagers.splice(index, 1);
             SubFactory.destroy();
@@ -300,12 +295,12 @@ export class PluginFactory {
     };
 
     public destroyMidiSynthesiserHost(host: MidiSynthesiserHost) {
-        var index = this.synthesiserHosts.findIndex(function (element) {
-            if (element === this) {
+        var index = this.synthesiserHosts.findIndex((element) => {
+            if (element === host) {
                 return true;
             }
             return false;
-        }, host);
+        });
         if (index >= 0) {
             this.synthesiserHosts.splice(index, 1);
             host.destroy();

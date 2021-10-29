@@ -2,14 +2,12 @@
 
 import { IFeatureInterfaceSender } from "../../Extractors/IExtractor";
 import { OutputNode } from "../../Extractors/OutputNode";
-import { IRequestFeatures } from "../../FeatureMap/index";
+import { FeatureMap, IRequestFeatures } from "../../FeatureMap/index";
 import { AudioPluginChainManager } from "../index";
 
 export class SubFactoryFeatureSender implements IFeatureInterfaceSender {
     private outputNodes: OutputNode[] = [];
-    constructor(private readonly owner: AudioPluginChainManager, private readonly FactoryFeatureMap: any) {
-        this.FactoryFeatureMap.createSourceMap(this, undefined);
-    }
+    constructor(private readonly owner: AudioPluginChainManager, private readonly FactoryFeatureMap: FeatureMap) { }
     public updateFeatures(featureObject: IRequestFeatures[], outputIndex = 0) {
         if (this.outputNodes[outputIndex] === undefined) {
             if (outputIndex > 1) {
@@ -39,14 +37,12 @@ export class SubFactoryFeatureSender implements IFeatureInterfaceSender {
             'results':[]}
         */
         this.FactoryFeatureMap.postFeatures({
-            'plugin': this,
+            'source': this,
             'outputIndex': featureObject.outputIndex,
             'frameSize': featureObject.frameSize,
             'results': featureObject.results
         });
     };
 
-    public destroy() {
-        this.FactoryFeatureMap.deleteSourceMap(this);
-    }
+    public destroy() { }
 }

@@ -120,7 +120,7 @@ export class AssetParameter extends PluginParameter < PluginAsset > {
             return undefined;
         }
     }
-    set value(v) {
+    set value(v: PluginAsset | AssetSelectionObject | string | number) {
         this.setValue(v, true);
     }
 

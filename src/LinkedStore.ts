@@ -1,4 +1,4 @@
-export type LinkedStoreValues = number | string | Map<string, LinkedStoreValues>;
+export type LinkedStoreValues = boolean | number | string | Map<string, LinkedStoreValues>;
 
 export interface LinkedStoreAltered {term: string, value: LinkedStoreValues}
 
@@ -74,7 +74,7 @@ export class LinkedStore {
         return this.et.removeEventListener(type, callback, options);
     }
 
-    public setTerm(term:string, value: number | string | Map<string, LinkedStoreValues>) {
+    public setTerm(term:string, value: boolean | number | string | Map<string, LinkedStoreValues>) {
         if (typeof term !== "string" || term.length === 0) {
             throw ("term must be a string");
         }

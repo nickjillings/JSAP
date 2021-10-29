@@ -1,0 +1,54 @@
+import { LinkedStore } from "../../LinkedStore";
+import { IPluginHost } from "../IPluginHost";
+import { PluginFactory } from "../PluginFactory";
+import { PluginInstance } from "../PluginInstance";
+import { PluginPrototype } from "../PluginPrototype";
+import { SubFactoryFeatureSender } from "./SubFactoryFeatureSender/index";
+export declare class AudioPluginChainManager implements IPluginHost {
+    readonly PluginFactory: PluginFactory;
+    readonly chainStart: AudioNode;
+    readonly chainStop: AudioNode;
+    private plugin_list;
+    private state;
+    private delaySamples;
+    readonly featureSender: SubFactoryFeatureSender;
+    private semanticStores;
+    private eventTarget;
+    factoryName: string;
+    readonly TrackData: LinkedStore;
+    constructor(PluginFactory: PluginFactory, chainStart: AudioNode, chainStop: AudioNode);
+    private rebuild;
+    private isolate;
+    private cutChain;
+    private joinChain;
+    private buildNewPlugin;
+    private getDelayCompensation;
+    bypassPlugin(plugin_instance: PluginInstance, state: boolean): void;
+    getPrototypes(): import("../PluginPrototype").IPluginPrototype<import("../IPluginInstance").IPluginInstance<IPluginHost>, IPluginHost>[];
+    getFactory(): PluginFactory;
+    destroy(reconnect?: boolean): void;
+    createPlugin(prototypeObject: PluginPrototype): Promise<any>;
+    removePlugin(plugin_object: PluginInstance): void;
+    destroyPlugin(plugin_object: PluginInstance): void;
+    getPlugins(): PluginInstance[];
+    getAllPlugins(): {
+        factory: PluginFactory;
+        audioPluginChainManagers: {
+            subFactory: AudioPluginChainManager;
+            plugins: PluginInstance[];
+        }[];
+    };
+    getPluginIndex(plugin_object: PluginInstance): number;
+    movePlugin(plugin_object: PluginInstance, new_index: number): void;
+    copyPlugin(plugin_object: PluginInstance, copy_index?: number): Promise<PluginInstance>;
+    duplicateAudioPluginChainManager(sourceAudioPluginChainManager: AudioPluginChainManager): Promise<this>;
+    recursiveProcessing(base: any, list: any): void;
+    updateDelayCompensation(): number;
+    handleEvent(e: Event): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    get SessionData(): LinkedStore;
+    get UserData(): LinkedStore;
+    get processingDelayAsSamples(): number;
+    get processingDelayAsSeconds(): number;
+}

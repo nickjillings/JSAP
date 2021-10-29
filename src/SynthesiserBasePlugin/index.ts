@@ -15,8 +15,8 @@ export abstract class SynthesiserBasePlugin extends BasePlugin<MidiSynthesisInst
         super (factory, pluginOwner, prototypeObject);
     }
     initialise?: () => Promise<void>;
-    stop() {
-        this.cancelAllEvents();
+    stop(ct?: number) {
+        this.cancelAllEvents(ct);
     }
     addInput(): AudioNode[] {
         throw new Error ("Cannot add input to type \"SynthesiserBasePlugin\"");

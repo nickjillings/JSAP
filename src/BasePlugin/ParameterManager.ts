@@ -8,7 +8,7 @@ import {URLParameter} from "./parameters/URLParameter";
 import {AssetParameter} from "./parameters/AssetParameter";
 import { IBasePlugin } from "./IBasePlugin";
 import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
-import { INestedPluginParameterObject, IPluginBaseParameter, isPluginParameter } from "./parameters/IPluginParameter";
+import { INestedPluginParameterObject, IPluginBaseParameter, isPluginParameter, isPluginParameterObject } from "./parameters/IPluginParameter";
 import { PluginParameterSetDetail } from "./parameters/PluginParameter";
 import { IPluginHost } from "../Factory/IPluginHost";
 
@@ -118,7 +118,7 @@ export class ParameterManager implements IPluginBaseParameter {
             return param;
         }
     }
-    public createStringParameter(name: string, defaultValue: string, maxLength: number, toStringFunc?: (item: string) => string, visibleName?: string, exposed?: boolean) {
+    public createStringParameter(name: string, defaultValue: string, maxLength?: number, toStringFunc?: (item: string) => string, visibleName?: string, exposed?: boolean) {
         if (typeof name !== "string" || typeof defaultValue !== "string" || (maxLength !== undefined && typeof maxLength !== "number")) {
             throw ("Invlid constructor");
         }
@@ -160,7 +160,7 @@ export class ParameterManager implements IPluginBaseParameter {
             return param;
         }
     }
-    public createListParameter(name, defaultValue, listOfValues, toStringFunc, visibleName, exposed) {
+    public createListParameter<T>(name: string, defaultValue: T, listOfValues: T[], toStringFunc?: (item: T) => string, visibleName?:string, exposed?:boolean) {
         if (typeof name !== "string" || typeof defaultValue === "undefined" || !Array.isArray(listOfValues)) {
             throw ("Invlid constructor");
         }
@@ -172,7 +172,7 @@ export class ParameterManager implements IPluginBaseParameter {
         }
         name = name.toLowerCase();
         if (this.isParameterNameAvailable(name)) {
-            const param = new ListParameter(this.owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed);
+            const param = new ListParameter<T>(this.owner, name, defaultValue, listOfValues, toStringFunc, visibleName, exposed);
             this.addParameter(param);
             param.addEventListener("parameterset", this);
             return param;
@@ -214,7 +214,7 @@ export class ParameterManager implements IPluginBaseParameter {
         }
         name = name.toLowerCase();
         if (this.isParameterNameAvailable(this)) {
-            const param = new AssetParameter(this.owner, name, visibleName, exposed);
+            const param = new ParameterManager(this.owner, this.pluginExternalInterface, name, exposed);
             this.addParameter(param);
             param.addEventListener("parameterset", this);
             return param;
@@ -276,7 +276,7 @@ export class ParameterManager implements IPluginBaseParameter {
         return true;
     }
 
-    public setParametersByObject(object: ParameterManagerSettableObject, updateInterfaces=true) {
+    public setParametersByObject(object: INestedPluginParameterObject, updateInterfaces=true) {
         for (const key in object) {
             if (object.hasOwnProperty(key)) {
                 const entry = object[key];
@@ -284,7 +284,9 @@ export class ParameterManager implements IPluginBaseParameter {
                     let parameter = this.findParameter(key);
                     if (parameter instanceof ParameterManager) {
                         // Nested Parameter store
-                        parameter.setParametersByObject(entry, updateInterfaces);
+                        if (!isPluginParameterObject(entry)) {
+                            parameter.setParametersByObject(entry, updateInterfaces);
+                        }
                     }
                     else if (isPluginParameter(parameter) && entry.hasOwnProperty("value")) {
                         this.setParameterByName(key, entry.value, updateInterfaces);

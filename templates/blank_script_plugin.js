@@ -26,7 +26,7 @@ var BlankPlugin = function (factory, owner) {
 };
 
 // Also update the prototype function here!
-BlankPlugin.prototype = Object.create(BasePlugin.prototype);
+BlankPlugin.prototype = Object.create(AudioPlugin.prototype);
 BlankPlugin.prototype.constructor = BlankPlugin;
 BlankPlugin.prototype.name = "BlankPlugin";
 BlankPlugin.prototype.version = "0.0.0";

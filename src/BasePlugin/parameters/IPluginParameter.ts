@@ -5,12 +5,16 @@ export interface IPluginParameterObject {
     name: string
     visibleName: string,
     type: string,
+    value?: any
 }
 
 export interface INestedPluginParameterObject {
     [key: string]: INestedPluginParameterObject | IPluginParameterObject
 }
 
+export function isPluginParameterObject(object: any): object is IPluginParameterObject {
+    return 'name' in object && 'visibleName' in object && 'type' in object;
+}
 
 export interface IParameterAutomationPoint<T> {
     time: number

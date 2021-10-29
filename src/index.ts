@@ -4,8 +4,7 @@
 /*eslint-env browser */
 /* jshint esversion:6 */
 
-import {BasePlugin} from './BasePlugin/index'
-import {SynthesiserBasePlugin} from './SynthesiserBasePlugin/index';
-import {PluginFactory} from "./Factory/PluginFactory";
-
-export {BasePlugin, SynthesiserBasePlugin, PluginFactory};
+export * from './BasePlugin/index'
+export * from './SynthesiserBasePlugin/index';
+export * from './Factory/PluginFactory';
+export * from './BasePlugin/AudioPlugin';

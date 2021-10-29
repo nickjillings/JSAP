@@ -3,11 +3,13 @@ const path = require("path");
 module.exports = {
     entry: "./src/index.ts",
     output: {
-        filename: "./JSAP.js",
-        path: path.resolve(__dirname, ''),
-        library: "JSAP"
+        library: "jsap",
+        libraryTarget: "umd",
+        globalObject: 'this',
+        filename: "index.js",
+        path: path.resolve(__dirname, 'dist')
     },
-    devtool: 'inline-source-map',
+    devtool: 'source-map',
     resolve: {
         extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
     },
@@ -20,5 +22,4 @@ module.exports = {
         ],
     },
     mode: "development",
-    watch: true
 };

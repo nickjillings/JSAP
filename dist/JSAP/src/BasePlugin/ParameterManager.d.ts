@@ -1,0 +1,52 @@
+import { NumberParameter } from "./parameters/NumberParameter";
+import { StringParameter } from "./parameters/StringParameter";
+import { ButtonParameter } from "./parameters/ButtonParameter";
+import { SwitchParameter } from "./parameters/SwitchParameter";
+import { ListParameter } from "./parameters/ListParameter";
+import { URLParameter } from "./parameters/URLParameter";
+import { AssetParameter } from "./parameters/AssetParameter";
+import { IBasePlugin } from "./IBasePlugin";
+import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
+import { INestedPluginParameterObject, IPluginBaseParameter } from "./parameters/IPluginParameter";
+import { PluginParameterSetDetail } from "./parameters/PluginParameter";
+export interface ParameterManagerSettableObject {
+    [key: string]: ParameterManagerSettableObject | number | string;
+    value?: any;
+}
+export declare class ParameterManager implements IPluginBaseParameter {
+    readonly owner: IBasePlugin;
+    private readonly pluginExternalInterface;
+    readonly name: string;
+    readonly exposed: boolean;
+    readonly type: "Parameter";
+    private parameterList;
+    private eventTarget;
+    visibleName: string;
+    constructor(owner: IBasePlugin, pluginExternalInterface: PluginInterfaceMessageHub, name?: string, exposed?: boolean);
+    private findParameter;
+    private isParameterNameAvailable;
+    private buildParameterObject;
+    private addParameter;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    handleEvent(e: CustomEvent<PluginParameterSetDetail>): void;
+    destroy(): void;
+    createNumberParameter(name: string, defaultValue: number, minimum: number, maximum: number, toStringFunc?: (item: number) => string, visibleName?: string, exposed?: boolean): NumberParameter;
+    createStringParameter(name: string, defaultValue: string, maxLength: number, toStringFunc?: (item: string) => string, visibleName?: string, exposed?: boolean): StringParameter;
+    createButtonParameter(name: string, visibleName?: string, exposed?: boolean): ButtonParameter;
+    createSwitchParameter(name: string, defaultValue: number, minState: number, maxState: number, toStringFunc?: (item: number) => string, visibleName?: string, exposed?: boolean): SwitchParameter;
+    createListParameter(name: any, defaultValue: any, listOfValues: any, toStringFunc: any, visibleName: any, exposed: any): ListParameter<any>;
+    createURLParameter(name: string, defaultValue: string, maxLength: number, toStringFunc?: (item: string) => string, visibleName?: string, exposed?: boolean): URLParameter;
+    createAssetParameter(name: string, visibleName?: string, exposed?: boolean): AssetParameter;
+    createParameterManager(name: string, visibleName?: string, exposed?: boolean): AssetParameter;
+    getParameterByName(name: string): IPluginBaseParameter;
+    getParameterObject(): INestedPluginParameterObject;
+    getParameterNames(): string[];
+    setParameterByName(name: string, value: any, updateInterfaces?: boolean): void;
+    deleteParameter(parameter: IPluginBaseParameter): boolean;
+    deleteAllParameters(): boolean;
+    setParametersByObject(object: INestedPluginParameterObject, updateInterfaces?: boolean): void;
+    toJSON(): {};
+    get parameters(): INestedPluginParameterObject;
+    get numParameters(): number;
+}
