@@ -1,16 +1,16 @@
 import { ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter } from "./ParameterManager";
-import { PluginInterfaceMessageHub } from "./PluginInterfaceMessageHub";
+import { PluginInterfaceMessageHub, PluginParameterJSON, PluginParameterJSONEntry, PluginParameterUpdateMessage, PluginStateUpdateMessage, StateLevel } from "./PluginInterfaceMessageHub";
 import { PluginFeatureInterface } from "./PluginFeatureInterface/index";
 import { LinkedStore } from "../LinkedStore";
 import { LinkedStoreInterface } from "./LinkedStoreInterface";
-import { IBasePlugin, IBasePluginAssetLoadingProgress } from "./IBasePlugin.js";
+import { IBasePlugin, IBasePluginAssetLoadingProgress, IBasePluginGUIDefinition } from "./IBasePlugin.js";
 import { PluginFactory } from "../Factory/PluginFactory";
 import { IPluginPrototype } from "../Factory/PluginPrototype";
 import { IPluginHost } from "../Factory/IPluginHost";
 import { IPluginInstance } from "../Factory/IPluginInstance";
 import { Observable } from "rxjs";
 import { INestedPluginParameterObject } from "./parameters/IPluginParameter";
-export { IBasePlugin, LinkedStoreInterface, INestedPluginParameterObject, ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter, IBasePluginAssetLoadingProgress };
+export { IBasePlugin, LinkedStoreInterface, INestedPluginParameterObject, ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter, IBasePluginAssetLoadingProgress, PluginParameterUpdateMessage, PluginParameterJSON, PluginParameterJSONEntry, StateLevel, PluginStateUpdateMessage };
 export declare abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPluginHost> implements IBasePlugin {
     readonly factory: PluginFactory;
     private pluginOwner;
@@ -33,6 +33,7 @@ export declare abstract class BasePlugin<T extends IPluginInstance<I>, I extends
     readonly name: string;
     readonly uniqueID: string;
     readonly version: string;
+    readonly GUI?: IBasePluginGUIDefinition;
     constructor(factory: PluginFactory, pluginOwner: I, prototypeObject: IPluginPrototype<T, I>);
     start(): void;
     stop(ct?: number): void;

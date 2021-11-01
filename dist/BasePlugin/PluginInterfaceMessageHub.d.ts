@@ -1,8 +1,27 @@
 import { IBasePlugin } from "./IBasePlugin";
+import { IPluginParameterObject } from "./parameters/IPluginParameter";
 export interface PluginInterfaceWindow extends Window {
     pluginInstance: IBasePlugin;
 }
-declare type StateLevel = "session" | "track" | "plugin" | "user";
+export interface PluginParameterJSONEntry extends IPluginParameterObject {
+    name: string;
+    automated?: boolean;
+}
+export declare type StateLevel = "session" | "track" | "plugin" | "user";
+export interface PluginParameterJSON {
+    [key: string]: PluginParameterJSONEntry;
+}
+export interface PluginParameterUpdateMessage {
+    sender_id: string;
+    message: "updateParameters";
+    parameters: PluginParameterJSON;
+}
+export interface PluginStateUpdateMessage {
+    message: "updateState";
+    level: StateLevel;
+    term: string;
+    value: any;
+}
 export declare class PluginInterfaceMessageHub {
     private readonly owner;
     private windowMessageList;
@@ -21,7 +40,6 @@ export declare class PluginInterfaceMessageHub {
     sendState(level: StateLevel, term: string): void;
     updateInterfaces(automationOnly?: boolean): void;
     closeWindows(): void;
-    registerWindow(w: PluginInterfaceWindow): boolean;
+    registerWindow(w: Window): boolean;
     removeWindow(w: any): void;
 }
-export {};

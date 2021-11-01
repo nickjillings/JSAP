@@ -34,13 +34,13 @@ export class PluginFactory {
     private audioStartProgramTime: number 
     private audioStartContextTime: number
     private audioStarted = false
-    private PluginGUI = new PluginUserInterfaceMessageHub(this);
+    public readonly PluginGUI = new PluginUserInterfaceMessageHub(this);
     private stores: LinkedStore[] = []
-    public SessionData = new LinkedStore("Session");
-    public UserData = new LinkedStore("User");
-    public FeatureMap = new FeatureMap(this);
-    public pluginAssets = new PluginAssetManager(this);
-    constructor(public context: AudioContext, private rootURL?: string) { }
+    public readonly SessionData = new LinkedStore("Session");
+    public readonly UserData = new LinkedStore("User");
+    public readonly FeatureMap = new FeatureMap(this);
+    public readonly pluginAssets = new PluginAssetManager(this);
+    constructor(public readonly context: AudioContext, private rootURL?: string) { }
     private async copyFactory(factory: PluginFactory, newcontext: AudioContext): Promise<PluginFactory> {
         const BFactory = new PluginFactory(newcontext, this.rootURL);
         for (const proto of this.plugin_prototypes) {
@@ -222,14 +222,14 @@ export class PluginFactory {
 
     public getAudioPluginPrototypes() {
         return this.plugin_prototypes.filter(function (proto) {
-            return proto.hasMidiInput == false && proto.hasMidiOutput == false;
-        });
+            return proto instanceof PluginPrototype && proto.hasMidiInput == false && proto.hasMidiOutput == false;
+        }) as PluginPrototype[];
     };
 
     public getMidiSynthPrototypes() {
         return this.plugin_prototypes.filter(function (proto) {
-            return proto.hasMidiInput == true && proto.hasMidiOutput == false;
-        });
+            return proto instanceof SynthesiserPrototype && proto.hasMidiInput == true && proto.hasMidiOutput == false;
+        }) as SynthesiserPrototype[];
     };
 
     public getMidiPluginPrototypes() {

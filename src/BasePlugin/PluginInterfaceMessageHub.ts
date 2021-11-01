@@ -7,16 +7,30 @@ export interface PluginInterfaceWindow extends Window {
     pluginInstance: IBasePlugin
 }
 
-interface PluginParameterJSONEntry extends IPluginParameterObject {
+export interface PluginParameterJSONEntry extends IPluginParameterObject {
     name: string
     automated?: boolean
 }
 
-type StateLevel = "session" | "track" | "plugin" | "user";
+export type StateLevel = "session" | "track" | "plugin" | "user";
 
-interface PluginParameterJSON {
+export interface PluginParameterJSON {
     [key: string]: PluginParameterJSONEntry
 }
+
+export interface PluginParameterUpdateMessage {
+    sender_id: string
+    message: "updateParameters",
+    parameters: PluginParameterJSON
+}
+
+export interface PluginStateUpdateMessage {
+    message: "updateState",
+    level: StateLevel,
+    term: string,
+    value: any
+}
+
 export class PluginInterfaceMessageHub {
     private windowMessageList: PluginInterfaceWindow[] = [];
     private eventTarget = new EventTarget();
@@ -42,7 +56,7 @@ export class PluginInterfaceMessageHub {
         return O;
     }
     private buildParameterUpdatePayload(sender_id?: string, sources: string[] =[]) {
-        const msg = {
+        const msg: PluginParameterUpdateMessage = {
             sender_id,
             message: "updateParameters",
             parameters: this.buildPluginParameterJSON(sources)
@@ -59,7 +73,7 @@ export class PluginInterfaceMessageHub {
         });
     }
     private broadcastStateChange(level: StateLevel, term: string, value: LinkedStoreValues) {
-        var msg = {
+        var msg: PluginStateUpdateMessage = {
             message: "updateState",
             level,
             term,
@@ -175,13 +189,14 @@ export class PluginInterfaceMessageHub {
         }
         window.removeEventListener("message", this);
     }
-    public registerWindow(w: PluginInterfaceWindow) {
-        if (this.windowMessageList.includes(w)) {
-            this.windowMessageList.splice(this.windowMessageList.indexOf(w), 1);
+    public registerWindow(w: Window) {
+        const pluginWindow = w as PluginInterfaceWindow;
+        if (this.windowMessageList.includes(pluginWindow)) {
+            this.windowMessageList.splice(this.windowMessageList.indexOf(pluginWindow), 1);
         }
-        this.windowMessageList.push(w);
-        w.pluginInstance = this.owner;
-        this.sendParameterUpdates(w);
+        this.windowMessageList.push(pluginWindow);
+        pluginWindow.pluginInstance = this.owner;
+        this.sendParameterUpdates(pluginWindow);
         return true;
     }
     public removeWindow(w) {

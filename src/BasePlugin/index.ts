@@ -3,11 +3,11 @@
 /*eslint-env browser */
 /*jshint esversion: 6 */
 import {ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter } from "./ParameterManager";
-import {PluginInterfaceMessageHub} from "./PluginInterfaceMessageHub";
+import {PluginInterfaceMessageHub, PluginParameterJSON, PluginParameterJSONEntry, PluginParameterUpdateMessage, PluginStateUpdateMessage, StateLevel} from "./PluginInterfaceMessageHub";
 import {PluginFeatureInterface} from "./PluginFeatureInterface/index";
 import {LinkedStore} from "../LinkedStore";
 import {LinkedStoreInterface} from "./LinkedStoreInterface";
-import { IBasePlugin, IBasePluginAssetLoadingProgress } from "./IBasePlugin.js";
+import { IBasePlugin, IBasePluginAssetLoadingProgress, IBasePluginGUIDefinition } from "./IBasePlugin.js";
 import { PluginFactory } from "../Factory/PluginFactory";
 import { IPluginPrototype } from "../Factory/PluginPrototype";
 import { IPluginHost } from "../Factory/IPluginHost";
@@ -20,7 +20,7 @@ import { INestedPluginParameterObject } from "./parameters/IPluginParameter";
 //     };
 // }
 
-export { IBasePlugin, LinkedStoreInterface, INestedPluginParameterObject, ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter, IBasePluginAssetLoadingProgress }
+export { IBasePlugin, LinkedStoreInterface, INestedPluginParameterObject, ParameterManager, NumberParameter, StringParameter, ButtonParameter, SwitchParameter, ListParameter, URLParameter, AssetParameter, IBasePluginAssetLoadingProgress, PluginParameterUpdateMessage, PluginParameterJSON, PluginParameterJSONEntry, StateLevel, PluginStateUpdateMessage }
 
 export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPluginHost> implements IBasePlugin {
     private inputList: AudioNode[] = [];
@@ -41,6 +41,7 @@ export abstract class BasePlugin<T extends IPluginInstance<I>, I extends IPlugin
     public readonly name: string = this.prototypeObject.name;
     public readonly uniqueID: string = this.prototypeObject.uniqueID;
     public readonly version: string = this.prototypeObject.version;
+    public readonly GUI?: IBasePluginGUIDefinition;
     constructor (public readonly factory: PluginFactory, private pluginOwner: I, public readonly prototypeObject: IPluginPrototype<T, I>) {
         this.parameters.addEventListener("parameterset", (e:CustomEvent) => {
             this.eventTarget.dispatchEvent(new CustomEvent("parameterset", {detail: e.detail}));

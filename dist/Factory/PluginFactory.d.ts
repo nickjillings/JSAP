@@ -18,7 +18,7 @@ interface JSAPResourceObject {
     returnObject: string;
 }
 export declare class PluginFactory {
-    context: AudioContext;
+    readonly context: AudioContext;
     private rootURL?;
     private plugin_prototypes;
     private audioPluginChainManagers;
@@ -27,12 +27,12 @@ export declare class PluginFactory {
     private audioStartProgramTime;
     private audioStartContextTime;
     private audioStarted;
-    private PluginGUI;
+    readonly PluginGUI: PluginUserInterfaceMessageHub;
     private stores;
-    SessionData: LinkedStore;
-    UserData: LinkedStore;
-    FeatureMap: FeatureMap;
-    pluginAssets: PluginAssetManager;
+    readonly SessionData: LinkedStore;
+    readonly UserData: LinkedStore;
+    readonly FeatureMap: FeatureMap;
+    readonly pluginAssets: PluginAssetManager;
     constructor(context: AudioContext, rootURL?: string);
     private copyFactory;
     private pluginAudioStart;
@@ -47,8 +47,8 @@ export declare class PluginFactory {
     addPrototype(plugin_proto: IPluginPrototypeConstructor, name: string, version: string, uniqueID: string, hasMidiInput?: boolean, hasMidiOutput?: boolean): IPluginPrototype<IPluginInstance<IPluginHost>, IPluginHost>;
     deletePrototype(plugin_proto: IPluginPrototype<IPluginInstance<IPluginHost>, IPluginHost>): void;
     getPrototypes(): IPluginPrototype<IPluginInstance<IPluginHost>, IPluginHost>[];
-    getAudioPluginPrototypes(): IPluginPrototype<IPluginInstance<IPluginHost>, IPluginHost>[];
-    getMidiSynthPrototypes(): IPluginPrototype<IPluginInstance<IPluginHost>, IPluginHost>[];
+    getAudioPluginPrototypes(): PluginPrototype[];
+    getMidiSynthPrototypes(): SynthesiserPrototype[];
     getMidiPluginPrototypes(): IPluginPrototype<IPluginInstance<IPluginHost>, IPluginHost>[];
     getAllPlugins(): IPluginInstance<IPluginHost>[];
     getAllPluginsObject(): {

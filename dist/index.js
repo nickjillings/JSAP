@@ -6816,7 +6816,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Subscriber": () => (/* binding */ Subscriber),
 /* harmony export */   "SafeSubscriber": () => (/* binding */ SafeSubscriber)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/rxjs/node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./util/isFunction */ "./node_modules/rxjs/_esm5/internal/util/isFunction.js");
 /* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Observer */ "./node_modules/rxjs/_esm5/internal/Observer.js");
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Subscription */ "./node_modules/rxjs/_esm5/internal/Subscription.js");
@@ -7664,10 +7664,10 @@ function toSubscriber(nextOrObserver, error, complete) {
 
 /***/ }),
 
-/***/ "./node_modules/tslib/tslib.es6.js":
-/*!*****************************************!*\
-  !*** ./node_modules/tslib/tslib.es6.js ***!
-  \*****************************************/
+/***/ "./node_modules/rxjs/node_modules/tslib/tslib.es6.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/rxjs/node_modules/tslib/tslib.es6.js ***!
+  \***********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -8654,12 +8654,13 @@ class PluginInterfaceMessageHub {
         window.removeEventListener("message", this);
     }
     registerWindow(w) {
-        if (this.windowMessageList.includes(w)) {
-            this.windowMessageList.splice(this.windowMessageList.indexOf(w), 1);
+        const pluginWindow = w;
+        if (this.windowMessageList.includes(pluginWindow)) {
+            this.windowMessageList.splice(this.windowMessageList.indexOf(pluginWindow), 1);
         }
-        this.windowMessageList.push(w);
-        w.pluginInstance = this.owner;
-        this.sendParameterUpdates(w);
+        this.windowMessageList.push(pluginWindow);
+        pluginWindow.pluginInstance = this.owner;
+        this.sendParameterUpdates(pluginWindow);
         return true;
     }
     removeWindow(w) {
@@ -11722,13 +11723,13 @@ class PluginFactory {
     ;
     getAudioPluginPrototypes() {
         return this.plugin_prototypes.filter(function (proto) {
-            return proto.hasMidiInput == false && proto.hasMidiOutput == false;
+            return proto instanceof _PluginPrototype__WEBPACK_IMPORTED_MODULE_2__.PluginPrototype && proto.hasMidiInput == false && proto.hasMidiOutput == false;
         });
     }
     ;
     getMidiSynthPrototypes() {
         return this.plugin_prototypes.filter(function (proto) {
-            return proto.hasMidiInput == true && proto.hasMidiOutput == false;
+            return proto instanceof _PluginPrototype__WEBPACK_IMPORTED_MODULE_2__.SynthesiserPrototype && proto.hasMidiInput == true && proto.hasMidiOutput == false;
         });
     }
     ;
@@ -12121,18 +12122,18 @@ class PluginUserInterfaceMessageHub {
         this.factory = factory;
         this.default_interface = {
             src: "jsap_default.html",
-            width: "500px",
-            height: "500px"
+            width: 500,
+            height: 500
         };
     }
     buildPluginInterface(plugin_object, interface_object) {
         const iframe = document.createElement("iframe");
         iframe.src = interface_object.src;
         if (interface_object.width) {
-            iframe.width = interface_object.width;
+            iframe.width = `${interface_object.width}px`;
         }
         if (interface_object.height) {
-            iframe.height = interface_object.height;
+            iframe.height = `${interface_object.height}px`;
         }
         iframe.style.border = "0";
         //iframe.contentWindow.pluginInstance = plugin_object;

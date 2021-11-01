@@ -16,6 +16,12 @@ export interface IBasePluginAssetLoadingProgress {
     numberOfAssetsLoaded: number
 }
 
+export interface IBasePluginGUIDefinition {
+    src: string,
+    width: number,
+    height: number
+}
+
 export interface IBasePlugin {
     readonly owner: IPluginHost
     readonly context: AudioContext;
@@ -38,6 +44,7 @@ export interface IBasePlugin {
     readonly name: string
     readonly version: string
     readonly uniqueID: string
+    readonly GUI?: IBasePluginGUIDefinition
     readonly SessionData: LinkedStore
     readonly UserData: LinkedStore
     readonly TrackData: LinkedStore
