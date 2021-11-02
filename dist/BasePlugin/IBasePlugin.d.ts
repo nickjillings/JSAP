@@ -21,7 +21,7 @@ export interface IBasePluginGUIDefinition {
 }
 export interface IBasePlugin {
     readonly owner: IPluginHost;
-    readonly context: AudioContext;
+    readonly context: BaseAudioContext;
     readonly factory: PluginFactory;
     readonly parameters: ParameterManager;
     readonly featureMap: PluginFeatureInterface;

@@ -18,7 +18,7 @@ interface JSAPResourceObject {
     returnObject: string;
 }
 export declare class PluginFactory {
-    readonly context: AudioContext;
+    readonly context: BaseAudioContext;
     private rootURL?;
     private plugin_prototypes;
     private audioPluginChainManagers;
@@ -33,7 +33,7 @@ export declare class PluginFactory {
     readonly UserData: LinkedStore;
     readonly FeatureMap: FeatureMap;
     readonly pluginAssets: PluginAssetManager;
-    constructor(context: AudioContext, rootURL?: string);
+    constructor(context: BaseAudioContext, rootURL?: string);
     private copyFactory;
     private pluginAudioStart;
     private pluginAudioStop;
@@ -72,7 +72,7 @@ export declare class PluginFactory {
     createStore(storeName: string): LinkedStore;
     getStores(): LinkedStore[];
     findStore(storeName: string): LinkedStore;
-    createFactoryCopy(context: AudioContext): Promise<PluginFactory>;
+    createFactoryCopy(context: BaseAudioContext): Promise<PluginFactory>;
     get hasAudioStarted(): boolean;
     get pluginRootURL(): string;
     set pluginRootURL(t: string);

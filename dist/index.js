@@ -6816,7 +6816,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Subscriber": () => (/* binding */ Subscriber),
 /* harmony export */   "SafeSubscriber": () => (/* binding */ SafeSubscriber)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/rxjs/node_modules/tslib/tslib.es6.js");
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./util/isFunction */ "./node_modules/rxjs/_esm5/internal/util/isFunction.js");
 /* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Observer */ "./node_modules/rxjs/_esm5/internal/Observer.js");
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Subscription */ "./node_modules/rxjs/_esm5/internal/Subscription.js");
@@ -7664,10 +7664,10 @@ function toSubscriber(nextOrObserver, error, complete) {
 
 /***/ }),
 
-/***/ "./node_modules/rxjs/node_modules/tslib/tslib.es6.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/rxjs/node_modules/tslib/tslib.es6.js ***!
-  \***********************************************************/
+/***/ "./node_modules/tslib/tslib.es6.js":
+/*!*****************************************!*\
+  !*** ./node_modules/tslib/tslib.es6.js ***!
+  \*****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";

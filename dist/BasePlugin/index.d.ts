@@ -20,7 +20,7 @@ export declare abstract class BasePlugin<T extends IPluginInstance<I>, I extends
     private delaySamples;
     private eventTarget;
     readonly externalInterface: PluginInterfaceMessageHub;
-    readonly context: AudioContext;
+    readonly context: BaseAudioContext;
     readonly featureMap: PluginFeatureInterface;
     readonly parameters: ParameterManager;
     readonly PluginData: LinkedStore;

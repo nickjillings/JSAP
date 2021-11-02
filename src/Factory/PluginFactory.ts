@@ -40,8 +40,8 @@ export class PluginFactory {
     public readonly UserData = new LinkedStore("User");
     public readonly FeatureMap = new FeatureMap(this);
     public readonly pluginAssets = new PluginAssetManager(this);
-    constructor(public readonly context: AudioContext, private rootURL?: string) { }
-    private async copyFactory(factory: PluginFactory, newcontext: AudioContext): Promise<PluginFactory> {
+    constructor(public readonly context: BaseAudioContext, private rootURL?: string) { }
+    private async copyFactory(factory: PluginFactory, newcontext: BaseAudioContext): Promise<PluginFactory> {
         const BFactory = new PluginFactory(newcontext, this.rootURL);
         for (const proto of this.plugin_prototypes) {
             await BFactory.addPrototype(proto.proto, proto.name, proto.version, proto.uniqueID);
@@ -399,7 +399,7 @@ export class PluginFactory {
         return this.stores.find(a => a.name === storeName);
     };
 
-    public createFactoryCopy(context: AudioContext) {
+    public createFactoryCopy(context: BaseAudioContext) {
         return this.copyFactory(this, context);
     }
 
